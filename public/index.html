@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>StoreScope — Know Exactly Why Your Store Isn't Selling</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800;900&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#030507;
+  --surface:#080d12;
+  --card:#0c1318;
+  --border:#111c24;
+  --border2:#1a2a36;
+  --green:#00e87a;
+  --green2:#00c463;
+  --green-glow:rgba(0,232,122,0.12);
+  --green-dim:rgba(0,232,122,0.06);
+  --red:#ff3b5c;
+  --yellow:#ffb800;
+  --text:#e8eef3;
+  --muted:#4a6070;
+  --muted2:#2a3d4d;
+  --white:#ffffff;
+}
+
+html{scroll-behavior:smooth}
+body{
+  font-family:'Instrument Sans',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  overflow-x:hidden;
+  cursor:default;
+}
+
+/* ── NOISE TEXTURE ── */
+body::before{
+  content:'';
+  position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:0;opacity:.4;
+}
+
+/* ── GRID BACKGROUND ── */
+.grid-bg{
+  background-image:
+    linear-gradient(rgba(0,232,122,0.025) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(0,232,122,0.025) 1px,transparent 1px);
+  background-size:60px 60px;
+}
+
+/* ── NAV ── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 5%;height:64px;
+  background:rgba(3,5,7,0.85);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+}
+.logo{
+  font-family:'Syne',sans-serif;
+  font-weight:900;font-size:20px;
+  letter-spacing:-0.5px;
+  color:var(--white);
+}
+.logo span{color:var(--green)}
+.nav-badge{
+  font-size:11px;font-weight:600;
+  background:var(--green-dim);
+  color:var(--green);
+  border:1px solid rgba(0,232,122,0.2);
+  border-radius:100px;
+  padding:4px 12px;
+  letter-spacing:0.05em;
+  text-transform:uppercase;
+}
+
+/* ── HERO ── */
+.hero{
+  min-height:100vh;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:100px 5% 60px;
+  position:relative;
+  overflow:hidden;
+}
+
+/* Radial glow behind hero */
+.hero::after{
+  content:'';
+  position:absolute;
+  top:50%;left:50%;
+  transform:translate(-50%,-60%);
+  width:700px;height:500px;
+  background:radial-gradient(ellipse,rgba(0,232,122,0.07) 0%,transparent 70%);
+  pointer-events:none;
+}
+
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--green-dim);
+  border:1px solid rgba(0,232,122,0.15);
+  border-radius:100px;
+  padding:6px 16px;
+  font-size:12px;font-weight:600;
+  color:var(--green);
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+  margin-bottom:32px;
+  animation:fadeUp .6s ease both;
+}
+.pulse-dot{
+  width:7px;height:7px;
+  background:var(--green);
+  border-radius:50%;
+  animation:pulse 2s ease infinite;
+}
+@keyframes pulse{
+  0%,100%{opacity:1;transform:scale(1)}
+  50%{opacity:.4;transform:scale(.8)}
+}
+
+h1{
+  font-family:'Syne',sans-serif;
+  font-weight:900;
+  font-size:clamp(42px,7vw,88px);
+  line-height:.95;
+  letter-spacing:-3px;
+  text-align:center;
+  max-width:900px;
+  margin-bottom:24px;
+  animation:fadeUp .6s .1s ease both;
+}
+h1 em{
+  font-style:normal;
+  color:var(--green);
+  position:relative;
+  display:inline-block;
+}
+h1 em::after{
+  content:'';
+  position:absolute;
+  bottom:-4px;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--green),transparent);
+  border-radius:2px;
+}
+
+.hero-sub{
+  font-size:18px;
+  color:var(--muted);
+  text-align:center;
+  max-width:520px;
+  line-height:1.7;
+  margin-bottom:52px;
+  animation:fadeUp .6s .2s ease both;
+}
+
+/* ── SCAN BOX ── */
+.scan-box{
+  width:100%;max-width:640px;
+  animation:fadeUp .6s .3s ease both;
+  position:relative;z-index:1;
+}
+.scan-input-wrap{
+  display:flex;
+  background:var(--card);
+  border:1.5px solid var(--border2);
+  border-radius:16px;
+  overflow:hidden;
+  transition:border-color .2s,box-shadow .2s;
+  box-shadow:0 0 0 0 var(--green-glow);
+}
+.scan-input-wrap:focus-within{
+  border-color:rgba(0,232,122,0.4);
+  box-shadow:0 0 0 4px var(--green-dim),0 0 40px rgba(0,232,122,0.08);
+}
+.scan-input{
+  flex:1;
+  background:transparent;
+  border:none;outline:none;
+  padding:18px 20px;
+  font-family:'Instrument Sans',sans-serif;
+  font-size:15px;
+  color:var(--text);
+}
+.scan-input::placeholder{color:var(--muted)}
+.scan-btn{
+  background:var(--green);
+  color:#000;
+  border:none;
+  padding:0 28px;
+  font-family:'Syne',sans-serif;
+  font-weight:700;
+  font-size:14px;
+  letter-spacing:.02em;
+  cursor:pointer;
+  transition:background .2s,transform .1s;
+  white-space:nowrap;
+  display:flex;align-items:center;gap:8px;
+}
+.scan-btn:hover{background:#00ff87}
+.scan-btn:active{transform:scale(.98)}
+.scan-btn:disabled{
+  background:var(--muted2);
+  color:var(--muted);
+  cursor:not-allowed;
+}
+
+.scan-note{
+  text-align:center;
+  margin-top:14px;
+  font-size:12px;
+  color:var(--muted);
+}
+.scan-note span{color:var(--green);font-weight:600}
+
+/* ── STATS ROW ── */
+.stats-row{
+  display:flex;gap:40px;
+  margin-top:64px;
+  animation:fadeUp .6s .4s ease both;
+}
+.stat{text-align:center}
+.stat-num{
+  font-family:'Syne',sans-serif;
+  font-weight:900;font-size:32px;
+  color:var(--white);
+  line-height:1;
+}
+.stat-num span{color:var(--green)}
+.stat-label{
+  font-size:12px;
+  color:var(--muted);
+  margin-top:4px;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+}
+
+/* ── WHAT WE CHECK ── */
+.section{padding:100px 5%}
+.section-label{
+  font-size:11px;
+  font-weight:600;
+  letter-spacing:.1em;
+  text-transform:uppercase;
+  color:var(--green);
+  margin-bottom:16px;
+}
+.section-title{
+  font-family:'Syne',sans-serif;
+  font-weight:800;
+  font-size:clamp(28px,4vw,48px);
+  letter-spacing:-1.5px;
+  line-height:1.1;
+  margin-bottom:16px;
+}
+.section-sub{
+  font-size:16px;
+  color:var(--muted);
+  max-width:480px;
+  line-height:1.7;
+  margin-bottom:60px;
+}
+
+.checks-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+  gap:2px;
+  border:1px solid var(--border);
+  border-radius:20px;
+  overflow:hidden;
+}
+.check-card{
+  background:var(--card);
+  padding:28px;
+  transition:background .2s;
+  position:relative;
+  overflow:hidden;
+}
+.check-card::before{
+  content:'';
+  position:absolute;
+  top:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--border2),transparent);
+}
+.check-card:hover{background:#0f1a22}
+.check-icon{
+  width:40px;height:40px;
+  background:var(--green-dim);
+  border:1px solid rgba(0,232,122,0.15);
+  border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;
+  margin-bottom:16px;
+}
+.check-title{
+  font-family:'Syne',sans-serif;
+  font-weight:700;font-size:15px;
+  margin-bottom:8px;
+  color:var(--white);
+}
+.check-desc{
+  font-size:13px;
+  color:var(--muted);
+  line-height:1.6;
+}
+
+/* ── PROGRESS / LOADING ── */
+.progress-wrap{
+  width:100%;max-width:640px;
+  margin:0 auto;
+  display:none;
+}
+.progress-label{
+  font-size:13px;
+  color:var(--muted);
+  margin-bottom:10px;
+  display:flex;justify-content:space-between;
+}
+.progress-bar-bg{
+  background:var(--border);
+  border-radius:100px;
+  height:4px;
+  overflow:hidden;
+}
+.progress-bar{
+  height:100%;
+  background:linear-gradient(90deg,var(--green2),var(--green));
+  border-radius:100px;
+  width:0%;
+  transition:width .4s ease;
+  box-shadow:0 0 12px rgba(0,232,122,.4);
+}
+.progress-steps{
+  display:flex;flex-direction:column;gap:8px;
+  margin-top:20px;
+}
+.progress-step{
+  display:flex;align-items:center;gap:10px;
+  font-size:13px;color:var(--muted2);
+  transition:color .3s;
+}
+.progress-step.active{color:var(--text)}
+.progress-step.done{color:var(--green)}
+.step-dot{
+  width:8px;height:8px;
+  border-radius:50%;
+  background:var(--muted2);
+  flex-shrink:0;
+  transition:background .3s;
+}
+.progress-step.active .step-dot{
+  background:var(--green);
+  box-shadow:0 0 8px var(--green);
+  animation:pulse 1s infinite;
+}
+.progress-step.done .step-dot{background:var(--green)}
+
+/* ── RESULTS ── */
+#results{display:none;padding:40px 5% 100px;max-width:900px;margin:0 auto}
+
+.result-header{
+  display:flex;align-items:flex-start;
+  justify-content:space-between;
+  gap:24px;
+  margin-bottom:48px;
+  flex-wrap:wrap;
+}
+.result-store-info h2{
+  font-family:'Syne',sans-serif;
+  font-weight:800;font-size:28px;
+  letter-spacing:-1px;
+  margin-bottom:6px;
+}
+.result-store-info p{
+  font-size:14px;color:var(--muted);
+}
+.result-store-info a{
+  color:var(--green);text-decoration:none;
+  font-size:13px;
+}
+.result-store-info a:hover{text-decoration:underline}
+
+/* Score circle */
+.score-circle-wrap{
+  display:flex;flex-direction:column;
+  align-items:center;gap:8px;
+  flex-shrink:0;
+}
+.score-circle{
+  width:100px;height:100px;
+  position:relative;
+}
+.score-circle svg{transform:rotate(-90deg)}
+.score-circle-track{fill:none;stroke:var(--border);stroke-width:8}
+.score-circle-fill{
+  fill:none;stroke-width:8;
+  stroke-linecap:round;
+  stroke-dasharray:283;
+  stroke-dashoffset:283;
+  transition:stroke-dashoffset 1.5s cubic-bezier(.4,0,.2,1),stroke .3s;
+}
+.score-number{
+  position:absolute;
+  inset:0;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  font-family:'Syne',sans-serif;
+  font-weight:900;font-size:26px;
+  line-height:1;
+}
+.score-number small{font-size:11px;color:var(--muted);font-weight:400;font-family:'Instrument Sans',sans-serif}
+.score-label{
+  font-size:12px;font-weight:600;
+  letter-spacing:.06em;text-transform:uppercase;
+  text-align:center;
+}
+
+/* Critical issues */
+.critical-box{
+  background:rgba(255,59,92,.06);
+  border:1px solid rgba(255,59,92,.2);
+  border-radius:16px;
+  padding:24px;
+  margin-bottom:32px;
+}
+.critical-box h3{
+  font-family:'Syne',sans-serif;
+  font-weight:700;font-size:14px;
+  color:var(--red);
+  letter-spacing:.06em;text-transform:uppercase;
+  margin-bottom:16px;
+  display:flex;align-items:center;gap:8px;
+}
+.critical-item{
+  display:flex;align-items:flex-start;gap:10px;
+  padding:10px 0;
+  border-bottom:1px solid rgba(255,59,92,.1);
+  font-size:14px;
+}
+.critical-item:last-child{border-bottom:none}
+.critical-item::before{
+  content:'↳';
+  color:var(--red);
+  font-weight:700;
+  flex-shrink:0;
+  margin-top:1px;
+}
+
+/* Analysis sections */
+.analysis-sections{display:flex;flex-direction:column;gap:16px}
+.analysis-section{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:16px;
+  overflow:hidden;
+}
+.section-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 20px;
+  cursor:pointer;
+  transition:background .15s;
+  user-select:none;
+}
+.section-header:hover{background:#0f1a22}
+.section-header-left{
+  display:flex;align-items:center;gap:12px;
+}
+.section-header-icon{font-size:18px}
+.section-header-title{
+  font-family:'Syne',sans-serif;
+  font-weight:700;font-size:15px;
+}
+.section-header-right{
+  display:flex;align-items:center;gap:12px;
+}
+.section-score{
+  font-family:'Syne',sans-serif;
+  font-weight:700;font-size:14px;
+}
+.chevron{
+  font-size:12px;
+  color:var(--muted);
+  transition:transform .2s;
+}
+.section-body{
+  padding:0 20px;
+  max-height:0;overflow:hidden;
+  transition:max-height .3s ease,padding .3s;
+}
+.section-body.open{
+  max-height:600px;
+  padding:0 20px 20px;
+}
+.chevron.open{transform:rotate(180deg)}
+
+.check-row{
+  display:flex;align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+  padding:10px 0;
+  border-bottom:1px solid var(--border);
+  font-size:14px;
+}
+.check-row:last-child{border-bottom:none}
+.check-row-label{color:var(--muted);flex:1}
+.check-row-value{
+  font-weight:600;
+  text-align:right;
+  flex-shrink:0;
+}
+.check-row-value.good{color:var(--green)}
+.check-row-value.warn{color:var(--yellow)}
+.check-row-value.bad{color:var(--red)}
+.check-row-value.neutral{color:var(--text)}
+
+/* Verdict */
+.verdict-card{
+  background:linear-gradient(135deg,rgba(0,232,122,.06),rgba(0,196,99,.03));
+  border:1px solid rgba(0,232,122,.2);
+  border-radius:20px;
+  padding:32px;
+  margin-top:32px;
+}
+.verdict-title{
+  font-family:'Syne',sans-serif;
+  font-weight:800;font-size:22px;
+  margin-bottom:16px;
+  letter-spacing:-0.5px;
+}
+.verdict-items{display:flex;flex-direction:column;gap:10px;margin-bottom:24px}
+.verdict-item{
+  display:flex;align-items:flex-start;gap:10px;
+  font-size:14px;line-height:1.6;
+}
+.verdict-bullet{
+  width:20px;height:20px;
+  background:var(--green-dim);
+  border:1px solid rgba(0,232,122,.3);
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;color:var(--green);
+  flex-shrink:0;margin-top:1px;
+}
+
+/* Ad recommendation */
+.ad-box{
+  background:rgba(255,184,0,.05);
+  border:1px solid rgba(255,184,0,.2);
+  border-radius:16px;
+  padding:20px;
+  margin-top:16px;
+}
+.ad-box h4{
+  font-family:'Syne',sans-serif;
+  font-weight:700;font-size:14px;
+  color:var(--yellow);
+  margin-bottom:12px;
+  display:flex;align-items:center;gap:8px;
+}
+.ad-box p{font-size:14px;color:var(--muted);line-height:1.7}
+.ad-box strong{color:var(--text)}
+
+/* ── UPSELL ── */
+.upsell{
+  margin:0 5% 80px;
+  max-width:900px;
+  margin-left:auto;margin-right:auto;
+  background:var(--card);
+  border:1px solid var(--border2);
+  border-radius:24px;
+  padding:48px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:32px;
+  flex-wrap:wrap;
+  position:relative;
+  overflow:hidden;
+}
+.upsell::before{
+  content:'';
+  position:absolute;
+  top:-100px;right:-100px;
+  width:300px;height:300px;
+  background:radial-gradient(circle,rgba(0,232,122,.06),transparent 70%);
+  pointer-events:none;
+}
+.upsell-left h2{
+  font-family:'Syne',sans-serif;
+  font-weight:800;font-size:28px;
+  letter-spacing:-1px;
+  margin-bottom:12px;
+  max-width:400px;
+}
+.upsell-left p{
+  font-size:15px;color:var(--muted);
+  line-height:1.7;max-width:420px;
+}
+.upsell-btns{
+  display:flex;flex-direction:column;
+  gap:12px;flex-shrink:0;
+}
+.btn-primary{
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--green);
+  color:#000;
+  font-family:'Syne',sans-serif;
+  font-weight:700;font-size:14px;
+  padding:14px 28px;
+  border-radius:12px;
+  text-decoration:none;
+  transition:background .2s,transform .1s;
+  white-space:nowrap;
+}
+.btn-primary:hover{background:#00ff87;transform:translateY(-1px)}
+.btn-secondary{
+  display:inline-flex;align-items:center;gap:8px;
+  background:transparent;
+  color:var(--muted);
+  font-size:13px;
+  padding:10px 20px;
+  border-radius:12px;
+  border:1px solid var(--border2);
+  text-decoration:none;
+  transition:color .2s,border-color .2s;
+  text-align:center;justify-content:center;
+}
+.btn-secondary:hover{color:var(--text);border-color:var(--muted)}
+
+/* ── SCAN AGAIN ── */
+.scan-again-wrap{
+  text-align:center;
+  padding:0 5% 40px;
+}
+.scan-again-btn{
+  background:transparent;
+  border:1px solid var(--border2);
+  color:var(--muted);
+  font-family:'Instrument Sans',sans-serif;
+  font-size:14px;
+  padding:10px 24px;
+  border-radius:10px;
+  cursor:pointer;
+  transition:color .2s,border-color .2s;
+}
+.scan-again-btn:hover{color:var(--text);border-color:var(--muted)}
+
+/* ── ERROR ── */
+.error-box{
+  display:none;
+  background:rgba(255,59,92,.06);
+  border:1px solid rgba(255,59,92,.2);
+  border-radius:12px;
+  padding:14px 18px;
+  font-size:14px;color:var(--red);
+  margin-top:12px;
+  text-align:center;
+  max-width:640px;
+  margin-left:auto;margin-right:auto;
+}
+
+/* ── FOOTER ── */
+footer{
+  border-top:1px solid var(--border);
+  padding:24px 5%;
+  display:flex;align-items:center;justify-content:space-between;
+  font-size:13px;color:var(--muted);
+  flex-wrap:wrap;gap:12px;
+}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(20px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner{
+  width:16px;height:16px;
+  border:2px solid rgba(0,0,0,.2);
+  border-top-color:#000;
+  border-radius:50%;
+  animation:spin .6s linear infinite;
+  display:inline-block;
+}
+
+/* ── RESPONSIVE ── */
+@media(max-width:640px){
+  h1{letter-spacing:-1.5px}
+  .stats-row{gap:24px}
+  .scan-btn{padding:0 16px;font-size:13px}
+  .upsell{padding:32px 24px}
+  .upsell-left h2{font-size:22px}
+  .result-header{flex-direction:column}
+  .score-circle-wrap{flex-direction:row;gap:16px}
+}
+</style>
+</head>
+<body class="grid-bg">
+
+<!-- NAV -->
+<nav>
+  <div class="logo">Store<span>Scope</span></div>
+  <div class="nav-badge">🟢 Free Analysis</div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="hero">
+  <div class="hero-eyebrow">
+    <span class="pulse-dot"></span>
+    Real-time store diagnosis
+  </div>
+
+  <h1>Know exactly why your<br/>store isn't <em>selling</em></h1>
+
+  <p class="hero-sub">
+    Paste your store URL. Get a full diagnosis in seconds —
+    speed, SEO, trust signals, product quality, and whether
+    you should run ads right now.
+  </p>
+
+  <div class="scan-box">
+    <div class="scan-input-wrap">
+      <input
+        class="scan-input"
+        id="urlInput"
+        type="url"
+        placeholder="https://yourstore.com"
+        autocomplete="off"
+        spellcheck="false"
+      />
+      <button class="scan-btn" id="scanBtn" onclick="startScan()">
+        <span id="btnText">Analyse Store</span>
+        <span id="btnIcon">→</span>
+      </button>
+    </div>
+    <p class="scan-note">
+      Works with <span>Shopify</span>, Wix, WordPress, Squarespace & any store
+    </p>
+  </div>
+
+  <div class="error-box" id="errorBox"></div>
+
+  <!-- Progress -->
+  <div class="progress-wrap" id="progressWrap">
+    <div class="progress-label">
+      <span id="progressText">Connecting to store...</span>
+      <span id="progressPct">0%</span>
+    </div>
+    <div class="progress-bar-bg">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+    <div class="progress-steps" id="progressSteps"></div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat">
+      <div class="stat-num">47<span>+</span></div>
+      <div class="stat-label">Things checked</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">&lt;<span>10s</span></div>
+      <div class="stat-label">Analysis time</div>
+    </div>
+    <div class="stat">
+      <div class="stat-num">100<span>%</span></div>
+      <div class="stat-label">Free forever</div>
+    </div>
+  </div>
+</section>
+
+<!-- WHAT WE CHECK -->
+<section class="section" id="checksSection">
+  <div style="max-width:900px;margin:0 auto">
+    <div class="section-label">What we analyse</div>
+    <h2 class="section-title">47 checks across<br/>6 critical areas</h2>
+    <p class="section-sub">Every check is based on real data from your live store — not guesswork.</p>
+
+    <div class="checks-grid">
+      <div class="check-card">
+        <div class="check-icon">⚡</div>
+        <div class="check-title">Speed & Performance</div>
+        <div class="check-desc">Google PageSpeed score, load time, mobile performance. Slow sites lose 40% of visitors before they even see your products.</div>
+      </div>
+      <div class="check-card">
+        <div class="check-icon">🔍</div>
+        <div class="check-title">SEO Health Score</div>
+        <div class="check-desc">Meta titles, descriptions, image alt text, sitemap, indexing status. We estimate what page of Google you're currently on.</div>
+      </div>
+      <div class="check-card">
+        <div class="check-icon">🛒</div>
+        <div class="check-title">Product Quality</div>
+        <div class="check-desc">Description depth, image count, pricing strategy, catalogue size. Tells you if your products are strong enough to convert browsers into buyers.</div>
+      </div>
+      <div class="check-card">
+        <div class="check-icon">🛡️</div>
+        <div class="check-title">Trust & Credibility</div>
+        <div class="check-desc">Reviews, return policy, contact page, SSL, about page. First-time buyers need to trust you before they buy — we check if they can.</div>
+      </div>
+      <div class="check-card">
+        <div class="check-icon">📱</div>
+        <div class="check-title">Mobile Experience</div>
+        <div class="check-desc">85% of shoppers browse on mobile. We check if your store actually works properly on a phone screen.</div>
+      </div>
+      <div class="check-card">
+        <div class="check-icon">📣</div>
+        <div class="check-title">Ad Readiness</div>
+        <div class="check-desc">Should you run ads right now or fix your store first? We tell you exactly which product to promote and on which platform.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- RESULTS -->
+<div id="results"></div>
+
+<!-- UPSELL -->
+<div class="upsell" id="upsell" style="display:none">
+  <div class="upsell-left">
+    <h2>Need someone to handle all of this for you?</h2>
+    <p>I fix stores. SEO, speed, product pages, ad strategy — everything your analysis flagged, done properly so you start getting real sales.</p>
+  </div>
+  <div class="upsell-btns">
+    <a href="https://wa.me/12894757928" class="btn-primary" target="_blank">
+      💬 WhatsApp Me
+    </a>
+    <a href="mailto:fortrixtrn@gmail.com" class="btn-secondary">
+      ✉ Send Email
+    </a>
+  </div>
+</div>
+
+<div class="scan-again-wrap" id="scanAgainWrap" style="display:none">
+  <button class="scan-again-btn" onclick="resetScan()">← Analyse another store</button>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div>© 2026 StoreScope — Free store analysis tool</div>
+  <div>Built for store owners who want real answers</div>
+</footer>
+
+<script>
+// ══════════════════════════════════════════════════════
+//  ANALYSIS ENGINE
+// ══════════════════════════════════════════════════════
+
+const STEPS = [
+  'Connecting to store...',
+  'Checking speed & performance...',
+  'Scanning SEO signals...',
+  'Analysing product catalogue...',
+  'Checking trust signals...',
+  'Evaluating ad readiness...',
+  'Building your report...',
+]
+
+let scanActive = false
+
+function resetScan() {
+  document.getElementById('results').style.display = 'none'
+  document.getElementById('results').innerHTML = ''
+  document.getElementById('upsell').style.display = 'none'
+  document.getElementById('scanAgainWrap').style.display = 'none'
+  document.getElementById('hero').style.display = 'flex'
+  document.getElementById('checksSection').style.display = 'block'
+  document.getElementById('urlInput').value = ''
+  document.getElementById('progressWrap').style.display = 'none'
+  document.getElementById('errorBox').style.display = 'none'
+  document.getElementById('scanBtn').disabled = false
+  document.getElementById('btnText').textContent = 'Analyse Store'
+  document.getElementById('btnIcon').innerHTML = '→'
+  window.scrollTo({top:0,behavior:'smooth'})
+}
+
+function showError(msg) {
+  const box = document.getElementById('errorBox')
+  box.textContent = msg
+  box.style.display = 'block'
+  document.getElementById('scanBtn').disabled = false
+  document.getElementById('btnText').textContent = 'Analyse Store'
+  document.getElementById('btnIcon').innerHTML = '→'
+  document.getElementById('progressWrap').style.display = 'none'
+}
+
+function setProgress(pct, text) {
+  document.getElementById('progressBar').style.width = pct + '%'
+  document.getElementById('progressText').textContent = text
+  document.getElementById('progressPct').textContent = pct + '%'
+}
+
+function updateSteps(currentIdx) {
+  const container = document.getElementById('progressSteps')
+  container.innerHTML = STEPS.map((s,i) => `
+    <div class="progress-step ${i < currentIdx ? 'done' : i === currentIdx ? 'active' : ''}">
+      <span class="step-dot"></span>${s}
+    </div>
+  `).join('')
+}
+
+async function startScan() {
+  if (scanActive) return
+  const url = document.getElementById('urlInput').value.trim()
+  if (!url) { showError('Please enter a store URL'); return }
+
+  let cleanUrl = url
+  if (!cleanUrl.startsWith('http')) cleanUrl = 'https://' + cleanUrl
+
+  try { new URL(cleanUrl) }
+  catch { showError('That doesn\'t look like a valid URL. Try: https://yourstore.com'); return }
+
+  scanActive = true
+  document.getElementById('errorBox').style.display = 'none'
+  document.getElementById('scanBtn').disabled = true
+  document.getElementById('btnText').textContent = 'Scanning'
+  document.getElementById('btnIcon').innerHTML = '<span class="spinner"></span>'
+  document.getElementById('progressWrap').style.display = 'block'
+
+  updateSteps(0)
+  setProgress(5, STEPS[0])
+
+  try {
+    // Step through progress while fetching
+    const stepInterval = setInterval(() => {}, 100)
+
+    // Animate progress steps
+    let step = 0
+    const stepTimer = setInterval(() => {
+      step++
+      if (step < STEPS.length) {
+        updateSteps(step)
+        setProgress(Math.round((step / STEPS.length) * 85), STEPS[step])
+      }
+    }, 1200)
+
+    // Fetch analysis from API
+    const resp = await fetch('/api/analyse', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({url: cleanUrl})
+    })
+
+    clearInterval(stepTimer)
+    clearInterval(stepInterval)
+
+    if (!resp.ok) throw new Error('Analysis failed')
+    const data = await resp.json()
+
+    updateSteps(STEPS.length)
+    setProgress(100, 'Report ready!')
+    await sleep(600)
+
+    renderResults(data, cleanUrl)
+
+  } catch(e) {
+    showError('Could not reach that store. Make sure the URL is correct and the store is live.')
+  }
+
+  scanActive = false
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r,ms)) }
+
+// Enter key triggers scan
+document.getElementById('urlInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') startScan()
+})
+
+// ══════════════════════════════════════════════════════
+//  RENDER RESULTS
+// ══════════════════════════════════════════════════════
+
+function scoreColor(score) {
+  if (score >= 70) return 'var(--green)'
+  if (score >= 40) return 'var(--yellow)'
+  return 'var(--red)'
+}
+
+function scoreLabel(score) {
+  if (score >= 80) return {label:'Strong Store', color:'var(--green)'}
+  if (score >= 60) return {label:'Needs Work', color:'var(--yellow)'}
+  if (score >= 40) return {label:'Struggling', color:'var(--yellow)'}
+  return {label:'Critical Issues', color:'var(--red)'}
+}
+
+function valClass(val, goodFn) {
+  if (val === null || val === undefined) return 'neutral'
+  if (typeof goodFn === 'function') return goodFn(val) ? 'good' : 'bad'
+  return val ? 'good' : 'bad'
+}
+
+function renderResults(d, url) {
+  document.getElementById('hero').style.display = 'none'
+  document.getElementById('checksSection').style.display = 'none'
+  document.getElementById('progressWrap').style.display = 'none'
+
+  const overall = d.overall_score || 0
+  const sl = scoreLabel(overall)
+  const circumference = 283
+  const offset = circumference - (overall / 100) * circumference
+
+  const criticals = d.critical_issues || []
+  const fixes = d.top_fixes || []
+
+  const html = `
+  <div class="result-header">
+    <div class="result-store-info">
+      <h2>${d.store_name || 'Your Store'}</h2>
+      <p>${d.platform || 'Store'} &nbsp;·&nbsp; <a href="${url}" target="_blank">${url.replace(/https?:\/\//,'').slice(0,50)}</a></p>
+      ${d.is_new_seller ? '<p style="color:var(--green);font-size:13px;margin-top:6px">🌱 New store detected</p>' : ''}
+    </div>
+    <div class="score-circle-wrap">
+      <div class="score-circle">
+        <svg width="100" height="100" viewBox="0 0 100 100">
+          <circle class="score-circle-track" cx="50" cy="50" r="45"/>
+          <circle class="score-circle-fill" id="scoreFill" cx="50" cy="50" r="45"
+            stroke="${scoreColor(overall)}"
+            style="stroke-dashoffset:${offset}"/>
+        </svg>
+        <div class="score-number">
+          <span id="scoreNum">0</span>
+          <small>/100</small>
+        </div>
+      </div>
+      <div class="score-label" style="color:${sl.color}">${sl.label}</div>
+    </div>
+  </div>
+
+  ${criticals.length ? `
+  <div class="critical-box">
+    <h3>🚨 Critical issues costing you sales</h3>
+    ${criticals.map(c=>`<div class="critical-item">${c}</div>`).join('')}
+  </div>` : ''}
+
+  <div class="analysis-sections">
+
+    ${makeSection('⚡', 'Speed & Performance', d.speed_score, [
+      ['Google PageSpeed Score', d.pagespeed_score, v => v >= 50, v => v + '/100'],
+      ['Mobile Performance', d.mobile_score, v => v >= 50, v => v + '/100'],
+      ['Load Speed', d.load_speed, v => v <= 3, v => v + 's'],
+      ['SSL Certificate', d.has_ssl, null, v => v ? 'Secure ✓' : 'Missing ✗'],
+      ['Platform', d.platform, null, v => v || 'Unknown'],
+      ['Redesign Needed', d.redesign_needed, null, v => v ? 'Yes — design issues found' : 'No', true],
+    ])}
+
+    ${makeSection('🔍', 'SEO Health', d.seo_score, [
+      ['Meta Title', d.has_meta_title, null, v => v ? 'Present ✓' : 'Missing ✗'],
+      ['Meta Description', d.has_meta_description, null, v => v ? 'Present ✓' : 'Missing ✗'],
+      ['Image Alt Text', d.has_alt_text, null, v => v ? 'Found ✓' : 'Missing ✗'],
+      ['Sitemap', d.has_sitemap, null, v => v ? 'Found ✓' : 'Not found'],
+      ['Pages Indexed', d.pages_indexed, v => v > 5, v => v + ' pages'],
+      ['Estimated Google Position', d.google_tier, null, v => v || 'Unknown'],
+      ['Blog/Content', d.has_blog, null, v => v ? 'Yes ✓' : 'None found'],
+    ])}
+
+    ${makeSection('🛒', 'Products & Catalogue', d.products_score, [
+      ['Product Count', d.product_count, v => v >= 10, v => v + ' products'],
+      ['Avg Description Length', d.avg_desc_length, null, v => v],
+      ['Avg Images Per Product', d.avg_images, v => v >= 2, v => v],
+      ['Price Range', d.price_range, null, v => v || 'Unknown'],
+      ['Niche', d.niche, null, v => v || 'General'],
+    ])}
+
+    ${makeSection('🛡️', 'Trust & Credibility', d.trust_score, [
+      ['Customer Reviews', d.has_reviews, null, v => v ? 'Present ✓' : 'None found'],
+      ['Return Policy', d.has_return_policy, null, v => v ? 'Present ✓' : 'Missing ✗'],
+      ['Contact Page', d.has_contact, null, v => v ? 'Present ✓' : 'Missing ✗'],
+      ['About Page', d.has_about, null, v => v ? 'Present ✓' : 'Missing ✗'],
+      ['Social Media', d.has_social, null, v => v ? 'Linked ✓' : 'Not linked'],
+      ['Email Visible', d.has_email, null, v => v ? 'Yes ✓' : 'Not found'],
+    ])}
+
+    ${makeSection('📣', 'Ad Readiness', d.ads_score, [
+      ['Ready to Run Ads', d.should_run_ads, null, v => v ? 'Yes ✓' : 'Fix store first'],
+      ['Recommended Platform', d.ad_platform, null, v => v || 'N/A'],
+      ['Best Product to Promote', d.best_ad_product, null, v => v || 'N/A'],
+      ['Estimated Ad ROI', d.ad_roi_estimate, null, v => v || 'Unknown'],
+    ])}
+
+  </div>
+
+  ${d.should_run_ads && d.ad_reason ? `
+  <div class="ad-box">
+    <h4>📣 Ad Strategy Recommendation</h4>
+    <p>${d.ad_reason}</p>
+  </div>` : ''}
+
+  <div class="verdict-card">
+    <div class="verdict-title">Your top ${fixes.length} fixes right now</div>
+    <div class="verdict-items">
+      ${fixes.map((f,i)=>`
+      <div class="verdict-item">
+        <div class="verdict-bullet">${i+1}</div>
+        <div>${f}</div>
+      </div>`).join('')}
+    </div>
+    <p style="font-size:13px;color:var(--muted)">Fix these in order. Each one directly impacts your conversion rate and visibility.</p>
+  </div>
+  `
+
+  const resultsEl = document.getElementById('results')
+  resultsEl.innerHTML = html
+  resultsEl.style.display = 'block'
+
+  // Animate score counter
+  let current = 0
+  const target = overall
+  const timer = setInterval(() => {
+    current = Math.min(current + 2, target)
+    document.getElementById('scoreNum').textContent = current
+    if (current >= target) clearInterval(timer)
+  }, 20)
+
+  // Show upsell and scan again
+  document.getElementById('upsell').style.display = 'flex'
+  document.getElementById('scanAgainWrap').style.display = 'block'
+
+  // Scroll to results
+  setTimeout(() => resultsEl.scrollIntoView({behavior:'smooth', block:'start'}), 100)
+
+  // Add toggle listeners
+  document.querySelectorAll('.section-header').forEach(h => {
+    h.addEventListener('click', () => {
+      const body = h.nextElementSibling
+      const chev = h.querySelector('.chevron')
+      body.classList.toggle('open')
+      chev.classList.toggle('open')
+    })
+  })
+
+  // Auto-open first section
+  const firstBody = document.querySelector('.section-body')
+  const firstChev = document.querySelector('.chevron')
+  if (firstBody) { firstBody.classList.add('open'); firstChev.classList.add('open') }
+}
+
+function makeSection(icon, title, score, rows) {
+  const sc = score || 0
+  const color = scoreColor(sc)
+  return `
+  <div class="analysis-section">
+    <div class="section-header">
+      <div class="section-header-left">
+        <span class="section-header-icon">${icon}</span>
+        <span class="section-header-title">${title}</span>
+      </div>
+      <div class="section-header-right">
+        <span class="section-score" style="color:${color}">${sc}/100</span>
+        <span class="chevron">▼</span>
+      </div>
+    </div>
+    <div class="section-body">
+      ${rows.map(([label, val, goodFn, fmt, invert]) => {
+        const display = fmt ? fmt(val) : (val === null || val === undefined ? 'N/A' : val)
+        let cls = 'neutral'
+        if (val !== null && val !== undefined) {
+          if (typeof goodFn === 'function') {
+            cls = goodFn(val) ? (invert ? 'warn' : 'good') : (invert ? 'good' : 'bad')
+          } else if (goodFn === null) {
+            if (typeof val === 'boolean') cls = val ? 'good' : 'bad'
+            else cls = 'neutral'
+          }
+        }
+        return `
+        <div class="check-row">
+          <span class="check-row-label">${label}</span>
+          <span class="check-row-value ${cls}">${display ?? 'N/A'}</span>
+        </div>`
+      }).join('')}
+    </div>
+  </div>`
+}
+</script>
+</body>
+</html>
