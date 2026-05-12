@@ -1008,6 +1008,9 @@ function renderResults(d, url) {
   const fixes = d.top_fixes || []
 
   const html = `
+  <div style="text-align:center;padding:20px 0 8px;font-size:13px;color:var(--muted)">
+    Analysis complete — scroll down to see your full report
+  </div>
   <div class="result-header">
     <div class="result-store-info">
       <h2>${d.store_name || 'Your Store'}</h2>
@@ -1120,8 +1123,8 @@ function renderResults(d, url) {
   document.getElementById('upsell').style.display = 'flex'
   document.getElementById('scanAgainWrap').style.display = 'block'
 
-  // Scroll to results
-  setTimeout(() => resultsEl.scrollIntoView({behavior:'smooth', block:'start'}), 100)
+  // Scroll to very top of page
+  setTimeout(() => window.scrollTo({top:0, behavior:'smooth'}), 100)
 
   // Add toggle listeners
   document.querySelectorAll('.section-header').forEach(h => {
