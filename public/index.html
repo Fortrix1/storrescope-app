@@ -689,6 +689,85 @@ footer{
   display:inline-block;
 }
 
+/* ── CHARTS ── */
+.charts-row{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+  gap:16px;
+  margin-bottom:24px;
+}
+.chart-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:20px;
+  display:flex;flex-direction:column;
+  align-items:center;gap:12px;
+}
+.chart-card-title{
+  font-size:12px;font-weight:600;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+  color:var(--muted);
+  text-align:center;
+}
+.bar-chart{
+  width:100%;
+  display:flex;flex-direction:column;
+  gap:8px;
+}
+.bar-row{
+  display:flex;align-items:center;gap:8px;
+  font-size:12px;
+}
+.bar-label{
+  width:80px;color:var(--muted);
+  text-align:right;flex-shrink:0;
+  font-size:11px;
+}
+.bar-track{
+  flex:1;height:8px;
+  background:var(--border);
+  border-radius:100px;
+  overflow:hidden;
+}
+.bar-fill{
+  height:100%;border-radius:100px;
+  transition:width 1s cubic-bezier(.4,0,.2,1);
+}
+.bar-value{
+  width:32px;text-align:right;
+  font-size:11px;font-weight:600;
+  flex-shrink:0;
+}
+.donut-wrap{position:relative;width:120px;height:120px}
+.donut-wrap svg{transform:rotate(-90deg)}
+.donut-track{fill:none;stroke:var(--border);stroke-width:12}
+.donut-fill{fill:none;stroke-width:12;stroke-linecap:round;
+  stroke-dasharray:283;stroke-dashoffset:283;
+  transition:stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1)}
+.donut-label{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+}
+.donut-num{
+  font-family:'Syne',sans-serif;
+  font-weight:800;font-size:22px;line-height:1;
+}
+.donut-sub{font-size:10px;color:var(--muted);margin-top:2px}
+.radar-wrap{
+  width:160px;height:160px;position:relative;
+}
+.signal-bars{
+  display:flex;align-items:flex-end;
+  gap:4px;height:50px;
+}
+.signal-bar{
+  width:12px;border-radius:3px 3px 0 0;
+  transition:height 1s ease;
+}
+
 /* ── RESPONSIVE ── */
 @media(max-width:640px){
   h1{letter-spacing:-1.5px}
@@ -1011,6 +1090,88 @@ function renderResults(d, url) {
   <div style="text-align:center;padding:20px 0 8px;font-size:13px;color:var(--muted)">
     Analysis complete — scroll down to see your full report
   </div>
+
+  <!-- CHARTS ROW -->
+  <div class="charts-row">
+
+    <!-- Overall donut -->
+    <div class="chart-card">
+      <div class="chart-card-title">Overall Health</div>
+      <div class="donut-wrap">
+        <svg width="120" height="120" viewBox="0 0 100 100">
+          <circle class="donut-track" cx="50" cy="50" r="45"/>
+          <circle class="donut-fill" id="overallDonut" cx="50" cy="50" r="45"
+            stroke="${scoreColor(overall)}"
+            style="stroke-dashoffset:${283 - (overall/100)*283}"/>
+        </svg>
+        <div class="donut-label">
+          <span class="donut-num" style="color:${scoreColor(overall)}">${overall}</span>
+          <span class="donut-sub">/ 100</span>
+        </div>
+      </div>
+      <div style="font-size:12px;font-weight:600;color:${sl.color}">${sl.label}</div>
+    </div>
+
+    <!-- Bar chart of all scores -->
+    <div class="chart-card" style="flex:2;align-items:flex-start">
+      <div class="chart-card-title" style="text-align:left">Score Breakdown</div>
+      <div class="bar-chart" style="width:100%">
+        ${[
+          ['Speed',    d.speed_score    || 0, 'var(--green)'],
+          ['SEO',      d.seo_score      || 0, '#00aaff'],
+          ['Products', d.products_score || 0, '#aa55ff'],
+          ['Trust',    d.trust_score    || 0, '#ff9900'],
+          ['Ads',      d.ads_score      || 0, '#ff5566'],
+        ].map(([label, val, color]) => `
+        <div class="bar-row">
+          <span class="bar-label">${label}</span>
+          <div class="bar-track">
+            <div class="bar-fill" style="width:${val}%;background:${color}"></div>
+          </div>
+          <span class="bar-value" style="color:${color}">${val}</span>
+        </div>`).join('')}
+      </div>
+    </div>
+
+    <!-- Trust signals pie-style -->
+    <div class="chart-card">
+      <div class="chart-card-title">Trust Signals</div>
+      <div class="signal-bars">
+        ${[
+          [d.has_reviews      ? 60 : 10, 'var(--green)',  'Reviews'],
+          [d.has_return_policy? 60 : 10, '#00aaff',       'Returns'],
+          [d.has_contact      ? 60 : 10, '#aa55ff',       'Contact'],
+          [d.has_social       ? 60 : 10, '#ff9900',       'Social'],
+          [d.has_ssl          ? 60 : 10, 'var(--green)',  'SSL'],
+        ].map(([h, color, label]) => `
+        <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
+          <div class="signal-bar" style="height:${h}%;background:${color};width:16px;min-height:6px;max-height:50px;height:${h*0.5}px"></div>
+          <span style="font-size:9px;color:var(--muted)">${label}</span>
+        </div>`).join('')}
+      </div>
+      <div style="font-size:22px;font-family:'Syne',sans-serif;font-weight:800;color:${scoreColor(d.trust_score||0)}">${d.trust_score||0}<span style="font-size:12px;color:var(--muted)">/100</span></div>
+    </div>
+
+    <!-- SEO donut -->
+    <div class="chart-card">
+      <div class="chart-card-title">SEO Score</div>
+      <div class="donut-wrap">
+        <svg width="120" height="120" viewBox="0 0 100 100">
+          <circle class="donut-track" cx="50" cy="50" r="45"/>
+          <circle class="donut-fill" cx="50" cy="50" r="45"
+            stroke="#00aaff"
+            style="stroke-dashoffset:${283 - ((d.seo_score||0)/100)*283}"/>
+        </svg>
+        <div class="donut-label">
+          <span class="donut-num" style="color:#00aaff">${d.seo_score||0}</span>
+          <span class="donut-sub">/ 100</span>
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--muted);text-align:center">${d.google_tier||'Unknown'}</div>
+    </div>
+
+  </div>
+
   <div class="result-header">
     <div class="result-store-info">
       <h2>${d.store_name || 'Your Store'}</h2>
@@ -1051,14 +1212,18 @@ function renderResults(d, url) {
       ['Redesign Needed', d.redesign_needed, null, v => v ? 'Yes — design issues found' : 'No', true],
     ])}
 
-    ${makeSection('🔍', 'SEO Health', d.seo_score, [
-      ['Meta Title', d.has_meta_title, null, v => v ? 'Present ✓' : 'Missing ✗'],
-      ['Meta Description', d.has_meta_description, null, v => v ? 'Present ✓' : 'Missing ✗'],
-      ['Image Alt Text', d.has_alt_text, null, v => v ? 'Found ✓' : 'Missing ✗'],
+    \${makeSection('🔍', 'SEO Health', d.seo_score, [
+      ['Page Title', d.has_meta_title, null, v => v ? (d.meta_title_value||'Present ✓') : 'Missing ✗'],
+      ['Title Quality', null, null, () => d.title_quality||'Unknown'],
+      ['Meta Description', d.has_meta_description, null, v => v ? d.desc_quality : 'Missing ✗'],
+      ['Image Alt Text', d.has_alt_text, null, v => v ? (d.alt_text_pct+' covered ✓') : ((d.alt_text_pct||'0%')+' covered ✗')],
+      ['H1 Heading', d.has_h1, null, v => v ? 'Present ✓' : 'Missing ✗'],
+      ['H2 Headings', d.has_h2, null, v => v ? 'Present ✓' : 'Missing ✗'],
+      ['Open Graph Tags', d.has_og_tags, null, v => v ? 'Present ✓' : 'Missing ✗'],
       ['Sitemap', d.has_sitemap, null, v => v ? 'Found ✓' : 'Not found'],
-      ['Pages Indexed', d.pages_indexed, v => v > 5, v => v + ' pages'],
+      ['Robots.txt', d.has_robots, null, v => v ? 'Found ✓' : 'Not found'],
+      ['Blog/Content', d.has_blog, null, v => v ? 'Yes ✓' : 'None — missing SEO content'],
       ['Estimated Google Position', d.google_tier, null, v => v || 'Unknown'],
-      ['Blog/Content', d.has_blog, null, v => v ? 'Yes ✓' : 'None found'],
     ])}
 
     ${makeSection('🛒', 'Products & Catalogue', d.products_score, [

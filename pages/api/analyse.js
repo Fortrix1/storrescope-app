@@ -139,49 +139,102 @@ async function getPageSpeed(url) {
 async function checkSEO(url, html) {
   const base = url.replace(/\/$/, '')
 
-  const hasMetaTitle       = !!extractMeta(html, 'title') || /<title[^>]*>[^<]{5,}<\/title>/i.test(html)
-  const hasMetaDescription = !!extractMeta(html, 'description')
-  const hasAltText         = /alt=["'][^"']{3,}["']/i.test(html)
+  // Title quality check
+  const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i)
+  const metaTitle  = titleMatch ? titleMatch[1].trim() : ''
+  const hasMetaTitle = metaTitle.length > 5
 
-  // Check sitemap
-  const sitemapR = await safeFetch(base + '/sitemap.xml')
+  // Title quality rating
+  let titleQuality = 'Missing'
+  let titleScore   = 0
+  if (metaTitle) {
+    const tl = metaTitle.toLowerCase()
+    const len = metaTitle.length
+    if (len < 20) { titleQuality = 'Too short'; titleScore = 10 }
+    else if (len > 70) { titleQuality = 'Too long (gets cut off)'; titleScore = 15 }
+    else if (tl.includes('home') || tl === 'shopify store' || tl.includes('my store')) {
+      titleQuality = 'Generic — no keywords'; titleScore = 10
+    }
+    else if (len >= 30 && len <= 60) { titleQuality = 'Good length ✓'; titleScore = 30 }
+    else { titleQuality = 'Acceptable'; titleScore = 20 }
+  }
+
+  // Meta description quality
+  const metaDesc = extractMeta(html, 'description')
+  const hasMetaDescription = metaDesc.length > 10
+  let descQuality = 'Missing'
+  let descScore   = 0
+  if (metaDesc) {
+    const dl = metaDesc.length
+    if (dl < 50) { descQuality = 'Too short'; descScore = 8 }
+    else if (dl > 160) { descQuality = 'Too long'; descScore = 10 }
+    else { descQuality = 'Good ✓'; descScore = 20 }
+  }
+
+  // Image alt text quality
+  const imgTags      = html.match(/<img[^>]+>/gi) || []
+  const totalImgs    = imgTags.length
+  const imgsWithAlt  = imgTags.filter(t => /alt=["'][^"']{3,}["']/i.test(t)).length
+  const altPct       = totalImgs > 0 ? Math.round((imgsWithAlt / totalImgs) * 100) : 0
+  const hasAltText   = altPct > 30
+  let altScore       = Math.round(altPct * 0.15)
+
+  // Sitemap
+  const sitemapR   = await safeFetch(base + '/sitemap.xml')
   const hasSitemap = sitemapR?.ok || false
+  const sitemapScore = hasSitemap ? 15 : 0
 
-  // Check robots.txt
-  const robotsR = await safeFetch(base + '/robots.txt')
+  // Robots.txt
+  const robotsR   = await safeFetch(base + '/robots.txt')
   const hasRobots = robotsR?.ok || false
+  const robotsScore = hasRobots ? 5 : 0
 
-  // Count pages via site: search simulation
-  // We check how many internal links are in the HTML as a proxy
+  // Blog/content
+  const hasBlog   = hasPattern(html, ['/blogs/', '/blog', '/articles/', '/news'])
+  const blogScore = hasBlog ? 10 : 0
+
+  // Keyword tags (meta keywords, og tags)
+  const hasOgTags    = html.includes('og:title') && html.includes('og:description')
+  const hasKeywords  = !!extractMeta(html, 'keywords')
+  const ogScore      = hasOgTags ? 10 : 0
+
+  // Heading structure
+  const hasH1 = /<h1[^>]*>[^<]{3,}<\/h1>/i.test(html)
+  const hasH2 = /<h2[^>]*>[^<]{3,}<\/h2>/i.test(html)
+  const headingScore = (hasH1 ? 5 : 0) + (hasH2 ? 3 : 0)
+
+  // Internal links count
   const internalLinks = (html.match(/href=["']\/[^"']{1,}/g) || []).length
   const pagesIndexed  = Math.max(1, Math.floor(internalLinks * 0.4))
 
-  // Blog
-  const hasBlog = hasPattern(html, ['/blogs/', '/blog', '/articles/', '/news'])
+  // Total SEO score
+  const seoScore = Math.min(100,
+    titleScore + descScore + altScore + sitemapScore +
+    robotsScore + blogScore + ogScore + headingScore
+  )
 
-  // Estimate Google tier based on signals
-  let seoScore = 0
-  if (hasMetaTitle)       seoScore += 20
-  if (hasMetaDescription) seoScore += 20
-  if (hasAltText)         seoScore += 15
-  if (hasSitemap)         seoScore += 20
-  if (hasRobots)          seoScore += 10
-  if (hasBlog)            seoScore += 15
-
-  let googleTier = 'Page 5+'
-  if (seoScore >= 80) googleTier = 'Page 1-2'
-  else if (seoScore >= 60) googleTier = 'Page 2-3'
-  else if (seoScore >= 40) googleTier = 'Page 3-4'
-  else if (seoScore >= 20) googleTier = 'Page 4-5'
+  // Google tier estimate
+  let googleTier = 'Page 5+ (nearly invisible)'
+  if (seoScore >= 75) googleTier = 'Page 1-2 (good visibility)'
+  else if (seoScore >= 55) googleTier = 'Page 2-3 (some visibility)'
+  else if (seoScore >= 35) googleTier = 'Page 3-5 (low visibility)'
+  else googleTier = 'Page 5+ (nearly invisible)'
 
   return {
     seo_score:            seoScore,
     has_meta_title:       hasMetaTitle,
+    meta_title_value:     metaTitle.slice(0, 60) || 'Not found',
+    title_quality:        titleQuality,
     has_meta_description: hasMetaDescription,
+    desc_quality:         descQuality,
     has_alt_text:         hasAltText,
+    alt_text_pct:         altPct + '%',
     has_sitemap:          hasSitemap,
     has_robots:           hasRobots,
     has_blog:             hasBlog,
+    has_og_tags:          hasOgTags,
+    has_h1:               hasH1,
+    has_h2:               hasH2,
     pages_indexed:        pagesIndexed,
     google_tier:          googleTier,
   }
