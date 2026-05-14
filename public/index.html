@@ -1152,6 +1152,29 @@ function renderResults(d, url) {
       <div style="font-size:22px;font-family:'Syne',sans-serif;font-weight:800;color:${scoreColor(d.trust_score||0)}">${d.trust_score||0}<span style="font-size:12px;color:var(--muted)">/100</span></div>
     </div>
 
+    <!-- Radar chart -->
+    <div class="chart-card">
+      <div class="chart-card-title">Store Radar</div>
+      <svg width="140" height="140" viewBox="-70 -70 140 140">
+        <polygon points="0,-50 43,-25 43,25 0,50 -43,25 -43,-25" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+        <polygon points="0,-35 30,-17 30,17 0,35 -30,17 -30,-17" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+        <polygon points="0,-20 17,-10 17,10 0,20 -17,10 -17,-10" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
+        <line x1="0" y1="0" x2="0" y2="-50" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>
+        <line x1="0" y1="0" x2="43" y2="-25" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>
+        <line x1="0" y1="0" x2="43" y2="25" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>
+        <line x1="0" y1="0" x2="0" y2="50" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>
+        <line x1="0" y1="0" x2="-43" y2="25" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>
+        <line x1="0" y1="0" x2="-43" y2="-25" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>
+        <polygon id="radarPoly" points="0,0" fill="rgba(0,232,122,0.15)" stroke="rgba(0,232,122,0.6)" stroke-width="1.5"/>
+        <text x="0" y="-56" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="7">Speed</text>
+        <text x="50" y="-28" text-anchor="start" fill="rgba(255,255,255,0.4)" font-size="7">SEO</text>
+        <text x="50" y="32" text-anchor="start" fill="rgba(255,255,255,0.4)" font-size="7">Products</text>
+        <text x="0" y="62" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="7">Trust</text>
+        <text x="-50" y="32" text-anchor="end" fill="rgba(255,255,255,0.4)" font-size="7">Ads</text>
+        <text x="-50" y="-28" text-anchor="end" fill="rgba(255,255,255,0.4)" font-size="7">Mobile</text>
+      </svg>
+    </div>
+
     <!-- SEO donut -->
     <div class="chart-card">
       <div class="chart-card-title">SEO Score</div>
@@ -1204,15 +1227,15 @@ function renderResults(d, url) {
   <div class="analysis-sections">
 
     ${makeSection('⚡', 'Speed & Performance', d.speed_score, [
-      ['Google PageSpeed Score', d.pagespeed_score, v => v >= 50, v => v + '/100'],
+      ['Google PageSpeed Score', d.pagespeed_score, v => v >= 50, v => v + '/100' + (d.speed_estimated ? ' (estimated)' : '')],
       ['Mobile Performance', d.mobile_score, v => v >= 50, v => v + '/100'],
-      ['Load Speed', d.load_speed, v => v <= 3, v => v + 's'],
+      ['Load Speed', d.load_speed, null, v => v && v !== '0s' ? v : 'Not measured'],
       ['SSL Certificate', d.has_ssl, null, v => v ? 'Secure ✓' : 'Missing ✗'],
       ['Platform', d.platform, null, v => v || 'Unknown'],
-      ['Redesign Needed', d.redesign_needed, null, v => v ? 'Yes — design issues found' : 'No', true],
+      ['Redesign Needed', d.redesign_needed, null, v => v ? 'Yes — redesign recommended' : 'No issues found', true],
     ])}
 
-    \${makeSection('🔍', 'SEO Health', d.seo_score, [
+    ${makeSection('🔍', 'SEO Health', d.seo_score, [
       ['Page Title', d.has_meta_title, null, v => v ? (d.meta_title_value||'Present ✓') : 'Missing ✗'],
       ['Title Quality', null, null, () => d.title_quality||'Unknown'],
       ['Meta Description', d.has_meta_description, null, v => v ? d.desc_quality : 'Missing ✗'],
@@ -1283,6 +1306,27 @@ function renderResults(d, url) {
     document.getElementById('scoreNum').textContent = current
     if (current >= target) clearInterval(timer)
   }, 20)
+
+  // Animate radar chart
+  try {
+    const radarScores = [
+      d.speed_score    || 0,
+      d.seo_score      || 0,
+      d.products_score || 0,
+      d.trust_score    || 0,
+      d.ads_score      || 0,
+      d.mobile_score   || 0,
+    ]
+    const angles = [-90,-30,30,90,150,210].map(a => a * Math.PI / 180)
+    const pts = radarScores.map((s,i) => {
+      const r = (s/100)*50
+      return (r*Math.cos(angles[i])).toFixed(1)+','+(r*Math.sin(angles[i])).toFixed(1)
+    }).join(' ')
+    setTimeout(() => {
+      const poly = document.getElementById('radarPoly')
+      if (poly) poly.setAttribute('points', pts)
+    }, 400)
+  } catch(e) {}
 
   // Show upsell and scan again
   document.getElementById('upsell').style.display = 'flex'

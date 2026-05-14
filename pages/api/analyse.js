@@ -114,23 +114,48 @@ function adPlatformForNiche(niche) {
 
 async function getPageSpeed(url) {
   try {
-    // Google PageSpeed Insights API — free, no key needed for basic
-    const apiUrl = `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(url)}&strategy=mobile`
-    const r = await fetch(apiUrl, { signal: AbortSignal.timeout(15000) })
+    const apiUrl = `https://www.googleapis.com/pagespeedonline/v5/runPagespeed?url=${encodeURIComponent(url)}&strategy=mobile&category=performance`
+    const r = await fetch(apiUrl, { signal: AbortSignal.timeout(12000) })
     if (!r.ok) return null
     const d = await r.json()
-    const cats = d.lighthouseResult?.categories
+    const cats  = d.lighthouseResult?.categories
     const perf  = Math.round((cats?.performance?.score || 0) * 100)
-    const mobile = Math.round((cats?.performance?.score || 0) * 100)
-
-    // Load speed from metrics
     const metrics = d.lighthouseResult?.audits
-    const fcp = metrics?.['first-contentful-paint']?.numericValue || 0
+    const fcp   = metrics?.['first-contentful-paint']?.numericValue || 0
+    const lcp   = metrics?.['largest-contentful-paint']?.numericValue || 0
     const loadSpeed = parseFloat((fcp / 1000).toFixed(1))
-
-    return { perf, mobile, loadSpeed }
+    return { perf, mobile: perf, loadSpeed }
   } catch {
+    // Fallback — estimate speed from HTML size and resource count
     return null
+  }
+}
+
+async function estimateSpeed(url, html) {
+  // When PageSpeed API times out we estimate from what we can measure
+  const htmlSize    = html.length
+  const scriptCount = (html.match(/<script/gi) || []).length
+  const styleCount  = (html.match(/<link[^>]+stylesheet/gi) || []).length
+  const imgCount    = (html.match(/<img/gi) || []).length
+
+  let score = 70  // start optimistic
+  if (htmlSize > 500000) score -= 20
+  else if (htmlSize > 200000) score -= 10
+  if (scriptCount > 15) score -= 15
+  else if (scriptCount > 8) score -= 8
+  if (styleCount > 5) score -= 8
+  if (imgCount > 30) score -= 10
+
+  // Check for common slow elements
+  if (html.includes('data-src') || html.includes('lazyload')) score += 5 // lazy loading = good
+  if (html.includes('async') || html.includes('defer')) score += 5
+
+  score = Math.max(10, Math.min(85, score))
+  return {
+    perf:      score,
+    mobile:    Math.max(10, score - 10),
+    loadSpeed: score > 60 ? 2.1 : score > 40 ? 3.8 : 5.5,
+    estimated: true
   }
 }
 
@@ -470,13 +495,15 @@ async function analyseStore(url) {
   const html = await homeR.text()
 
   // 2. Run all checks in parallel
-  const [speedData, seoData, productData, trustData, psData] = await Promise.all([
-    Promise.resolve(null),     // speed handled by pagespeed
+  const [seoData, productData, trustData, psData] = await Promise.all([
     checkSEO(base, html),
     checkProducts(base),
     checkTrust(base, html),
     getPageSpeed(base),
   ])
+
+  // Use estimated speed if PageSpeed API timed out
+  const speedData = psData || await estimateSpeed(base, html)
 
   // 3. Platform detection
   const platform       = detectPlatform(html, base)
@@ -484,10 +511,11 @@ async function analyseStore(url) {
   const adPlatform     = adPlatformForNiche(niche)
 
   // 4. Speed score
-  const pagespeedScore = psData?.perf   || 0
-  const mobileScore    = psData?.mobile || 0
-  const loadSpeed      = psData?.loadSpeed || 0
+  const pagespeedScore = speedData?.perf      || 0
+  const mobileScore    = speedData?.mobile    || 0
+  const loadSpeed      = speedData?.loadSpeed || 0
   const speedScore     = pagespeedScore
+  const speedEstimated = speedData?.estimated || false
 
   // 5. Redesign check
   const redesignNeeded = (pagespeedScore < 40 || mobileScore < 40)
@@ -548,11 +576,19 @@ async function analyseStore(url) {
     pagespeed_score: pagespeedScore,
     mobile_score:    mobileScore,
     load_speed:      loadSpeed ? loadSpeed + 's' : 'Unknown',
+    speed_estimated: speedEstimated,
     has_ssl:         trustData.has_ssl,
     redesign_needed: redesignNeeded,
 
     // SEO
     ...seoData,
+    meta_title_value: seoData.meta_title_value || '',
+    title_quality:    seoData.title_quality    || 'Unknown',
+    desc_quality:     seoData.desc_quality     || 'Unknown',
+    alt_text_pct:     seoData.alt_text_pct     || '0%',
+    has_og_tags:      seoData.has_og_tags      || false,
+    has_h1:           seoData.has_h1           || false,
+    has_h2:           seoData.has_h2           || false,
 
     // Products
     products_score:  productData?.products_score || 20,
