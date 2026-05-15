@@ -920,6 +920,43 @@ footer{
 }
 .reveal.visible{opacity:1;transform:translateY(0)}
 
+/* ── ACTIVITY FEED ── */
+.activity-feed{
+  position:fixed;
+  bottom:24px;left:24px;
+  z-index:200;
+  display:flex;flex-direction:column;gap:8px;
+  pointer-events:none;
+}
+.activity-item{
+  background:rgba(13,12,24,0.95);
+  border:1px solid var(--border2);
+  border-left:2px solid var(--gold);
+  border-radius:10px;
+  padding:10px 14px;
+  font-size:12px;
+  color:var(--text);
+  max-width:280px;
+  backdrop-filter:blur(12px);
+  animation:slideIn .4s ease both;
+  line-height:1.5;
+}
+.activity-item strong{color:var(--gold)}
+.activity-item .a-time{
+  color:var(--muted);
+  font-size:10px;
+  margin-top:3px;
+  display:block;
+}
+@keyframes slideIn{
+  from{opacity:0;transform:translateX(-20px)}
+  to{opacity:1;transform:translateX(0)}
+}
+@keyframes slideOut{
+  from{opacity:1;transform:translateX(0)}
+  to{opacity:0;transform:translateX(-20px)}
+}
+
 /* ── RESPONSIVE ── */
 @media(max-width:768px){
   .about-strip{grid-template-columns:1fr;gap:48px}
@@ -1236,7 +1273,7 @@ const STEPS=[
 
 let scanning=false
 
-function startScan2(){
+window.startScan2 = function startScan2(){
   const url=document.getElementById('urlInput2').value.trim()
   if(url) {
     document.getElementById('urlInput').value=url
@@ -1245,7 +1282,7 @@ function startScan2(){
   }
 }
 
-function resetScan(){
+window.resetScan = function resetScan(){
   document.getElementById('results').style.display='none'
   document.getElementById('results').innerHTML=''
   document.getElementById('upsell').style.display='none'
@@ -1281,7 +1318,7 @@ function updateSteps(idx){
     </div>`).join('')
 }
 
-async function startScan(){
+window.startScan = async function startScan(){
   if(scanning)return
   const url=document.getElementById('urlInput').value.trim()
   if(!url){showErr('Please enter a store URL');return}
@@ -1322,8 +1359,11 @@ async function startScan(){
   scanning=false
 }
 
-document.getElementById('urlInput').addEventListener('keydown',e=>{
-  if(e.key==='Enter')startScan()
+document.addEventListener('DOMContentLoaded', function() {
+  const inp = document.getElementById('urlInput')
+  if(inp) inp.addEventListener('keydown',e=>{
+    if(e.key==='Enter')startScan()
+  })
 })
 
 // ── SCORE HELPERS ────────────────────────────────────
@@ -1558,5 +1598,59 @@ function makeAcc(icon,title,score,rows){
   </div>`
 }
 </script>
+<!-- ACTIVITY FEED -->
+<div class="activity-feed" id="activityFeed"></div>
+
+<script>
+// ── LIVE ACTIVITY FEED ──────────────────────────────
+const ACTIVITIES = [
+  {name: 'Zara K.', action: 'just analysed their store', detail: 'Found 4 critical SEO issues', time: 'just now'},
+  {name: 'Marcus O.', action: 'discovered why they had no sales', detail: 'Missing trust signals and reviews', time: '2 min ago'},
+  {name: 'Priya S.', action: 'checked their store health', detail: 'Page speed was costing them 60% of visitors', time: '4 min ago'},
+  {name: 'Chidi A.', action: 'got their analysis', detail: 'SEO tweaks could double their visibility', time: '6 min ago'},
+  {name: 'Leila N.', action: 'ran a store analysis', detail: 'No return policy was blocking all conversions', time: '8 min ago'},
+  {name: 'Tomás B.', action: 'just checked their store', detail: 'Product descriptions needed improvement', time: '11 min ago'},
+  {name: 'Amara F.', action: 'discovered their issues', detail: 'Mobile experience was broken on 85% of visits', time: '14 min ago'},
+  {name: 'David W.', action: 'got their report', detail: 'Tweaking their SEO tags increased visibility', time: '17 min ago'},
+  {name: 'Suki T.', action: 'analysed their beauty store', detail: 'Missing social proof was hurting trust', time: '20 min ago'},
+  {name: 'Kofi M.', action: 'just ran an analysis', detail: 'Google could not index their pages properly', time: '23 min ago'},
+]
+
+let actIdx = 0
+const feed  = document.getElementById('activityFeed')
+
+function showActivity() {
+  if (!feed) return
+  const a    = ACTIVITIES[actIdx % ACTIVITIES.length]
+  actIdx++
+
+  const el   = document.createElement('div')
+  el.className = 'activity-item'
+  el.innerHTML = `
+    <strong>${a.name}</strong> ${a.action}<br/>
+    <span style="color:var(--muted);font-size:11px">${a.detail}</span>
+    <span class="a-time">● ${a.time}</span>
+  `
+  feed.appendChild(el)
+
+  // Remove after 6 seconds
+  setTimeout(() => {
+    el.style.animation = 'slideOut .4s ease both'
+    setTimeout(() => el.remove(), 400)
+  }, 6000)
+
+  // Keep max 3 visible
+  while (feed.children.length > 3) {
+    feed.removeChild(feed.firstChild)
+  }
+}
+
+// Show first after 3 seconds, then every 8 seconds
+setTimeout(() => {
+  showActivity()
+  setInterval(showActivity, 8000)
+}, 3000)
+</script>
+
 </body>
 </html>
