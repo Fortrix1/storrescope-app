@@ -1,19 +1,12 @@
-# StoreScope — Free Store Analysis Tool
+# Karios Agency Website
 
-## Deploy to Vercel in 3 steps:
-
+## Deploy to Vercel:
 1. Push this folder to GitHub
-2. Connect to vercel.com → Import Project
-3. Deploy — goes live at storrescope.vercel.app
+2. Import on vercel.com
+3. Select Next.js preset
+4. Deploy
 
-## Before deploying:
-Edit `public/index.html` and update:
-- Line with `https://wa.me/YOUR_NUMBER` → your WhatsApp number
-- Line with `mailto:YOUR_EMAIL` → your email
-
-## How it works:
-- `public/index.html` — the full website (UI + client JS)
-- `pages/api/analyse.js` — the analysis engine (runs on Vercel)
-- Calls Google PageSpeed API (free, no key needed)
-- Visits the store URL and scrapes 47+ signals
-- Returns full analysis as JSON
+## Structure:
+- public/index.html — full website
+- pages/api/analyse.js — store analysis engine
+- pages/index.js — Next.js page renderer

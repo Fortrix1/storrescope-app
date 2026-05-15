@@ -3,33 +3,37 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>StoreScope — Know Exactly Why Your Store Isn't Selling</title>
+<title>Karios Agency — We Turn Struggling Stores Into Stores That Sell</title>
+<meta name="description" content="Why isn't your store selling? Find out in 10 seconds. Karios Agency — SEO, strategy, and growth systems for ecommerce stores."/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800;900&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cabinet+Grotesk:wght@300;400;500;700;800;900&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet"/>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 
 :root{
-  --bg:#030507;
-  --surface:#080d12;
-  --card:#0c1318;
-  --border:#111c24;
-  --border2:#1a2a36;
-  --green:#00e87a;
-  --green2:#00c463;
-  --green-glow:rgba(0,232,122,0.12);
-  --green-dim:rgba(0,232,122,0.06);
+  --bg:#05040a;
+  --surface:#080712;
+  --card:#0d0c18;
+  --border:#16142a;
+  --border2:#1e1c35;
+  --gold:#d4a84b;
+  --gold2:#f0c060;
+  --gold-glow:rgba(212,168,75,0.12);
+  --gold-dim:rgba(212,168,75,0.06);
+  --amber:#ff9500;
+  --white:#f0ece4;
+  --text:#c8c0b0;
+  --muted:#5a5060;
+  --muted2:#2a2535;
   --red:#ff3b5c;
-  --yellow:#ffb800;
-  --text:#e8eef3;
-  --muted:#4a6070;
-  --muted2:#2a3d4d;
-  --white:#ffffff;
+  --green:#00d97e;
+  --green2:rgba(0,217,126,0.08);
 }
 
 html{scroll-behavior:smooth}
+
 body{
-  font-family:'Instrument Sans',sans-serif;
+  font-family:'Cabinet Grotesk',sans-serif;
   background:var(--bg);
   color:var(--text);
   min-height:100vh;
@@ -37,666 +41,638 @@ body{
   cursor:default;
 }
 
-/* ── NOISE TEXTURE ── */
+/* ── CUSTOM CURSOR ── */
+.cursor{
+  width:8px;height:8px;
+  background:var(--gold);
+  border-radius:50%;
+  position:fixed;
+  pointer-events:none;
+  z-index:9999;
+  transform:translate(-50%,-50%);
+  transition:transform .1s,width .3s,height .3s,background .3s;
+  mix-blend-mode:difference;
+}
+.cursor-ring{
+  width:36px;height:36px;
+  border:1px solid rgba(212,168,75,0.4);
+  border-radius:50%;
+  position:fixed;
+  pointer-events:none;
+  z-index:9998;
+  transform:translate(-50%,-50%);
+  transition:transform .12s ease,width .3s,height .3s;
+}
+
+/* ── GRAIN OVERLAY ── */
 body::before{
   content:'';
   position:fixed;inset:0;
-  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
-  pointer-events:none;z-index:0;opacity:.4;
-}
-
-/* ── GRID BACKGROUND ── */
-.grid-bg{
-  background-image:
-    linear-gradient(rgba(0,232,122,0.025) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(0,232,122,0.025) 1px,transparent 1px);
-  background-size:60px 60px;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:1000;opacity:.5;
 }
 
 /* ── NAV ── */
 nav{
   position:fixed;top:0;left:0;right:0;z-index:100;
   display:flex;align-items:center;justify-content:space-between;
-  padding:0 5%;height:64px;
-  background:rgba(3,5,7,0.85);
-  backdrop-filter:blur(20px);
+  padding:0 6%;height:68px;
+  background:rgba(5,4,10,0.8);
+  backdrop-filter:blur(24px);
   border-bottom:1px solid var(--border);
 }
 .logo{
-  font-family:'Syne',sans-serif;
-  font-weight:900;font-size:20px;
-  letter-spacing:-0.5px;
+  font-family:'Bebas Neue',sans-serif;
+  font-size:26px;
+  letter-spacing:2px;
   color:var(--white);
+  display:flex;align-items:center;gap:2px;
 }
-.logo span{color:var(--green)}
-.nav-badge{
-  font-size:11px;font-weight:600;
-  background:var(--green-dim);
-  color:var(--green);
-  border:1px solid rgba(0,232,122,0.2);
-  border-radius:100px;
-  padding:4px 12px;
-  letter-spacing:0.05em;
-  text-transform:uppercase;
+.logo-dot{
+  width:7px;height:7px;
+  background:var(--gold);
+  border-radius:50%;
+  margin-left:3px;
+  animation:pulse 2s infinite;
 }
+.nav-links{
+  display:flex;align-items:center;gap:32px;
+  list-style:none;
+}
+.nav-links a{
+  font-size:13px;font-weight:500;
+  color:var(--muted);
+  text-decoration:none;
+  letter-spacing:.04em;
+  transition:color .2s;
+}
+.nav-links a:hover{color:var(--white)}
+.nav-cta{
+  background:var(--gold);
+  color:#000;
+  font-family:'Cabinet Grotesk',sans-serif;
+  font-weight:800;font-size:12px;
+  letter-spacing:.06em;text-transform:uppercase;
+  padding:10px 20px;border-radius:6px;
+  text-decoration:none;
+  transition:background .2s,transform .1s;
+  border:none;cursor:pointer;
+}
+.nav-cta:hover{background:var(--gold2);transform:translateY(-1px)}
 
 /* ── HERO ── */
 .hero{
   min-height:100vh;
   display:flex;flex-direction:column;
   align-items:center;justify-content:center;
-  padding:100px 5% 60px;
+  padding:120px 6% 80px;
   position:relative;
   overflow:hidden;
+  text-align:center;
 }
 
-/* Radial glow behind hero */
-.hero::after{
-  content:'';
+/* Background elements */
+.hero-orb{
   position:absolute;
-  top:50%;left:50%;
-  transform:translate(-50%,-60%);
-  width:700px;height:500px;
-  background:radial-gradient(ellipse,rgba(0,232,122,0.07) 0%,transparent 70%);
+  border-radius:50%;
+  pointer-events:none;
+  filter:blur(80px);
+}
+.hero-orb-1{
+  width:600px;height:600px;
+  background:radial-gradient(circle,rgba(212,168,75,0.06),transparent 70%);
+  top:-100px;left:50%;transform:translateX(-50%);
+}
+.hero-orb-2{
+  width:300px;height:300px;
+  background:radial-gradient(circle,rgba(255,149,0,0.04),transparent 70%);
+  bottom:100px;right:10%;
+}
+
+/* Diagonal lines background */
+.hero-lines{
+  position:absolute;inset:0;
+  background-image:repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 80px,
+    rgba(212,168,75,0.015) 80px,
+    rgba(212,168,75,0.015) 81px
+  );
   pointer-events:none;
 }
 
-.hero-eyebrow{
-  display:inline-flex;align-items:center;gap:8px;
-  background:var(--green-dim);
-  border:1px solid rgba(0,232,122,0.15);
+/* Floating tag */
+.hero-tag{
+  display:inline-flex;align-items:center;gap:10px;
+  border:1px solid rgba(212,168,75,0.2);
+  background:rgba(212,168,75,0.04);
   border-radius:100px;
-  padding:6px 16px;
+  padding:8px 18px;
   font-size:12px;font-weight:600;
-  color:var(--green);
-  letter-spacing:0.08em;
-  text-transform:uppercase;
-  margin-bottom:32px;
-  animation:fadeUp .6s ease both;
+  color:var(--gold);
+  letter-spacing:.1em;text-transform:uppercase;
+  margin-bottom:40px;
+  animation:fadeUp .7s ease both;
 }
-.pulse-dot{
-  width:7px;height:7px;
-  background:var(--green);
-  border-radius:50%;
-  animation:pulse 2s ease infinite;
-}
-@keyframes pulse{
-  0%,100%{opacity:1;transform:scale(1)}
-  50%{opacity:.4;transform:scale(.8)}
+.tag-line{
+  width:20px;height:1px;
+  background:var(--gold);
+  opacity:.5;
 }
 
-h1{
-  font-family:'Syne',sans-serif;
-  font-weight:900;
-  font-size:clamp(42px,7vw,88px);
-  line-height:.95;
-  letter-spacing:-3px;
-  text-align:center;
-  max-width:900px;
-  margin-bottom:24px;
-  animation:fadeUp .6s .1s ease both;
+/* Main headline */
+.hero-h1{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(56px,10vw,130px);
+  line-height:.92;
+  letter-spacing:2px;
+  color:var(--white);
+  margin-bottom:8px;
+  animation:fadeUp .7s .1s ease both;
 }
-h1 em{
-  font-style:normal;
-  color:var(--green);
+.hero-h1 .gold{
+  color:var(--gold);
   position:relative;
   display:inline-block;
 }
-h1 em::after{
-  content:'';
-  position:absolute;
-  bottom:-4px;left:0;right:0;height:3px;
-  background:linear-gradient(90deg,var(--green),transparent);
-  border-radius:2px;
+.hero-h1-italic{
+  font-family:'Instrument Serif',serif;
+  font-style:italic;
+  font-size:clamp(48px,8vw,108px);
+  color:rgba(240,236,228,0.4);
+  letter-spacing:0;
+  display:block;
+  animation:fadeUp .7s .15s ease both;
 }
 
 .hero-sub{
-  font-size:18px;
+  font-size:clamp(15px,2vw,18px);
   color:var(--muted);
-  text-align:center;
   max-width:520px;
-  line-height:1.7;
-  margin-bottom:52px;
-  animation:fadeUp .6s .2s ease both;
+  line-height:1.8;
+  margin:24px auto 56px;
+  font-weight:400;
+  animation:fadeUp .7s .2s ease both;
 }
+.hero-sub strong{color:var(--text);font-weight:600}
 
 /* ── SCAN BOX ── */
-.scan-box{
-  width:100%;max-width:640px;
-  animation:fadeUp .6s .3s ease both;
+.scan-section{
+  width:100%;max-width:620px;
+  animation:fadeUp .7s .3s ease both;
   position:relative;z-index:1;
 }
-.scan-input-wrap{
+.scan-label{
+  font-size:11px;font-weight:700;
+  letter-spacing:.12em;text-transform:uppercase;
+  color:var(--gold);
+  margin-bottom:12px;
+  display:flex;align-items:center;gap:8px;
+}
+.scan-label::before{
+  content:'';
+  width:24px;height:1px;
+  background:var(--gold);
+  opacity:.5;
+}
+.scan-wrap{
   display:flex;
   background:var(--card);
-  border:1.5px solid var(--border2);
-  border-radius:16px;
+  border:1px solid var(--border2);
+  border-radius:12px;
   overflow:hidden;
-  transition:border-color .2s,box-shadow .2s;
-  box-shadow:0 0 0 0 var(--green-glow);
+  transition:border-color .3s,box-shadow .3s;
+  box-shadow:0 0 0 0 var(--gold-glow);
 }
-.scan-input-wrap:focus-within{
-  border-color:rgba(0,232,122,0.4);
-  box-shadow:0 0 0 4px var(--green-dim),0 0 40px rgba(0,232,122,0.08);
+.scan-wrap:focus-within{
+  border-color:rgba(212,168,75,0.4);
+  box-shadow:0 0 0 4px var(--gold-dim),0 0 60px rgba(212,168,75,0.06);
 }
 .scan-input{
-  flex:1;
-  background:transparent;
+  flex:1;background:transparent;
   border:none;outline:none;
-  padding:18px 20px;
-  font-family:'Instrument Sans',sans-serif;
-  font-size:15px;
-  color:var(--text);
+  padding:18px 22px;
+  font-family:'Cabinet Grotesk',sans-serif;
+  font-size:15px;font-weight:400;
+  color:var(--white);
+  letter-spacing:.01em;
 }
 .scan-input::placeholder{color:var(--muted)}
 .scan-btn{
-  background:var(--green);
-  color:#000;
-  border:none;
+  background:var(--gold);
+  color:#000;border:none;
   padding:0 28px;
-  font-family:'Syne',sans-serif;
-  font-weight:700;
-  font-size:14px;
-  letter-spacing:.02em;
+  font-family:'Bebas Neue',sans-serif;
+  font-size:16px;letter-spacing:2px;
   cursor:pointer;
   transition:background .2s,transform .1s;
   white-space:nowrap;
-  display:flex;align-items:center;gap:8px;
+  display:flex;align-items:center;gap:10px;
 }
-.scan-btn:hover{background:#00ff87}
+.scan-btn:hover{background:var(--gold2)}
 .scan-btn:active{transform:scale(.98)}
-.scan-btn:disabled{
-  background:var(--muted2);
-  color:var(--muted);
-  cursor:not-allowed;
-}
+.scan-btn:disabled{background:var(--muted2);color:var(--muted);cursor:not-allowed}
 
-.scan-note{
-  text-align:center;
+.scan-meta{
+  display:flex;align-items:center;gap:20px;
   margin-top:14px;
-  font-size:12px;
-  color:var(--muted);
+  font-size:12px;color:var(--muted);
+  justify-content:center;
 }
-.scan-note span{color:var(--green);font-weight:600}
+.scan-meta span{display:flex;align-items:center;gap:5px}
+.scan-meta span::before{
+  content:'';
+  width:5px;height:5px;
+  background:var(--green);
+  border-radius:50%;
+}
 
-/* ── STATS ROW ── */
-.stats-row{
-  display:flex;gap:40px;
-  margin-top:64px;
-  animation:fadeUp .6s .4s ease both;
+/* ── SCROLL INDICATOR ── */
+.scroll-hint{
+  position:absolute;bottom:40px;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+  font-size:11px;color:var(--muted);
+  letter-spacing:.1em;text-transform:uppercase;
+  animation:fadeUp .7s .6s ease both;
 }
-.stat{text-align:center}
-.stat-num{
-  font-family:'Syne',sans-serif;
-  font-weight:900;font-size:32px;
+.scroll-mouse{
+  width:22px;height:34px;
+  border:1.5px solid var(--muted2);
+  border-radius:11px;
+  position:relative;
+}
+.scroll-mouse::after{
+  content:'';
+  position:absolute;
+  top:6px;left:50%;transform:translateX(-50%);
+  width:3px;height:6px;
+  background:var(--gold);
+  border-radius:2px;
+  animation:scrollAnim 2s infinite;
+}
+@keyframes scrollAnim{
+  0%,100%{opacity:1;transform:translateX(-50%) translateY(0)}
+  50%{opacity:.3;transform:translateX(-50%) translateY(6px)}
+}
+
+/* ── TICKER ── */
+.ticker-wrap{
+  border-top:1px solid var(--border);
+  border-bottom:1px solid var(--border);
+  background:var(--surface);
+  padding:14px 0;
+  overflow:hidden;
+  position:relative;
+  margin:0;
+}
+.ticker-track{
+  display:flex;gap:0;
+  width:max-content;
+  animation:ticker 30s linear infinite;
+}
+.ticker-item{
+  display:flex;align-items:center;gap:12px;
+  padding:0 32px;
+  font-size:12px;font-weight:600;
+  letter-spacing:.08em;text-transform:uppercase;
+  color:var(--muted);
+  white-space:nowrap;
+}
+.ticker-dot{
+  width:4px;height:4px;
+  background:var(--gold);
+  border-radius:50%;
+  flex-shrink:0;
+}
+@keyframes ticker{
+  from{transform:translateX(0)}
+  to{transform:translateX(-50%)}
+}
+
+/* ── ABOUT STRIP (visible before analysis) ── */
+.about-strip{
+  padding:100px 6%;
+  max-width:1100px;
+  margin:0 auto;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:80px;
+  align-items:center;
+}
+.about-strip-left{}
+.strip-eyebrow{
+  font-size:11px;font-weight:700;
+  letter-spacing:.12em;text-transform:uppercase;
+  color:var(--gold);
+  margin-bottom:20px;
+  display:flex;align-items:center;gap:10px;
+}
+.strip-eyebrow::after{
+  content:'';flex:1;height:1px;
+  background:linear-gradient(90deg,var(--border2),transparent);
+}
+.about-strip h2{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(40px,5vw,64px);
+  letter-spacing:1px;
   color:var(--white);
-  line-height:1;
+  line-height:.95;
+  margin-bottom:20px;
 }
-.stat-num span{color:var(--green)}
-.stat-label{
-  font-size:12px;
-  color:var(--muted);
-  margin-top:4px;
-  text-transform:uppercase;
-  letter-spacing:.06em;
+.about-strip h2 em{
+  font-family:'Instrument Serif',serif;
+  font-style:italic;
+  color:var(--gold);
+  letter-spacing:0;
 }
+.about-strip p{
+  font-size:16px;color:var(--muted);
+  line-height:1.8;margin-bottom:16px;
+}
+.about-strip p strong{color:var(--text)}
+.about-cta{
+  display:inline-flex;align-items:center;gap:10px;
+  margin-top:24px;
+  font-size:13px;font-weight:700;
+  letter-spacing:.06em;text-transform:uppercase;
+  color:var(--gold);
+  text-decoration:none;
+  border-bottom:1px solid rgba(212,168,75,0.3);
+  padding-bottom:4px;
+  transition:color .2s,border-color .2s;
+}
+.about-cta:hover{color:var(--gold2);border-color:var(--gold)}
+.about-cta-arrow{transition:transform .2s}
+.about-cta:hover .about-cta-arrow{transform:translateX(4px)}
 
-/* ── WHAT WE CHECK ── */
-.section{padding:100px 5%}
-.section-label{
-  font-size:11px;
-  font-weight:600;
-  letter-spacing:.1em;
-  text-transform:uppercase;
-  color:var(--green);
-  margin-bottom:16px;
+.about-strip-right{
+  display:flex;flex-direction:column;gap:16px;
+}
+.stat-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:24px 28px;
+  display:flex;align-items:center;gap:20px;
+  transition:border-color .2s,transform .2s;
+}
+.stat-card:hover{border-color:rgba(212,168,75,0.2);transform:translateX(4px)}
+.stat-icon{
+  width:48px;height:48px;
+  background:var(--gold-dim);
+  border:1px solid rgba(212,168,75,0.1);
+  border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;flex-shrink:0;
+}
+.stat-info{}
+.stat-num{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:32px;letter-spacing:1px;
+  color:var(--white);line-height:1;
+}
+.stat-num span{color:var(--gold)}
+.stat-desc{font-size:13px;color:var(--muted);margin-top:2px}
+
+/* ── SERVICES ── */
+.services{
+  padding:100px 6%;
+  max-width:1100px;
+  margin:0 auto;
+}
+.section-header{
+  display:flex;align-items:flex-end;
+  justify-content:space-between;
+  margin-bottom:56px;
+  gap:24px;
+  flex-wrap:wrap;
+}
+.section-header-left{}
+.section-eyebrow{
+  font-size:11px;font-weight:700;
+  letter-spacing:.12em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:12px;
 }
 .section-title{
-  font-family:'Syne',sans-serif;
-  font-weight:800;
-  font-size:clamp(28px,4vw,48px);
-  letter-spacing:-1.5px;
-  line-height:1.1;
-  margin-bottom:16px;
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(40px,5vw,72px);
+  letter-spacing:1px;
+  color:var(--white);
+  line-height:.92;
+}
+.section-title em{
+  font-family:'Instrument Serif',serif;
+  font-style:italic;color:rgba(240,236,228,0.35);
+  letter-spacing:0;
 }
 .section-sub{
-  font-size:16px;
-  color:var(--muted);
-  max-width:480px;
-  line-height:1.7;
-  margin-bottom:60px;
+  font-size:15px;color:var(--muted);
+  max-width:320px;line-height:1.7;
 }
 
-.checks-grid{
+.services-grid{
   display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+  grid-template-columns:repeat(3,1fr);
   gap:2px;
   border:1px solid var(--border);
   border-radius:20px;
   overflow:hidden;
 }
-.check-card{
+.service-card{
   background:var(--card);
-  padding:28px;
+  padding:36px 32px;
+  position:relative;
+  overflow:hidden;
   transition:background .2s;
+  cursor:default;
+}
+.service-card::after{
+  content:'';
+  position:absolute;
+  bottom:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--gold),transparent);
+  transform:scaleX(0);transform-origin:left;
+  transition:transform .3s;
+}
+.service-card:hover{background:#100f1e}
+.service-card:hover::after{transform:scaleX(1)}
+.service-num{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:48px;letter-spacing:1px;
+  color:var(--muted2);
+  line-height:1;
+  margin-bottom:20px;
+}
+.service-icon{
+  width:44px;height:44px;
+  background:var(--gold-dim);
+  border:1px solid rgba(212,168,75,0.12);
+  border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;
+  margin-bottom:20px;
+}
+.service-title{
+  font-family:'Cabinet Grotesk',sans-serif;
+  font-weight:800;font-size:18px;
+  color:var(--white);
+  margin-bottom:10px;
+  letter-spacing:-.3px;
+}
+.service-desc{
+  font-size:14px;color:var(--muted);
+  line-height:1.7;
+}
+.service-tag{
+  display:inline-block;
+  margin-top:16px;
+  font-size:11px;font-weight:600;
+  letter-spacing:.06em;text-transform:uppercase;
+  color:var(--gold);
+  background:var(--gold-dim);
+  border:1px solid rgba(212,168,75,0.12);
+  border-radius:4px;
+  padding:3px 8px;
+}
+
+/* ── ANALYSER SECTION ── */
+.analyser-section{
+  padding:100px 6%;
   position:relative;
   overflow:hidden;
 }
-.check-card::before{
-  content:'';
-  position:absolute;
-  top:0;left:0;right:0;height:1px;
-  background:linear-gradient(90deg,transparent,var(--border2),transparent);
+.analyser-bg{
+  position:absolute;inset:0;
+  background:linear-gradient(180deg,transparent,rgba(212,168,75,0.03),transparent);
+  pointer-events:none;
 }
-.check-card:hover{background:#0f1a22}
-.check-icon{
-  width:40px;height:40px;
-  background:var(--green-dim);
-  border:1px solid rgba(0,232,122,0.15);
-  border-radius:10px;
-  display:flex;align-items:center;justify-content:center;
-  font-size:18px;
-  margin-bottom:16px;
+.analyser-inner{
+  max-width:800px;margin:0 auto;
+  text-align:center;position:relative;z-index:1;
 }
-.check-title{
-  font-family:'Syne',sans-serif;
-  font-weight:700;font-size:15px;
-  margin-bottom:8px;
+.analyser-title{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(48px,7vw,96px);
+  letter-spacing:1px;
   color:var(--white);
+  line-height:.92;
+  margin-bottom:20px;
 }
-.check-desc{
-  font-size:13px;
-  color:var(--muted);
-  line-height:1.6;
+.analyser-title span{color:var(--gold)}
+.analyser-sub{
+  font-size:17px;color:var(--muted);
+  line-height:1.8;max-width:500px;
+  margin:0 auto 48px;
 }
 
-/* ── PROGRESS / LOADING ── */
+/* ── PROGRESS ── */
 .progress-wrap{
-  width:100%;max-width:640px;
-  margin:0 auto;
+  width:100%;max-width:620px;
+  margin:24px auto 0;
   display:none;
 }
 .progress-label{
-  font-size:13px;
-  color:var(--muted);
-  margin-bottom:10px;
   display:flex;justify-content:space-between;
+  font-size:12px;color:var(--muted);
+  margin-bottom:8px;
 }
-.progress-bar-bg{
+.progress-track{
   background:var(--border);
-  border-radius:100px;
-  height:4px;
-  overflow:hidden;
+  border-radius:100px;height:3px;overflow:hidden;
 }
-.progress-bar{
-  height:100%;
-  background:linear-gradient(90deg,var(--green2),var(--green));
-  border-radius:100px;
-  width:0%;
-  transition:width .4s ease;
-  box-shadow:0 0 12px rgba(0,232,122,.4);
+.progress-fill{
+  height:100%;border-radius:100px;
+  background:linear-gradient(90deg,var(--gold),var(--gold2));
+  width:0%;transition:width .5s ease;
+  box-shadow:0 0 10px rgba(212,168,75,.4);
 }
 .progress-steps{
-  display:flex;flex-direction:column;gap:8px;
-  margin-top:20px;
-}
-.progress-step{
-  display:flex;align-items:center;gap:10px;
-  font-size:13px;color:var(--muted2);
-  transition:color .3s;
-}
-.progress-step.active{color:var(--text)}
-.progress-step.done{color:var(--green)}
-.step-dot{
-  width:8px;height:8px;
-  border-radius:50%;
-  background:var(--muted2);
-  flex-shrink:0;
-  transition:background .3s;
-}
-.progress-step.active .step-dot{
-  background:var(--green);
-  box-shadow:0 0 8px var(--green);
-  animation:pulse 1s infinite;
-}
-.progress-step.done .step-dot{background:var(--green)}
-
-/* ── RESULTS ── */
-#results{display:none;padding:40px 5% 100px;max-width:900px;margin:0 auto}
-
-.result-header{
-  display:flex;align-items:flex-start;
-  justify-content:space-between;
-  gap:24px;
-  margin-bottom:48px;
-  flex-wrap:wrap;
-}
-.result-store-info h2{
-  font-family:'Syne',sans-serif;
-  font-weight:800;font-size:28px;
-  letter-spacing:-1px;
-  margin-bottom:6px;
-}
-.result-store-info p{
-  font-size:14px;color:var(--muted);
-}
-.result-store-info a{
-  color:var(--green);text-decoration:none;
-  font-size:13px;
-}
-.result-store-info a:hover{text-decoration:underline}
-
-/* Score circle */
-.score-circle-wrap{
-  display:flex;flex-direction:column;
-  align-items:center;gap:8px;
-  flex-shrink:0;
-}
-.score-circle{
-  width:100px;height:100px;
-  position:relative;
-}
-.score-circle svg{transform:rotate(-90deg)}
-.score-circle-track{fill:none;stroke:var(--border);stroke-width:8}
-.score-circle-fill{
-  fill:none;stroke-width:8;
-  stroke-linecap:round;
-  stroke-dasharray:283;
-  stroke-dashoffset:283;
-  transition:stroke-dashoffset 1.5s cubic-bezier(.4,0,.2,1),stroke .3s;
-}
-.score-number{
-  position:absolute;
-  inset:0;
-  display:flex;flex-direction:column;
-  align-items:center;justify-content:center;
-  font-family:'Syne',sans-serif;
-  font-weight:900;font-size:26px;
-  line-height:1;
-}
-.score-number small{font-size:11px;color:var(--muted);font-weight:400;font-family:'Instrument Sans',sans-serif}
-.score-label{
-  font-size:12px;font-weight:600;
-  letter-spacing:.06em;text-transform:uppercase;
-  text-align:center;
-}
-
-/* Critical issues */
-.critical-box{
-  background:rgba(255,59,92,.06);
-  border:1px solid rgba(255,59,92,.2);
-  border-radius:16px;
-  padding:24px;
-  margin-bottom:32px;
-}
-.critical-box h3{
-  font-family:'Syne',sans-serif;
-  font-weight:700;font-size:14px;
-  color:var(--red);
-  letter-spacing:.06em;text-transform:uppercase;
-  margin-bottom:16px;
-  display:flex;align-items:center;gap:8px;
-}
-.critical-item{
-  display:flex;align-items:flex-start;gap:10px;
-  padding:10px 0;
-  border-bottom:1px solid rgba(255,59,92,.1);
-  font-size:14px;
-}
-.critical-item:last-child{border-bottom:none}
-.critical-item::before{
-  content:'↳';
-  color:var(--red);
-  font-weight:700;
-  flex-shrink:0;
-  margin-top:1px;
-}
-
-/* Analysis sections */
-.analysis-sections{display:flex;flex-direction:column;gap:16px}
-.analysis-section{
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:16px;
-  overflow:hidden;
-}
-.section-header{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:18px 20px;
-  cursor:pointer;
-  transition:background .15s;
-  user-select:none;
-}
-.section-header:hover{background:#0f1a22}
-.section-header-left{
-  display:flex;align-items:center;gap:12px;
-}
-.section-header-icon{font-size:18px}
-.section-header-title{
-  font-family:'Syne',sans-serif;
-  font-weight:700;font-size:15px;
-}
-.section-header-right{
-  display:flex;align-items:center;gap:12px;
-}
-.section-score{
-  font-family:'Syne',sans-serif;
-  font-weight:700;font-size:14px;
-}
-.chevron{
-  font-size:12px;
-  color:var(--muted);
-  transition:transform .2s;
-}
-.section-body{
-  padding:0 20px;
-  max-height:0;overflow:hidden;
-  transition:max-height .3s ease,padding .3s;
-}
-.section-body.open{
-  max-height:600px;
-  padding:0 20px 20px;
-}
-.chevron.open{transform:rotate(180deg)}
-
-.check-row{
-  display:flex;align-items:flex-start;
-  justify-content:space-between;
-  gap:12px;
-  padding:10px 0;
-  border-bottom:1px solid var(--border);
-  font-size:14px;
-}
-.check-row:last-child{border-bottom:none}
-.check-row-label{color:var(--muted);flex:1}
-.check-row-value{
-  font-weight:600;
-  text-align:right;
-  flex-shrink:0;
-}
-.check-row-value.good{color:var(--green)}
-.check-row-value.warn{color:var(--yellow)}
-.check-row-value.bad{color:var(--red)}
-.check-row-value.neutral{color:var(--text)}
-
-/* Verdict */
-.verdict-card{
-  background:linear-gradient(135deg,rgba(0,232,122,.06),rgba(0,196,99,.03));
-  border:1px solid rgba(0,232,122,.2);
-  border-radius:20px;
-  padding:32px;
-  margin-top:32px;
-}
-.verdict-title{
-  font-family:'Syne',sans-serif;
-  font-weight:800;font-size:22px;
-  margin-bottom:16px;
-  letter-spacing:-0.5px;
-}
-.verdict-items{display:flex;flex-direction:column;gap:10px;margin-bottom:24px}
-.verdict-item{
-  display:flex;align-items:flex-start;gap:10px;
-  font-size:14px;line-height:1.6;
-}
-.verdict-bullet{
-  width:20px;height:20px;
-  background:var(--green-dim);
-  border:1px solid rgba(0,232,122,.3);
-  border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  font-size:10px;color:var(--green);
-  flex-shrink:0;margin-top:1px;
-}
-
-/* Ad recommendation */
-.ad-box{
-  background:rgba(255,184,0,.05);
-  border:1px solid rgba(255,184,0,.2);
-  border-radius:16px;
-  padding:20px;
+  display:flex;flex-direction:column;gap:6px;
   margin-top:16px;
 }
-.ad-box h4{
-  font-family:'Syne',sans-serif;
-  font-weight:700;font-size:14px;
-  color:var(--yellow);
-  margin-bottom:12px;
+.p-step{
   display:flex;align-items:center;gap:8px;
+  font-size:12px;color:var(--muted2);
+  transition:color .3s;
 }
-.ad-box p{font-size:14px;color:var(--muted);line-height:1.7}
-.ad-box strong{color:var(--text)}
-
-/* ── UPSELL ── */
-.upsell{
-  margin:0 5% 80px;
-  max-width:900px;
-  margin-left:auto;margin-right:auto;
-  background:var(--card);
-  border:1px solid var(--border2);
-  border-radius:24px;
-  padding:48px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:32px;
-  flex-wrap:wrap;
-  position:relative;
-  overflow:hidden;
+.p-step.active{color:var(--text)}
+.p-step.done{color:var(--gold)}
+.p-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--muted2);flex-shrink:0;
+  transition:background .3s;
 }
-.upsell::before{
-  content:'';
-  position:absolute;
-  top:-100px;right:-100px;
-  width:300px;height:300px;
-  background:radial-gradient(circle,rgba(0,232,122,.06),transparent 70%);
-  pointer-events:none;
-}
-.upsell-left h2{
-  font-family:'Syne',sans-serif;
-  font-weight:800;font-size:28px;
-  letter-spacing:-1px;
-  margin-bottom:12px;
-  max-width:400px;
-}
-.upsell-left p{
-  font-size:15px;color:var(--muted);
-  line-height:1.7;max-width:420px;
-}
-.upsell-btns{
-  display:flex;flex-direction:column;
-  gap:12px;flex-shrink:0;
-}
-.btn-primary{
-  display:inline-flex;align-items:center;gap:8px;
-  background:var(--green);
-  color:#000;
-  font-family:'Syne',sans-serif;
-  font-weight:700;font-size:14px;
-  padding:14px 28px;
-  border-radius:12px;
-  text-decoration:none;
-  transition:background .2s,transform .1s;
-  white-space:nowrap;
-}
-.btn-primary:hover{background:#00ff87;transform:translateY(-1px)}
-.btn-secondary{
-  display:inline-flex;align-items:center;gap:8px;
-  background:transparent;
-  color:var(--muted);
-  font-size:13px;
-  padding:10px 20px;
-  border-radius:12px;
-  border:1px solid var(--border2);
-  text-decoration:none;
-  transition:color .2s,border-color .2s;
-  text-align:center;justify-content:center;
-}
-.btn-secondary:hover{color:var(--text);border-color:var(--muted)}
-
-/* ── SCAN AGAIN ── */
-.scan-again-wrap{
-  text-align:center;
-  padding:0 5% 40px;
-}
-.scan-again-btn{
-  background:transparent;
-  border:1px solid var(--border2);
-  color:var(--muted);
-  font-family:'Instrument Sans',sans-serif;
-  font-size:14px;
-  padding:10px 24px;
-  border-radius:10px;
-  cursor:pointer;
-  transition:color .2s,border-color .2s;
-}
-.scan-again-btn:hover{color:var(--text);border-color:var(--muted)}
+.p-step.active .p-dot{background:var(--gold);box-shadow:0 0 6px var(--gold);animation:pulse 1s infinite}
+.p-step.done .p-dot{background:var(--gold)}
 
 /* ── ERROR ── */
-.error-box{
+.error-msg{
   display:none;
-  background:rgba(255,59,92,.06);
+  background:rgba(255,59,92,.07);
   border:1px solid rgba(255,59,92,.2);
-  border-radius:12px;
-  padding:14px 18px;
-  font-size:14px;color:var(--red);
+  border-radius:10px;
+  padding:12px 18px;
+  font-size:13px;color:var(--red);
   margin-top:12px;
   text-align:center;
-  max-width:640px;
-  margin-left:auto;margin-right:auto;
 }
 
-/* ── FOOTER ── */
-footer{
-  border-top:1px solid var(--border);
-  padding:24px 5%;
-  display:flex;align-items:center;justify-content:space-between;
-  font-size:13px;color:var(--muted);
-  flex-wrap:wrap;gap:12px;
+/* ── RESULTS ── */
+#results{
+  display:none;
+  padding:60px 6% 80px;
+  max-width:960px;
+  margin:0 auto;
 }
 
-/* ── ANIMATIONS ── */
-@keyframes fadeUp{
-  from{opacity:0;transform:translateY(20px)}
-  to{opacity:1;transform:translateY(0)}
+.result-top{
+  display:flex;align-items:flex-start;
+  justify-content:space-between;
+  gap:24px;margin-bottom:48px;
+  flex-wrap:wrap;
 }
-@keyframes spin{to{transform:rotate(360deg)}}
-.spinner{
-  width:16px;height:16px;
-  border:2px solid rgba(0,0,0,.2);
-  border-top-color:#000;
-  border-radius:50%;
-  animation:spin .6s linear infinite;
-  display:inline-block;
+.result-store h2{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:36px;letter-spacing:1px;
+  color:var(--white);margin-bottom:4px;
 }
+.result-store p{font-size:13px;color:var(--muted)}
+.result-store a{color:var(--gold);text-decoration:none}
+.result-store a:hover{text-decoration:underline}
 
-/* ── CHARTS ── */
-.charts-row{
+/* Score ring */
+.score-ring-wrap{
+  display:flex;flex-direction:column;
+  align-items:center;gap:6px;flex-shrink:0;
+}
+.score-ring{width:96px;height:96px;position:relative}
+.score-ring svg{transform:rotate(-90deg)}
+.ring-track{fill:none;stroke:var(--border);stroke-width:7}
+.ring-fill{
+  fill:none;stroke-width:7;stroke-linecap:round;
+  stroke-dasharray:283;stroke-dashoffset:283;
+  transition:stroke-dashoffset 1.5s cubic-bezier(.4,0,.2,1);
+}
+.ring-num{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  font-family:'Bebas Neue',sans-serif;
+  font-size:28px;letter-spacing:1px;
+  line-height:1;
+}
+.ring-num small{font-size:11px;color:var(--muted);font-family:'Cabinet Grotesk',sans-serif;font-weight:400}
+.ring-label{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;text-align:center}
+
+/* Charts row */
+.charts-grid{
   display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
-  gap:16px;
+  grid-template-columns:1fr 1.6fr 1fr;
+  gap:12px;
   margin-bottom:24px;
 }
-.chart-card{
+.chart-box{
   background:var(--card);
   border:1px solid var(--border);
   border-radius:16px;
@@ -704,193 +680,474 @@ footer{
   display:flex;flex-direction:column;
   align-items:center;gap:12px;
 }
-.chart-card-title{
-  font-size:12px;font-weight:600;
-  text-transform:uppercase;
-  letter-spacing:.06em;
-  color:var(--muted);
-  text-align:center;
+.chart-box-title{
+  font-size:11px;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;
+  color:var(--muted);text-align:center;
 }
-.bar-chart{
-  width:100%;
-  display:flex;flex-direction:column;
-  gap:8px;
+.bar-chart{width:100%;display:flex;flex-direction:column;gap:10px}
+.brow{display:flex;align-items:center;gap:8px;font-size:11px}
+.blabel{width:72px;color:var(--muted);text-align:right;flex-shrink:0;font-size:10px}
+.btrack{flex:1;height:6px;background:var(--border);border-radius:100px;overflow:hidden}
+.bfill{height:100%;border-radius:100px;transition:width 1.2s cubic-bezier(.4,0,.2,1)}
+.bval{width:28px;text-align:right;font-size:10px;font-weight:700;flex-shrink:0}
+
+/* Critical box */
+.crit-box{
+  background:rgba(255,59,92,.05);
+  border:1px solid rgba(255,59,92,.15);
+  border-radius:16px;
+  padding:24px;
+  margin-bottom:20px;
 }
-.bar-row{
+.crit-title{
+  font-size:11px;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;
+  color:var(--red);margin-bottom:14px;
   display:flex;align-items:center;gap:8px;
-  font-size:12px;
 }
-.bar-label{
-  width:80px;color:var(--muted);
-  text-align:right;flex-shrink:0;
-  font-size:11px;
+.crit-item{
+  display:flex;align-items:flex-start;gap:10px;
+  padding:9px 0;
+  border-bottom:1px solid rgba(255,59,92,.08);
+  font-size:13px;line-height:1.6;
 }
-.bar-track{
-  flex:1;height:8px;
-  background:var(--border);
-  border-radius:100px;
+.crit-item:last-child{border-bottom:none}
+.crit-arrow{color:var(--red);flex-shrink:0;font-weight:700}
+
+/* Analysis accordion */
+.acc-list{display:flex;flex-direction:column;gap:10px}
+.acc-item{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:14px;
   overflow:hidden;
 }
-.bar-fill{
-  height:100%;border-radius:100px;
-  transition:width 1s cubic-bezier(.4,0,.2,1);
+.acc-head{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 20px;cursor:pointer;
+  transition:background .15s;user-select:none;
 }
-.bar-value{
-  width:32px;text-align:right;
-  font-size:11px;font-weight:600;
-  flex-shrink:0;
+.acc-head:hover{background:#100f1e}
+.acc-head-l{display:flex;align-items:center;gap:10px}
+.acc-ico{font-size:16px}
+.acc-name{font-weight:700;font-size:14px;color:var(--white)}
+.acc-head-r{display:flex;align-items:center;gap:10px}
+.acc-score{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px}
+.acc-chev{font-size:10px;color:var(--muted);transition:transform .2s}
+.acc-body{max-height:0;overflow:hidden;transition:max-height .3s ease,padding .3s}
+.acc-body.open{max-height:600px;padding:0 20px 20px}
+.acc-chev.open{transform:rotate(180deg)}
+.check-row{
+  display:flex;align-items:flex-start;
+  justify-content:space-between;gap:12px;
+  padding:9px 0;
+  border-bottom:1px solid var(--border);
+  font-size:13px;
 }
-.donut-wrap{position:relative;width:120px;height:120px}
-.donut-wrap svg{transform:rotate(-90deg)}
-.donut-track{fill:none;stroke:var(--border);stroke-width:12}
-.donut-fill{fill:none;stroke-width:12;stroke-linecap:round;
-  stroke-dasharray:283;stroke-dashoffset:283;
-  transition:stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1)}
-.donut-label{
-  position:absolute;inset:0;
-  display:flex;flex-direction:column;
-  align-items:center;justify-content:center;
+.check-row:last-child{border-bottom:none}
+.check-lbl{color:var(--muted);flex:1}
+.check-val{font-weight:600;text-align:right;flex-shrink:0}
+.good{color:var(--green)}
+.warn{color:#ffb800}
+.bad{color:var(--red)}
+.neutral{color:var(--text)}
+
+/* Verdict */
+.verdict{
+  background:linear-gradient(135deg,rgba(212,168,75,0.06),rgba(212,168,75,0.02));
+  border:1px solid rgba(212,168,75,0.15);
+  border-radius:20px;
+  padding:32px;margin-top:20px;
 }
-.donut-num{
-  font-family:'Syne',sans-serif;
-  font-weight:800;font-size:22px;line-height:1;
+.verdict h3{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:28px;letter-spacing:1px;
+  color:var(--white);margin-bottom:20px;
 }
-.donut-sub{font-size:10px;color:var(--muted);margin-top:2px}
-.radar-wrap{
-  width:160px;height:160px;position:relative;
-}
-.signal-bars{
-  display:flex;align-items:flex-end;
-  gap:4px;height:50px;
-}
-.signal-bar{
-  width:12px;border-radius:3px 3px 0 0;
-  transition:height 1s ease;
+.verdict-items{display:flex;flex-direction:column;gap:12px;margin-bottom:24px}
+.v-item{display:flex;align-items:flex-start;gap:12px;font-size:14px;line-height:1.6}
+.v-num{
+  width:22px;height:22px;
+  background:var(--gold-dim);
+  border:1px solid rgba(212,168,75,0.2);
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;font-weight:700;color:var(--gold);
+  flex-shrink:0;margin-top:1px;
 }
 
+/* Ad box */
+.ad-box{
+  background:rgba(255,149,0,.05);
+  border:1px solid rgba(255,149,0,.15);
+  border-radius:14px;
+  padding:20px;margin-top:16px;
+}
+.ad-box h4{
+  font-size:12px;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;
+  color:var(--amber);margin-bottom:10px;
+  display:flex;align-items:center;gap:6px;
+}
+.ad-box p{font-size:14px;color:var(--muted);line-height:1.7}
+.ad-box strong{color:var(--text)}
+
+/* ── UPSELL ── */
+.upsell{
+  max-width:960px;margin:0 auto 80px;
+  padding:0 6%;
+  display:none;
+}
+.upsell-card{
+  background:var(--card);
+  border:1px solid var(--border2);
+  border-radius:24px;
+  padding:56px 48px;
+  display:flex;align-items:center;
+  justify-content:space-between;gap:40px;
+  position:relative;overflow:hidden;
+  flex-wrap:wrap;
+}
+.upsell-card::before{
+  content:'';
+  position:absolute;top:-150px;right:-150px;
+  width:400px;height:400px;
+  background:radial-gradient(circle,rgba(212,168,75,.05),transparent 70%);
+  pointer-events:none;
+}
+.upsell-card::after{
+  content:'';
+  position:absolute;top:0;left:0;bottom:0;
+  width:3px;
+  background:linear-gradient(180deg,var(--gold),transparent);
+}
+.upsell-left h2{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:40px;letter-spacing:1px;
+  color:var(--white);
+  line-height:.95;margin-bottom:14px;
+  max-width:400px;
+}
+.upsell-left p{
+  font-size:15px;color:var(--muted);
+  line-height:1.7;max-width:420px;
+}
+.upsell-btns{display:flex;flex-direction:column;gap:10px;flex-shrink:0}
+.btn-gold{
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--gold);color:#000;
+  font-family:'Cabinet Grotesk',sans-serif;
+  font-weight:800;font-size:14px;
+  padding:14px 28px;border-radius:10px;
+  text-decoration:none;
+  transition:background .2s,transform .1s;
+  white-space:nowrap;
+}
+.btn-gold:hover{background:var(--gold2);transform:translateY(-1px)}
+.btn-outline{
+  display:inline-flex;align-items:center;gap:8px;
+  background:transparent;color:var(--muted);
+  font-size:13px;padding:10px 20px;
+  border-radius:10px;border:1px solid var(--border2);
+  text-decoration:none;
+  transition:color .2s,border-color .2s;
+  text-align:center;justify-content:center;
+}
+.btn-outline:hover{color:var(--text);border-color:var(--muted)}
+
+/* ── SCAN AGAIN ── */
+.scan-again{text-align:center;padding:0 6% 60px;display:none}
+.btn-ghost{
+  background:transparent;
+  border:1px solid var(--border2);
+  color:var(--muted);
+  font-family:'Cabinet Grotesk',sans-serif;
+  font-size:13px;
+  padding:10px 24px;border-radius:8px;
+  cursor:pointer;
+  transition:color .2s,border-color .2s;
+}
+.btn-ghost:hover{color:var(--text);border-color:var(--muted)}
+
+/* ── FOOTER ── */
+footer{
+  border-top:1px solid var(--border);
+  padding:32px 6%;
+  display:flex;align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;gap:16px;
+}
+.footer-logo{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:20px;letter-spacing:2px;
+  color:var(--white);
+}
+.footer-links{
+  display:flex;gap:24px;list-style:none;
+}
+.footer-links a{
+  font-size:12px;color:var(--muted);
+  text-decoration:none;
+  transition:color .2s;
+}
+.footer-links a:hover{color:var(--white)}
+.footer-copy{font-size:12px;color:var(--muted)}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(24px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@keyframes pulse{
+  0%,100%{opacity:1;transform:scale(1)}
+  50%{opacity:.4;transform:scale(.75)}
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner{
+  width:14px;height:14px;
+  border:2px solid rgba(0,0,0,.2);
+  border-top-color:#000;
+  border-radius:50%;
+  animation:spin .6s linear infinite;
+  display:inline-block;
+}
+
+/* Scroll reveal */
+.reveal{
+  opacity:0;transform:translateY(32px);
+  transition:opacity .7s ease,transform .7s ease;
+}
+.reveal.visible{opacity:1;transform:translateY(0)}
+
 /* ── RESPONSIVE ── */
-@media(max-width:640px){
-  h1{letter-spacing:-1.5px}
-  .stats-row{gap:24px}
-  .scan-btn{padding:0 16px;font-size:13px}
-  .upsell{padding:32px 24px}
-  .upsell-left h2{font-size:22px}
-  .result-header{flex-direction:column}
-  .score-circle-wrap{flex-direction:row;gap:16px}
+@media(max-width:768px){
+  .about-strip{grid-template-columns:1fr;gap:48px}
+  .services-grid{grid-template-columns:1fr}
+  .charts-grid{grid-template-columns:1fr}
+  .upsell-card{padding:32px 24px}
+  .nav-links{display:none}
+  .hero-h1{letter-spacing:0}
 }
 </style>
 </head>
-<body class="grid-bg">
+<body>
+
+<!-- Custom cursor -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
 
 <!-- NAV -->
 <nav>
-  <div class="logo">Store<span>Scope</span></div>
-  <div class="nav-badge">🟢 Free Analysis</div>
+  <div class="logo">KARIOS<div class="logo-dot"></div></div>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#services">Services</a></li>
+    <li><a href="#analyser">Free Analysis</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <a href="https://wa.me/12894757928" class="nav-cta" target="_blank">Work With Us</a>
 </nav>
 
 <!-- HERO -->
-<section class="hero" id="hero">
-  <div class="hero-eyebrow">
-    <span class="pulse-dot"></span>
-    Real-time store diagnosis
+<section class="hero" id="top">
+  <div class="hero-orb hero-orb-1"></div>
+  <div class="hero-orb hero-orb-2"></div>
+  <div class="hero-lines"></div>
+
+  <div class="hero-tag">
+    <span class="tag-line"></span>
+    Karios Agency — Growth Systems for Ecommerce
+    <span class="tag-line"></span>
   </div>
 
-  <h1>Know exactly why your<br/>store isn't <em>selling</em></h1>
+  <h1 class="hero-h1">
+    WHY ISN'T YOUR<br/>
+    STORE <span class="gold">SELLING?</span>
+  </h1>
+  <span class="hero-h1-italic">We'll tell you in 10 seconds.</span>
 
   <p class="hero-sub">
-    Paste your store URL. Get a full diagnosis in seconds —
-    speed, SEO, trust signals, product quality, and whether
-    you should run ads right now.
+    <strong>Then fix it for good.</strong> Karios Agency turns struggling stores into stores that sell —
+    through SEO, strategy, and growth systems built specifically for your niche.
   </p>
 
-  <div class="scan-box">
-    <div class="scan-input-wrap">
-      <input
-        class="scan-input"
-        id="urlInput"
-        type="url"
+  <div class="scan-section">
+    <div class="scan-label">Analyse Your Store Free</div>
+    <div class="scan-wrap">
+      <input class="scan-input" id="urlInput" type="url"
         placeholder="https://yourstore.com"
-        autocomplete="off"
-        spellcheck="false"
-      />
+        autocomplete="off" spellcheck="false"/>
       <button class="scan-btn" id="scanBtn" onclick="startScan()">
-        <span id="btnText">Analyse Store</span>
+        <span id="btnText">ANALYSE</span>
         <span id="btnIcon">→</span>
       </button>
     </div>
-    <p class="scan-note">
-      Works with <span>Shopify</span>, Wix, WordPress, Squarespace & any store
-    </p>
+    <div class="scan-meta">
+      <span>47 checks run</span>
+      <span>Results in under 10s</span>
+      <span>100% free</span>
+    </div>
+    <div class="error-msg" id="errorMsg"></div>
+    <div class="progress-wrap" id="progressWrap">
+      <div class="progress-label">
+        <span id="pText">Connecting...</span>
+        <span id="pPct">0%</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill" id="pBar"></div>
+      </div>
+      <div class="progress-steps" id="pSteps"></div>
+    </div>
   </div>
 
-  <div class="error-box" id="errorBox"></div>
-
-  <!-- Progress -->
-  <div class="progress-wrap" id="progressWrap">
-    <div class="progress-label">
-      <span id="progressText">Connecting to store...</span>
-      <span id="progressPct">0%</span>
-    </div>
-    <div class="progress-bar-bg">
-      <div class="progress-bar" id="progressBar"></div>
-    </div>
-    <div class="progress-steps" id="progressSteps"></div>
+  <div class="scroll-hint">
+    <div class="scroll-mouse"></div>
+    <span>Scroll to explore</span>
   </div>
+</section>
 
-  <div class="stats-row">
-    <div class="stat">
-      <div class="stat-num">47<span>+</span></div>
-      <div class="stat-label">Things checked</div>
+<!-- TICKER -->
+<div class="ticker-wrap">
+  <div class="ticker-track">
+    <div class="ticker-item"><span class="ticker-dot"></span>SEO Optimisation</div>
+    <div class="ticker-item"><span class="ticker-dot"></span>Store Analysis</div>
+    <div class="ticker-item"><span class="ticker-dot"></span>Product Research</div>
+    <div class="ticker-item"><span class="ticker-dot"></span>Ad Strategy</div>
+    <div class="ticker-item"><span class="ticker-dot"></span>Conversion Rate Optimisation</div>
+    <div class="ticker-item"><span class="ticker-dot"></span>Growth Systems</div>
+    <div class="ticker-item"><span class="ticker-dot"></span>Social Media Strategy</div>
+    <div class="ticker-item"><span class="ticker-dot"></span>Karios Agency</div>
+    <!-- Duplicate for seamless loop -->
+    <div class="ticker-item"><span class="ticker-dot"></span>SEO Optimisation</div>
+    <div class="ticker-item"><span class="ticker-dot"></span>Store Analysis</div>
+    <div class="ticker-item"><span class="ticker-dot"></span>Product Research</div>
+    <div class="ticker-item"><span class="ticker-dot"></span>Ad Strategy</div>
+    <div class="ticker-item"><span class="ticker-dot"></span>Conversion Rate Optimisation</div>
+    <div class="ticker-item"><span class="ticker-dot"></span>Growth Systems</div>
+    <div class="ticker-item"><span class="ticker-dot"></span>Social Media Strategy</div>
+    <div class="ticker-item"><span class="ticker-dot"></span>Karios Agency</div>
+  </div>
+</div>
+
+<!-- ABOUT STRIP -->
+<section class="about-strip reveal" id="about">
+  <div class="about-strip-left">
+    <div class="strip-eyebrow">Who We Are</div>
+    <h2>We don't<br/><em>guess.</em><br/>We diagnose.</h2>
+    <p>Most agencies tell you to "improve your SEO" without showing you exactly what's broken. At Karios Agency, <strong>every recommendation comes from real data</strong> pulled directly from your live store.</p>
+    <p>We've worked with stores across fashion, beauty, home decor, digital products and more — finding the exact issues that stop browsers from becoming buyers.</p>
+    <a href="#analyser" class="about-cta">
+      See what's wrong with your store
+      <span class="about-cta-arrow">→</span>
+    </a>
+  </div>
+  <div class="about-strip-right">
+    <div class="stat-card">
+      <div class="stat-icon">🔍</div>
+      <div class="stat-info">
+        <div class="stat-num">47<span>+</span></div>
+        <div class="stat-desc">Data points checked per store</div>
+      </div>
     </div>
-    <div class="stat">
-      <div class="stat-num">&lt;<span>10s</span></div>
-      <div class="stat-label">Analysis time</div>
+    <div class="stat-card">
+      <div class="stat-icon">⚡</div>
+      <div class="stat-info">
+        <div class="stat-num">&lt;<span>10s</span></div>
+        <div class="stat-desc">Time to get your full analysis</div>
+      </div>
     </div>
-    <div class="stat">
-      <div class="stat-num">100<span>%</span></div>
-      <div class="stat-label">Free forever</div>
+    <div class="stat-card">
+      <div class="stat-icon">🎯</div>
+      <div class="stat-info">
+        <div class="stat-num">6<span> Areas</span></div>
+        <div class="stat-desc">Speed, SEO, Products, Trust, Mobile, Ads</div>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">💡</div>
+      <div class="stat-info">
+        <div class="stat-num">100<span>%</span></div>
+        <div class="stat-desc">Free — no signup, no catch</div>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- WHAT WE CHECK -->
-<section class="section" id="checksSection">
-  <div style="max-width:900px;margin:0 auto">
-    <div class="section-label">What we analyse</div>
-    <h2 class="section-title">47 checks across<br/>6 critical areas</h2>
-    <p class="section-sub">Every check is based on real data from your live store — not guesswork.</p>
+<!-- SERVICES -->
+<section class="services reveal" id="services">
+  <div class="section-header">
+    <div class="section-header-left">
+      <div class="section-eyebrow">What We Do</div>
+      <div class="section-title">Every service<br/><em>your store needs</em></div>
+    </div>
+    <p class="section-sub">One agency. Everything handled. You focus on your products — we handle the growth.</p>
+  </div>
+  <div class="services-grid">
+    <div class="service-card">
+      <div class="service-num">01</div>
+      <div class="service-icon">🔍</div>
+      <div class="service-title">Store Diagnosis</div>
+      <div class="service-desc">Full audit of your store — speed, SEO, trust signals, products, and conversion blockers. You get a prioritised fix list, not vague advice.</div>
+      <span class="service-tag">Free Tool Available</span>
+    </div>
+    <div class="service-card">
+      <div class="service-num">02</div>
+      <div class="service-icon">📈</div>
+      <div class="service-title">SEO & Visibility</div>
+      <div class="service-desc">We optimise your store to rank on Google for the keywords your buyers actually search. More visibility, more organic traffic, more sales.</div>
+      <span class="service-tag">Most Popular</span>
+    </div>
+    <div class="service-card">
+      <div class="service-num">03</div>
+      <div class="service-icon">🎯</div>
+      <div class="service-title">Product Research</div>
+      <div class="service-desc">Weekly lists of trending products matched to your niche — with supplier links and demand data. Never guess what to sell again.</div>
+      <span class="service-tag">Weekly Delivery</span>
+    </div>
+    <div class="service-card">
+      <div class="service-num">04</div>
+      <div class="service-icon">📣</div>
+      <div class="service-title">Ad Strategy</div>
+      <div class="service-desc">We tell you exactly when to run ads, which product to promote, what platform to use, and what budget makes sense for your store right now.</div>
+      <span class="service-tag">Data-Driven</span>
+    </div>
+    <div class="service-card">
+      <div class="service-num">05</div>
+      <div class="service-icon">📱</div>
+      <div class="service-title">Social Media</div>
+      <div class="service-desc">Content strategy and social media setup built around your niche. We connect your store to the platforms where your buyers actually spend time.</div>
+      <span class="service-tag">Platform Specific</span>
+    </div>
+    <div class="service-card">
+      <div class="service-num">06</div>
+      <div class="service-icon">🚀</div>
+      <div class="service-title">Growth Systems</div>
+      <div class="service-desc">Email flows, review collection, upsell strategy, retention — the systems that turn one-time buyers into repeat customers and grow revenue automatically.</div>
+      <span class="service-tag">Long-Term Growth</span>
+    </div>
+  </div>
+</section>
 
-    <div class="checks-grid">
-      <div class="check-card">
-        <div class="check-icon">⚡</div>
-        <div class="check-title">Speed & Performance</div>
-        <div class="check-desc">Google PageSpeed score, load time, mobile performance. Slow sites lose 40% of visitors before they even see your products.</div>
+<!-- ANALYSER SECTION -->
+<section class="analyser-section reveal" id="analyser">
+  <div class="analyser-bg"></div>
+  <div class="analyser-inner">
+    <div class="section-eyebrow" style="text-align:center;margin-bottom:16px">Free Store Analyser</div>
+    <h2 class="analyser-title">YOUR STORE.<br/><span>DIAGNOSED.</span></h2>
+    <p class="analyser-sub">Paste your store URL below. We'll check 47 data points and tell you exactly what's costing you sales right now.</p>
+
+    <div class="scan-section">
+      <div class="scan-wrap" style="max-width:620px;margin:0 auto">
+        <input class="scan-input" id="urlInput2" type="url"
+          placeholder="https://yourstore.com"
+          autocomplete="off" spellcheck="false"/>
+        <button class="scan-btn" onclick="startScan2()">
+          <span id="btnText2">ANALYSE</span>
+          <span id="btnIcon2">→</span>
+        </button>
       </div>
-      <div class="check-card">
-        <div class="check-icon">🔍</div>
-        <div class="check-title">SEO Health Score</div>
-        <div class="check-desc">Meta titles, descriptions, image alt text, sitemap, indexing status. We estimate what page of Google you're currently on.</div>
-      </div>
-      <div class="check-card">
-        <div class="check-icon">🛒</div>
-        <div class="check-title">Product Quality</div>
-        <div class="check-desc">Description depth, image count, pricing strategy, catalogue size. Tells you if your products are strong enough to convert browsers into buyers.</div>
-      </div>
-      <div class="check-card">
-        <div class="check-icon">🛡️</div>
-        <div class="check-title">Trust & Credibility</div>
-        <div class="check-desc">Reviews, return policy, contact page, SSL, about page. First-time buyers need to trust you before they buy — we check if they can.</div>
-      </div>
-      <div class="check-card">
-        <div class="check-icon">📱</div>
-        <div class="check-title">Mobile Experience</div>
-        <div class="check-desc">85% of shoppers browse on mobile. We check if your store actually works properly on a phone screen.</div>
-      </div>
-      <div class="check-card">
-        <div class="check-icon">📣</div>
-        <div class="check-title">Ad Readiness</div>
-        <div class="check-desc">Should you run ads right now or fix your store first? We tell you exactly which product to promote and on which platform.</div>
-      </div>
+      <div class="error-msg" id="errorMsg2"></div>
     </div>
   </div>
 </section>
@@ -899,489 +1156,402 @@ footer{
 <div id="results"></div>
 
 <!-- UPSELL -->
-<div class="upsell" id="upsell" style="display:none">
-  <div class="upsell-left">
-    <h2>Need someone to handle all of this for you?</h2>
-    <p>I fix stores. SEO, speed, product pages, ad strategy — everything your analysis flagged, done properly so you start getting real sales.</p>
-  </div>
-  <div class="upsell-btns">
-    <a href="https://wa.me/12894757928" class="btn-primary" target="_blank">
-      💬 WhatsApp Me
-    </a>
-    <a href="mailto:fortrixtrn@gmail.com" class="btn-secondary">
-      ✉ Send Email
-    </a>
+<div class="upsell" id="upsell">
+  <div class="upsell-card">
+    <div class="upsell-left">
+      <h2>Need Someone To Fix All Of This?</h2>
+      <p>Your analysis shows exactly what's broken. We fix it — SEO, speed, products, ads — everything your store needs to start converting traffic into sales.</p>
+    </div>
+    <div class="upsell-btns">
+      <a href="https://wa.me/12894757928" class="btn-gold" target="_blank" id="contact">
+        💬 WhatsApp Us Now
+      </a>
+      <a href="mailto:fortrixtrn@gmail.com" class="btn-outline">
+        ✉ Send An Email
+      </a>
+    </div>
   </div>
 </div>
 
-<div class="scan-again-wrap" id="scanAgainWrap" style="display:none">
-  <button class="scan-again-btn" onclick="resetScan()">← Analyse another store</button>
+<div class="scan-again" id="scanAgain">
+  <button class="btn-ghost" onclick="resetScan()">← Analyse another store</button>
 </div>
 
 <!-- FOOTER -->
 <footer>
-  <div>© 2026 StoreScope — Free store analysis tool</div>
-  <div>Built for store owners who want real answers</div>
+  <div class="footer-logo">KARIOS</div>
+  <ul class="footer-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#services">Services</a></li>
+    <li><a href="#analyser">Free Analysis</a></li>
+    <li><a href="mailto:fortrixtrn@gmail.com">Contact</a></li>
+  </ul>
+  <div class="footer-copy">© 2026 Karios Agency</div>
 </footer>
 
 <script>
-// ══════════════════════════════════════════════════════
-//  ANALYSIS ENGINE
-// ══════════════════════════════════════════════════════
+// ── CURSOR ──────────────────────────────────────────
+const cur  = document.getElementById('cursor')
+const curR = document.getElementById('cursorRing')
+let mx=0,my=0,rx=0,ry=0
+document.addEventListener('mousemove',e=>{
+  mx=e.clientX;my=e.clientY
+  cur.style.left=mx+'px';cur.style.top=my+'px'
+})
+function animateCursor(){
+  rx+=(mx-rx)*.12;ry+=(my-ry)*.12
+  curR.style.left=rx+'px';curR.style.top=ry+'px'
+  requestAnimationFrame(animateCursor)
+}
+animateCursor()
+document.querySelectorAll('a,button,.service-card,.stat-card').forEach(el=>{
+  el.addEventListener('mouseenter',()=>{
+    cur.style.transform='translate(-50%,-50%) scale(2.5)'
+    curR.style.transform='translate(-50%,-50%) scale(1.4)'
+  })
+  el.addEventListener('mouseleave',()=>{
+    cur.style.transform='translate(-50%,-50%) scale(1)'
+    curR.style.transform='translate(-50%,-50%) scale(1)'
+  })
+})
 
-const STEPS = [
+// ── SCROLL REVEAL ────────────────────────────────────
+const observer = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting) e.target.classList.add('visible')
+  })
+},{threshold:.1})
+document.querySelectorAll('.reveal').forEach(el=>observer.observe(el))
+
+// ── ANALYSIS ENGINE ──────────────────────────────────
+const STEPS=[
   'Connecting to store...',
   'Checking speed & performance...',
   'Scanning SEO signals...',
   'Analysing product catalogue...',
-  'Checking trust signals...',
+  'Checking trust & credibility...',
   'Evaluating ad readiness...',
   'Building your report...',
 ]
 
-let scanActive = false
+let scanning=false
 
-function resetScan() {
-  document.getElementById('results').style.display = 'none'
-  document.getElementById('results').innerHTML = ''
-  document.getElementById('upsell').style.display = 'none'
-  document.getElementById('scanAgainWrap').style.display = 'none'
-  document.getElementById('hero').style.display = 'flex'
-  document.getElementById('checksSection').style.display = 'block'
-  document.getElementById('urlInput').value = ''
-  document.getElementById('progressWrap').style.display = 'none'
-  document.getElementById('errorBox').style.display = 'none'
-  document.getElementById('scanBtn').disabled = false
-  document.getElementById('btnText').textContent = 'Analyse Store'
-  document.getElementById('btnIcon').innerHTML = '→'
+function startScan2(){
+  const url=document.getElementById('urlInput2').value.trim()
+  if(url) {
+    document.getElementById('urlInput').value=url
+    startScan()
+    document.getElementById('top').scrollIntoView({behavior:'smooth'})
+  }
+}
+
+function resetScan(){
+  document.getElementById('results').style.display='none'
+  document.getElementById('results').innerHTML=''
+  document.getElementById('upsell').style.display='none'
+  document.getElementById('scanAgain').style.display='none'
+  document.getElementById('urlInput').value=''
+  document.getElementById('progressWrap').style.display='none'
+  document.getElementById('errorMsg').style.display='none'
+  document.getElementById('scanBtn').disabled=false
+  document.getElementById('btnText').textContent='ANALYSE'
+  document.getElementById('btnIcon').innerHTML='→'
   window.scrollTo({top:0,behavior:'smooth'})
 }
 
-function showError(msg) {
-  const box = document.getElementById('errorBox')
-  box.textContent = msg
-  box.style.display = 'block'
-  document.getElementById('scanBtn').disabled = false
-  document.getElementById('btnText').textContent = 'Analyse Store'
-  document.getElementById('btnIcon').innerHTML = '→'
-  document.getElementById('progressWrap').style.display = 'none'
+function showErr(msg){
+  const b=document.getElementById('errorMsg')
+  b.textContent=msg;b.style.display='block'
+  document.getElementById('scanBtn').disabled=false
+  document.getElementById('btnText').textContent='ANALYSE'
+  document.getElementById('btnIcon').innerHTML='→'
+  document.getElementById('progressWrap').style.display='none'
 }
 
-function setProgress(pct, text) {
-  document.getElementById('progressBar').style.width = pct + '%'
-  document.getElementById('progressText').textContent = text
-  document.getElementById('progressPct').textContent = pct + '%'
+function setProgress(pct,text){
+  document.getElementById('pBar').style.width=pct+'%'
+  document.getElementById('pText').textContent=text
+  document.getElementById('pPct').textContent=pct+'%'
 }
 
-function updateSteps(currentIdx) {
-  const container = document.getElementById('progressSteps')
-  container.innerHTML = STEPS.map((s,i) => `
-    <div class="progress-step ${i < currentIdx ? 'done' : i === currentIdx ? 'active' : ''}">
-      <span class="step-dot"></span>${s}
-    </div>
-  `).join('')
+function updateSteps(idx){
+  document.getElementById('pSteps').innerHTML=STEPS.map((s,i)=>`
+    <div class="p-step ${i<idx?'done':i===idx?'active':''}">
+      <span class="p-dot"></span>${s}
+    </div>`).join('')
 }
 
-async function startScan() {
-  if (scanActive) return
-  const url = document.getElementById('urlInput').value.trim()
-  if (!url) { showError('Please enter a store URL'); return }
+async function startScan(){
+  if(scanning)return
+  const url=document.getElementById('urlInput').value.trim()
+  if(!url){showErr('Please enter a store URL');return}
+  let clean=url
+  if(!clean.startsWith('http'))clean='https://'+clean
+  try{new URL(clean)}catch{showErr("That doesn't look like a valid URL");return}
 
-  let cleanUrl = url
-  if (!cleanUrl.startsWith('http')) cleanUrl = 'https://' + cleanUrl
+  scanning=true
+  document.getElementById('errorMsg').style.display='none'
+  document.getElementById('scanBtn').disabled=true
+  document.getElementById('btnText').textContent='Scanning'
+  document.getElementById('btnIcon').innerHTML='<span class="spinner"></span>'
+  document.getElementById('progressWrap').style.display='block'
+  updateSteps(0);setProgress(5,STEPS[0])
 
-  try { new URL(cleanUrl) }
-  catch { showError('That doesn\'t look like a valid URL. Try: https://yourstore.com'); return }
+  let step=0
+  const st=setInterval(()=>{
+    step++
+    if(step<STEPS.length){updateSteps(step);setProgress(Math.round(step/STEPS.length*85),STEPS[step])}
+  },1200)
 
-  scanActive = true
-  document.getElementById('errorBox').style.display = 'none'
-  document.getElementById('scanBtn').disabled = true
-  document.getElementById('btnText').textContent = 'Scanning'
-  document.getElementById('btnIcon').innerHTML = '<span class="spinner"></span>'
-  document.getElementById('progressWrap').style.display = 'block'
-
-  updateSteps(0)
-  setProgress(5, STEPS[0])
-
-  try {
-    // Step through progress while fetching
-    const stepInterval = setInterval(() => {}, 100)
-
-    // Animate progress steps
-    let step = 0
-    const stepTimer = setInterval(() => {
-      step++
-      if (step < STEPS.length) {
-        updateSteps(step)
-        setProgress(Math.round((step / STEPS.length) * 85), STEPS[step])
-      }
-    }, 1200)
-
-    // Fetch analysis from API
-    const resp = await fetch('/api/analyse', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({url: cleanUrl})
+  try{
+    const r=await fetch('/api/analyse',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({url:clean})
     })
-
-    clearInterval(stepTimer)
-    clearInterval(stepInterval)
-
-    if (!resp.ok) throw new Error('Analysis failed')
-    const data = await resp.json()
-
-    updateSteps(STEPS.length)
-    setProgress(100, 'Report ready!')
-    await sleep(600)
-
-    renderResults(data, cleanUrl)
-
-  } catch(e) {
-    showError('Could not reach that store. Make sure the URL is correct and the store is live.')
+    clearInterval(st)
+    if(!r.ok)throw new Error('failed')
+    const d=await r.json()
+    updateSteps(STEPS.length);setProgress(100,'Report ready!')
+    await new Promise(r=>setTimeout(r,500))
+    renderResults(d,clean)
+  }catch(e){
+    clearInterval(st)
+    showErr('Could not reach that store. Make sure the URL is correct and the store is live.')
   }
-
-  scanActive = false
+  scanning=false
 }
 
-function sleep(ms) { return new Promise(r => setTimeout(r,ms)) }
-
-// Enter key triggers scan
-document.getElementById('urlInput').addEventListener('keydown', e => {
-  if (e.key === 'Enter') startScan()
+document.getElementById('urlInput').addEventListener('keydown',e=>{
+  if(e.key==='Enter')startScan()
 })
 
-// ══════════════════════════════════════════════════════
-//  RENDER RESULTS
-// ══════════════════════════════════════════════════════
-
-function scoreColor(score) {
-  if (score >= 70) return 'var(--green)'
-  if (score >= 40) return 'var(--yellow)'
-  return 'var(--red)'
+// ── SCORE HELPERS ────────────────────────────────────
+function scoreColor(s){
+  if(s>=70)return'var(--green)'
+  if(s>=40)return'#ffb800'
+  return'var(--red)'
+}
+function scoreLabel(s){
+  if(s>=80)return{l:'Strong Store',c:'var(--green)'}
+  if(s>=60)return{l:'Needs Work',c:'#ffb800'}
+  if(s>=40)return{l:'Struggling',c:'#ffb800'}
+  return{l:'Critical Issues',c:'var(--red)'}
+}
+function vc(val,goodFn){
+  if(val===null||val===undefined)return'neutral'
+  if(typeof goodFn==='function')return goodFn(val)?'good':'bad'
+  if(typeof val==='boolean')return val?'good':'bad'
+  return'neutral'
 }
 
-function scoreLabel(score) {
-  if (score >= 80) return {label:'Strong Store', color:'var(--green)'}
-  if (score >= 60) return {label:'Needs Work', color:'var(--yellow)'}
-  if (score >= 40) return {label:'Struggling', color:'var(--yellow)'}
-  return {label:'Critical Issues', color:'var(--red)'}
-}
+// ── RENDER RESULTS ───────────────────────────────────
+function renderResults(d,url){
+  const overall=d.overall_score||0
+  const sl=scoreLabel(overall)
+  const offset=283-(overall/100)*283
+  const criticals=d.critical_issues||[]
+  const fixes=d.top_fixes||[]
 
-function valClass(val, goodFn) {
-  if (val === null || val === undefined) return 'neutral'
-  if (typeof goodFn === 'function') return goodFn(val) ? 'good' : 'bad'
-  return val ? 'good' : 'bad'
-}
-
-function renderResults(d, url) {
-  document.getElementById('hero').style.display = 'none'
-  document.getElementById('checksSection').style.display = 'none'
-  document.getElementById('progressWrap').style.display = 'none'
-
-  const overall = d.overall_score || 0
-  const sl = scoreLabel(overall)
-  const circumference = 283
-  const offset = circumference - (overall / 100) * circumference
-
-  const criticals = d.critical_issues || []
-  const fixes = d.top_fixes || []
-
-  const html = `
-  <div style="text-align:center;padding:20px 0 8px;font-size:13px;color:var(--muted)">
-    Analysis complete — scroll down to see your full report
+  const html=`
+  <div style="text-align:center;padding:16px 0 0;font-size:12px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase">
+    Analysis complete — scroll down for your full report
   </div>
 
-  <!-- CHARTS ROW -->
-  <div class="charts-row">
+  <!-- Charts -->
+  <div class="charts-grid" style="margin-top:32px">
 
-    <!-- Overall donut -->
-    <div class="chart-card">
-      <div class="chart-card-title">Overall Health</div>
-      <div class="donut-wrap">
-        <svg width="120" height="120" viewBox="0 0 100 100">
-          <circle class="donut-track" cx="50" cy="50" r="45"/>
-          <circle class="donut-fill" id="overallDonut" cx="50" cy="50" r="45"
-            stroke="${scoreColor(overall)}"
-            style="stroke-dashoffset:${283 - (overall/100)*283}"/>
-        </svg>
-        <div class="donut-label">
-          <span class="donut-num" style="color:${scoreColor(overall)}">${overall}</span>
-          <span class="donut-sub">/ 100</span>
-        </div>
-      </div>
-      <div style="font-size:12px;font-weight:600;color:${sl.color}">${sl.label}</div>
-    </div>
-
-    <!-- Bar chart of all scores -->
-    <div class="chart-card" style="flex:2;align-items:flex-start">
-      <div class="chart-card-title" style="text-align:left">Score Breakdown</div>
-      <div class="bar-chart" style="width:100%">
-        ${[
-          ['Speed',    d.speed_score    || 0, 'var(--green)'],
-          ['SEO',      d.seo_score      || 0, '#00aaff'],
-          ['Products', d.products_score || 0, '#aa55ff'],
-          ['Trust',    d.trust_score    || 0, '#ff9900'],
-          ['Ads',      d.ads_score      || 0, '#ff5566'],
-        ].map(([label, val, color]) => `
-        <div class="bar-row">
-          <span class="bar-label">${label}</span>
-          <div class="bar-track">
-            <div class="bar-fill" style="width:${val}%;background:${color}"></div>
-          </div>
-          <span class="bar-value" style="color:${color}">${val}</span>
-        </div>`).join('')}
-      </div>
-    </div>
-
-    <!-- Trust signals pie-style -->
-    <div class="chart-card">
-      <div class="chart-card-title">Trust Signals</div>
-      <div class="signal-bars">
-        ${[
-          [d.has_reviews      ? 60 : 10, 'var(--green)',  'Reviews'],
-          [d.has_return_policy? 60 : 10, '#00aaff',       'Returns'],
-          [d.has_contact      ? 60 : 10, '#aa55ff',       'Contact'],
-          [d.has_social       ? 60 : 10, '#ff9900',       'Social'],
-          [d.has_ssl          ? 60 : 10, 'var(--green)',  'SSL'],
-        ].map(([h, color, label]) => `
-        <div style="display:flex;flex-direction:column;align-items:center;gap:4px">
-          <div class="signal-bar" style="height:${h}%;background:${color};width:16px;min-height:6px;max-height:50px;height:${h*0.5}px"></div>
-          <span style="font-size:9px;color:var(--muted)">${label}</span>
-        </div>`).join('')}
-      </div>
-      <div style="font-size:22px;font-family:'Syne',sans-serif;font-weight:800;color:${scoreColor(d.trust_score||0)}">${d.trust_score||0}<span style="font-size:12px;color:var(--muted)">/100</span></div>
-    </div>
-
-    <!-- Radar chart -->
-    <div class="chart-card">
-      <div class="chart-card-title">Store Radar</div>
-      <svg width="140" height="140" viewBox="-70 -70 140 140">
-        <polygon points="0,-50 43,-25 43,25 0,50 -43,25 -43,-25" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
-        <polygon points="0,-35 30,-17 30,17 0,35 -30,17 -30,-17" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
-        <polygon points="0,-20 17,-10 17,10 0,20 -17,10 -17,-10" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1"/>
-        <line x1="0" y1="0" x2="0" y2="-50" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>
-        <line x1="0" y1="0" x2="43" y2="-25" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>
-        <line x1="0" y1="0" x2="43" y2="25" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>
-        <line x1="0" y1="0" x2="0" y2="50" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>
-        <line x1="0" y1="0" x2="-43" y2="25" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>
-        <line x1="0" y1="0" x2="-43" y2="-25" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>
-        <polygon id="radarPoly" points="0,0" fill="rgba(0,232,122,0.15)" stroke="rgba(0,232,122,0.6)" stroke-width="1.5"/>
-        <text x="0" y="-56" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="7">Speed</text>
-        <text x="50" y="-28" text-anchor="start" fill="rgba(255,255,255,0.4)" font-size="7">SEO</text>
-        <text x="50" y="32" text-anchor="start" fill="rgba(255,255,255,0.4)" font-size="7">Products</text>
-        <text x="0" y="62" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="7">Trust</text>
-        <text x="-50" y="32" text-anchor="end" fill="rgba(255,255,255,0.4)" font-size="7">Ads</text>
-        <text x="-50" y="-28" text-anchor="end" fill="rgba(255,255,255,0.4)" font-size="7">Mobile</text>
-      </svg>
-    </div>
-
-    <!-- SEO donut -->
-    <div class="chart-card">
-      <div class="chart-card-title">SEO Score</div>
-      <div class="donut-wrap">
-        <svg width="120" height="120" viewBox="0 0 100 100">
-          <circle class="donut-track" cx="50" cy="50" r="45"/>
-          <circle class="donut-fill" cx="50" cy="50" r="45"
-            stroke="#00aaff"
-            style="stroke-dashoffset:${283 - ((d.seo_score||0)/100)*283}"/>
-        </svg>
-        <div class="donut-label">
-          <span class="donut-num" style="color:#00aaff">${d.seo_score||0}</span>
-          <span class="donut-sub">/ 100</span>
-        </div>
-      </div>
-      <div style="font-size:12px;color:var(--muted);text-align:center">${d.google_tier||'Unknown'}</div>
-    </div>
-
-  </div>
-
-  <div class="result-header">
-    <div class="result-store-info">
-      <h2>${d.store_name || 'Your Store'}</h2>
-      <p>${d.platform || 'Store'} &nbsp;·&nbsp; <a href="${url}" target="_blank">${url.replace(/https?:\/\//,'').slice(0,50)}</a></p>
-      ${d.is_new_seller ? '<p style="color:var(--green);font-size:13px;margin-top:6px">🌱 New store detected</p>' : ''}
-    </div>
-    <div class="score-circle-wrap">
-      <div class="score-circle">
-        <svg width="100" height="100" viewBox="0 0 100 100">
-          <circle class="score-circle-track" cx="50" cy="50" r="45"/>
-          <circle class="score-circle-fill" id="scoreFill" cx="50" cy="50" r="45"
+    <div class="chart-box">
+      <div class="chart-box-title">Overall Health</div>
+      <div style="position:relative;width:100px;height:100px">
+        <svg width="100" height="100" viewBox="0 0 100 100" style="transform:rotate(-90deg)">
+          <circle class="ring-track" cx="50" cy="50" r="45"/>
+          <circle class="ring-fill" cx="50" cy="50" r="45"
             stroke="${scoreColor(overall)}"
             style="stroke-dashoffset:${offset}"/>
         </svg>
-        <div class="score-number">
-          <span id="scoreNum">0</span>
-          <small>/100</small>
+        <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
+          <span style="font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:1px;color:${scoreColor(overall)}" id="scoreNum">0</span>
+          <span style="font-size:10px;color:var(--muted)">/100</span>
         </div>
       </div>
-      <div class="score-label" style="color:${sl.color}">${sl.label}</div>
+      <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:${sl.c}">${sl.l}</div>
+    </div>
+
+    <div class="chart-box" style="align-items:flex-start">
+      <div class="chart-box-title" style="text-align:left;width:100%">Score Breakdown</div>
+      <div class="bar-chart" style="width:100%">
+        ${[
+          ['Speed',    d.speed_score    ||0,'#d4a84b'],
+          ['SEO',      d.seo_score      ||0,'#00aaff'],
+          ['Products', d.products_score ||0,'#aa55ff'],
+          ['Trust',    d.trust_score    ||0,'#00d97e'],
+          ['Ads',      d.ads_score      ||0,'#ff9500'],
+        ].map(([l,v,c])=>`
+        <div class="brow">
+          <span class="blabel">${l}</span>
+          <div class="btrack"><div class="bfill" style="width:${v}%;background:${c}"></div></div>
+          <span class="bval" style="color:${c}">${v}</span>
+        </div>`).join('')}
+      </div>
+    </div>
+
+    <div class="chart-box">
+      <div class="chart-box-title">SEO Score</div>
+      <div style="position:relative;width:100px;height:100px">
+        <svg width="100" height="100" viewBox="0 0 100 100" style="transform:rotate(-90deg)">
+          <circle class="ring-track" cx="50" cy="50" r="45"/>
+          <circle class="ring-fill" cx="50" cy="50" r="45"
+            stroke="#00aaff"
+            style="stroke-dashoffset:${283-((d.seo_score||0)/100)*283}"/>
+        </svg>
+        <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
+          <span style="font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:1px;color:#00aaff">${d.seo_score||0}</span>
+          <span style="font-size:10px;color:var(--muted)">/100</span>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--muted);text-align:center">${d.google_tier||'Unknown'}</div>
     </div>
   </div>
 
-  ${criticals.length ? `
-  <div class="critical-box">
-    <h3>🚨 Critical issues costing you sales</h3>
-    ${criticals.map(c=>`<div class="critical-item">${c}</div>`).join('')}
-  </div>` : ''}
-
-  <div class="analysis-sections">
-
-    ${makeSection('⚡', 'Speed & Performance', d.speed_score, [
-      ['Google PageSpeed Score', d.pagespeed_score, v => v >= 50, v => v + '/100' + (d.speed_estimated ? ' (estimated)' : '')],
-      ['Mobile Performance', d.mobile_score, v => v >= 50, v => v + '/100'],
-      ['Load Speed', d.load_speed, null, v => v && v !== '0s' ? v : 'Not measured'],
-      ['SSL Certificate', d.has_ssl, null, v => v ? 'Secure ✓' : 'Missing ✗'],
-      ['Platform', d.platform, null, v => v || 'Unknown'],
-      ['Redesign Needed', d.redesign_needed, null, v => v ? 'Yes — redesign recommended' : 'No issues found', true],
-    ])}
-
-    ${makeSection('🔍', 'SEO Health', d.seo_score, [
-      ['Page Title', d.has_meta_title, null, v => v ? (d.meta_title_value||'Present ✓') : 'Missing ✗'],
-      ['Title Quality', null, null, () => d.title_quality||'Unknown'],
-      ['Meta Description', d.has_meta_description, null, v => v ? d.desc_quality : 'Missing ✗'],
-      ['Image Alt Text', d.has_alt_text, null, v => v ? (d.alt_text_pct+' covered ✓') : ((d.alt_text_pct||'0%')+' covered ✗')],
-      ['H1 Heading', d.has_h1, null, v => v ? 'Present ✓' : 'Missing ✗'],
-      ['H2 Headings', d.has_h2, null, v => v ? 'Present ✓' : 'Missing ✗'],
-      ['Open Graph Tags', d.has_og_tags, null, v => v ? 'Present ✓' : 'Missing ✗'],
-      ['Sitemap', d.has_sitemap, null, v => v ? 'Found ✓' : 'Not found'],
-      ['Robots.txt', d.has_robots, null, v => v ? 'Found ✓' : 'Not found'],
-      ['Blog/Content', d.has_blog, null, v => v ? 'Yes ✓' : 'None — missing SEO content'],
-      ['Estimated Google Position', d.google_tier, null, v => v || 'Unknown'],
-    ])}
-
-    ${makeSection('🛒', 'Products & Catalogue', d.products_score, [
-      ['Product Count', d.product_count, v => v >= 10, v => v + ' products'],
-      ['Avg Description Length', d.avg_desc_length, null, v => v],
-      ['Avg Images Per Product', d.avg_images, v => v >= 2, v => v],
-      ['Price Range', d.price_range, null, v => v || 'Unknown'],
-      ['Niche', d.niche, null, v => v || 'General'],
-    ])}
-
-    ${makeSection('🛡️', 'Trust & Credibility', d.trust_score, [
-      ['Customer Reviews', d.has_reviews, null, v => v ? 'Present ✓' : 'None found'],
-      ['Return Policy', d.has_return_policy, null, v => v ? 'Present ✓' : 'Missing ✗'],
-      ['Contact Page', d.has_contact, null, v => v ? 'Present ✓' : 'Missing ✗'],
-      ['About Page', d.has_about, null, v => v ? 'Present ✓' : 'Missing ✗'],
-      ['Social Media', d.has_social, null, v => v ? 'Linked ✓' : 'Not linked'],
-      ['Email Visible', d.has_email, null, v => v ? 'Yes ✓' : 'Not found'],
-    ])}
-
-    ${makeSection('📣', 'Ad Readiness', d.ads_score, [
-      ['Ready to Run Ads', d.should_run_ads, null, v => v ? 'Yes ✓' : 'Fix store first'],
-      ['Recommended Platform', d.ad_platform, null, v => v || 'N/A'],
-      ['Best Product to Promote', d.best_ad_product, null, v => v || 'N/A'],
-      ['Estimated Ad ROI', d.ad_roi_estimate, null, v => v || 'Unknown'],
-    ])}
-
+  <!-- Store info + overall score -->
+  <div class="result-top">
+    <div class="result-store">
+      <h2>${d.store_name||'Your Store'}</h2>
+      <p>${d.platform||'Store'} · <a href="${url}" target="_blank">${url.replace(/https?:\\/\\//,'').slice(0,50)}</a></p>
+      ${d.is_new_seller?'<p style="color:var(--green);font-size:12px;margin-top:6px;font-weight:600">🌱 New store detected</p>':''}
+    </div>
   </div>
 
-  ${d.should_run_ads && d.ad_reason ? `
-  <div class="ad-box">
-    <h4>📣 Ad Strategy Recommendation</h4>
-    <p>${d.ad_reason}</p>
-  </div>` : ''}
+  ${criticals.length?`
+  <div class="crit-box">
+    <div class="crit-title">🚨 Critical Issues Costing You Sales</div>
+    ${criticals.map(c=>`<div class="crit-item"><span class="crit-arrow">↳</span>${c}</div>`).join('')}
+  </div>`:''}
 
-  <div class="verdict-card">
-    <div class="verdict-title">Your top ${fixes.length} fixes right now</div>
+  <div class="acc-list">
+    ${makeAcc('⚡','Speed & Performance',d.speed_score,[
+      ['Google PageSpeed',d.pagespeed_score,v=>v>=50,v=>v+'/100'+(d.speed_estimated?' (est.)':'')],
+      ['Mobile Score',d.mobile_score,v=>v>=50,v=>v+'/100'],
+      ['Load Speed',d.load_speed,null,v=>v&&v!=='0s'?v:'Not measured'],
+      ['SSL Certificate',d.has_ssl,null,v=>v?'Secure ✓':'Missing ✗'],
+      ['Platform',d.platform,null,v=>v||'Unknown'],
+      ['Redesign Needed',d.redesign_needed,null,v=>v?'Yes — recommended':'No issues',true],
+    ])}
+    ${makeAcc('🔍','SEO Health',d.seo_score,[
+      ['Page Title',d.has_meta_title,null,v=>v?(d.meta_title_value||'Present ✓'):'Missing ✗'],
+      ['Title Quality',null,null,()=>d.title_quality||'Unknown'],
+      ['Meta Description',d.has_meta_description,null,v=>v?d.desc_quality:'Missing ✗'],
+      ['Image Alt Text',d.has_alt_text,null,v=>v?(d.alt_text_pct+' covered ✓'):((d.alt_text_pct||'0%')+' covered ✗')],
+      ['H1 Heading',d.has_h1,null,v=>v?'Present ✓':'Missing ✗'],
+      ['Open Graph Tags',d.has_og_tags,null,v=>v?'Present ✓':'Missing ✗'],
+      ['Sitemap',d.has_sitemap,null,v=>v?'Found ✓':'Not found'],
+      ['Blog / Content',d.has_blog,null,v=>v?'Yes ✓':'None — missing SEO content'],
+      ['Estimated Google Page',d.google_tier,null,v=>v||'Unknown'],
+    ])}
+    ${makeAcc('🛒','Products & Catalogue',d.products_score,[
+      ['Product Count',d.product_count,v=>v>=10,v=>v+' products'],
+      ['Description Quality',null,null,()=>d.avg_desc_length||'Unknown'],
+      ['Avg Images Per Product',d.avg_images,v=>v>=2,v=>v],
+      ['Price Range',d.price_range,null,v=>v||'Unknown'],
+      ['Niche',d.niche,null,v=>v||'General'],
+    ])}
+    ${makeAcc('🛡️','Trust & Credibility',d.trust_score,[
+      ['Customer Reviews',d.has_reviews,null,v=>v?'Present ✓':'None found ✗'],
+      ['Return Policy',d.has_return_policy,null,v=>v?'Present ✓':'Missing ✗'],
+      ['Contact Page',d.has_contact,null,v=>v?'Present ✓':'Missing ✗'],
+      ['About Page',d.has_about,null,v=>v?'Present ✓':'Missing ✗'],
+      ['Social Media',d.has_social,null,v=>v?'Linked ✓':'Not linked'],
+      ['Email Visible',d.has_email,null,v=>v?'Yes ✓':'Not found'],
+      ['SSL / Security',d.has_ssl,null,v=>v?'Secure ✓':'Unsecured ✗'],
+    ])}
+    ${makeAcc('📣','Ad Readiness',d.ads_score,[
+      ['Ready to Run Ads',d.should_run_ads,null,v=>v?'Yes ✓':'Fix store first'],
+      ['Recommended Platform',d.ad_platform,null,v=>v||'N/A'],
+      ['Best Product to Promote',d.best_ad_product,null,v=>v||'N/A'],
+      ['Estimated ROI',d.ad_roi_estimate,null,v=>v||'Unknown'],
+    ])}
+  </div>
+
+  ${d.should_run_ads&&d.ad_reason?`
+  <div class="ad-box">
+    <h4>📣 Ad Strategy</h4>
+    <p>${d.ad_reason}</p>
+  </div>`:''}
+
+  <div class="verdict">
+    <h3>Your Top ${fixes.length} Fixes Right Now</h3>
     <div class="verdict-items">
       ${fixes.map((f,i)=>`
-      <div class="verdict-item">
-        <div class="verdict-bullet">${i+1}</div>
+      <div class="v-item">
+        <div class="v-num">${i+1}</div>
         <div>${f}</div>
       </div>`).join('')}
     </div>
-    <p style="font-size:13px;color:var(--muted)">Fix these in order. Each one directly impacts your conversion rate and visibility.</p>
+    <p style="font-size:13px;color:var(--muted)">Fix these in order. Each one directly impacts your conversion rate and Google visibility.</p>
   </div>
   `
 
-  const resultsEl = document.getElementById('results')
-  resultsEl.innerHTML = html
-  resultsEl.style.display = 'block'
+  const el=document.getElementById('results')
+  el.innerHTML=html
+  el.style.display='block'
 
-  // Animate score counter
-  let current = 0
-  const target = overall
-  const timer = setInterval(() => {
-    current = Math.min(current + 2, target)
-    document.getElementById('scoreNum').textContent = current
-    if (current >= target) clearInterval(timer)
-  }, 20)
+  // Animate score
+  let cur2=0
+  const t=setInterval(()=>{
+    cur2=Math.min(cur2+2,overall)
+    document.getElementById('scoreNum').textContent=cur2
+    if(cur2>=overall)clearInterval(t)
+  },18)
 
-  // Animate radar chart
-  try {
-    const radarScores = [
-      d.speed_score    || 0,
-      d.seo_score      || 0,
-      d.products_score || 0,
-      d.trust_score    || 0,
-      d.ads_score      || 0,
-      d.mobile_score   || 0,
-    ]
-    const angles = [-90,-30,30,90,150,210].map(a => a * Math.PI / 180)
-    const pts = radarScores.map((s,i) => {
-      const r = (s/100)*50
-      return (r*Math.cos(angles[i])).toFixed(1)+','+(r*Math.sin(angles[i])).toFixed(1)
-    }).join(' ')
-    setTimeout(() => {
-      const poly = document.getElementById('radarPoly')
-      if (poly) poly.setAttribute('points', pts)
-    }, 400)
-  } catch(e) {}
+  // Show upsell
+  document.getElementById('upsell').style.display='block'
+  document.getElementById('scanAgain').style.display='block'
 
-  // Show upsell and scan again
-  document.getElementById('upsell').style.display = 'flex'
-  document.getElementById('scanAgainWrap').style.display = 'block'
+  // Scroll to top
+  setTimeout(()=>window.scrollTo({top:0,behavior:'smooth'}),100)
 
-  // Scroll to very top of page
-  setTimeout(() => window.scrollTo({top:0, behavior:'smooth'}), 100)
-
-  // Add toggle listeners
-  document.querySelectorAll('.section-header').forEach(h => {
-    h.addEventListener('click', () => {
-      const body = h.nextElementSibling
-      const chev = h.querySelector('.chevron')
+  // Accordion listeners
+  document.querySelectorAll('.acc-head').forEach(h=>{
+    h.addEventListener('click',()=>{
+      const body=h.nextElementSibling
+      const chev=h.querySelector('.acc-chev')
       body.classList.toggle('open')
       chev.classList.toggle('open')
     })
   })
-
-  // Auto-open first section
-  const firstBody = document.querySelector('.section-body')
-  const firstChev = document.querySelector('.chevron')
-  if (firstBody) { firstBody.classList.add('open'); firstChev.classList.add('open') }
+  // Open first
+  const first=document.querySelector('.acc-body')
+  const firstC=document.querySelector('.acc-chev')
+  if(first){first.classList.add('open');firstC.classList.add('open')}
 }
 
-function makeSection(icon, title, score, rows) {
-  const sc = score || 0
-  const color = scoreColor(sc)
-  return `
-  <div class="analysis-section">
-    <div class="section-header">
-      <div class="section-header-left">
-        <span class="section-header-icon">${icon}</span>
-        <span class="section-header-title">${title}</span>
+function makeAcc(icon,title,score,rows){
+  const sc=score||0
+  const col=scoreColor(sc)
+  return`
+  <div class="acc-item">
+    <div class="acc-head">
+      <div class="acc-head-l">
+        <span class="acc-ico">${icon}</span>
+        <span class="acc-name">${title}</span>
       </div>
-      <div class="section-header-right">
-        <span class="section-score" style="color:${color}">${sc}/100</span>
-        <span class="chevron">▼</span>
+      <div class="acc-head-r">
+        <span class="acc-score" style="color:${col}">${sc}/100</span>
+        <span class="acc-chev">▼</span>
       </div>
     </div>
-    <div class="section-body">
-      ${rows.map(([label, val, goodFn, fmt, invert]) => {
-        const display = fmt ? fmt(val) : (val === null || val === undefined ? 'N/A' : val)
-        let cls = 'neutral'
-        if (val !== null && val !== undefined) {
-          if (typeof goodFn === 'function') {
-            cls = goodFn(val) ? (invert ? 'warn' : 'good') : (invert ? 'good' : 'bad')
-          } else if (goodFn === null) {
-            if (typeof val === 'boolean') cls = val ? 'good' : 'bad'
-            else cls = 'neutral'
-          }
+    <div class="acc-body">
+      ${rows.map(([label,val,goodFn,fmt,invert])=>{
+        const display=fmt?fmt(val):(val===null||val===undefined?'N/A':String(val))
+        let cls='neutral'
+        if(val!==null&&val!==undefined){
+          if(typeof goodFn==='function')cls=goodFn(val)?(invert?'warn':'good'):(invert?'good':'bad')
+          else if(goodFn===null&&typeof val==='boolean')cls=val?'good':'bad'
         }
-        return `
-        <div class="check-row">
-          <span class="check-row-label">${label}</span>
-          <span class="check-row-value ${cls}">${display ?? 'N/A'}</span>
+        return`<div class="check-row">
+          <span class="check-lbl">${label}</span>
+          <span class="check-val ${cls}">${display??'N/A'}</span>
         </div>`
       }).join('')}
     </div>

@@ -1,6 +1,6 @@
 {
-  "name": "storrescope",
-  "version": "1.0.1",
+  "name": "karios-agency",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
