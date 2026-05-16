@@ -1345,7 +1345,7 @@ window.startScan = async function startScan(){
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({url:clean})
-    }))
+    })
     clearInterval(st)
     if(!r.ok)throw new Error('failed')
     const d=await r.json()
@@ -1458,7 +1458,7 @@ function renderResults(d,url){
   <div class="result-top">
     <div class="result-store">
       <h2>${d.store_name||'Your Store'}</h2>
-      <p>${d.platform||'Store'} · <a href="${url}" target="_blank">${url.replace(/https?:\\/\\//,'').slice(0,50)}</a></p>
+      <p>${d.platform||'Store'} · <a href="${url}" target="_blank">${url.replace('https://','').replace('http://','').slice(0,50)}</a></p>
       ${d.is_new_seller?'<p style="color:var(--green);font-size:12px;margin-top:6px;font-weight:600">🌱 New store detected</p>':''}
     </div>
   </div>
