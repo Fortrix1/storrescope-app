@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Our Work — Karios Agency</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cabinet+Grotesk:wght@400;500;700;800;900&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#05040a;--card:#0d0c18;--border:#16142a;--border2:#1e1c35;
+  --gold:#d4a84b;--gold2:#f0c060;--gold-dim:rgba(212,168,75,0.06);
+  --white:#f0ece4;--text:#c8c0b0;--muted:#5a5060;--muted2:#2a2535;
+  --green:#00d97e;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Cabinet Grotesk',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden}
+nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 6%;height:68px;background:rgba(5,4,10,0.85);backdrop-filter:blur(24px);border-bottom:1px solid var(--border)}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:2px;color:var(--white);text-decoration:none;display:flex;align-items:center;gap:3px}
+.logo-dot{width:7px;height:7px;background:var(--gold);border-radius:50%;animation:pulse 2s infinite}
+.nav-links{display:flex;align-items:center;gap:28px;list-style:none}
+.nav-links a{font-size:13px;font-weight:500;color:var(--muted);text-decoration:none;transition:color .2s}
+.nav-links a:hover,.nav-links a.active{color:var(--white)}
+.nav-cta{background:var(--gold);color:#000;font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;padding:10px 20px;border-radius:6px;text-decoration:none;transition:background .2s}
+.nav-cta:hover{background:var(--gold2)}
+.hero{padding:140px 6% 60px;max-width:1100px;margin:0 auto}
+.back{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);text-decoration:none;margin-bottom:36px;transition:color .2s}
+.back:hover{color:var(--gold)}
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:14px}
+.page-h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(56px,8vw,96px);letter-spacing:1px;color:var(--white);line-height:.92;margin-bottom:18px}
+.page-h1 em{font-family:'Instrument Serif',serif;font-style:italic;color:rgba(240,236,228,0.35);letter-spacing:0}
+.page-sub{font-size:16px;color:var(--muted);max-width:480px;line-height:1.8}
+.section{padding:0 6% 70px;max-width:1100px;margin:0 auto}
+.sec-label{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
+.sec-h{font-family:'Bebas Neue',sans-serif;font-size:clamp(36px,4vw,56px);letter-spacing:1px;color:var(--white);margin-bottom:32px}
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:start}
+.about-text p{font-size:15px;color:var(--muted);line-height:1.8;margin-bottom:14px}
+.about-text p strong{color:var(--text)}
+.skills{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+.skill{background:var(--gold-dim);border:1px solid rgba(212,168,75,0.15);border-radius:6px;padding:5px 12px;font-size:12px;font-weight:600;color:var(--gold)}
+.stats{display:flex;flex-direction:column;gap:12px}
+.stat-box{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px 24px;display:flex;align-items:center;gap:16px;transition:border-color .2s,transform .2s}
+.stat-box:hover{border-color:rgba(212,168,75,0.2);transform:translateX(4px)}
+.stat-box-ico{font-size:22px}
+.stat-box-num{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:1px;color:var(--white)}
+.stat-box-num span{color:var(--gold)}
+.stat-box-lbl{font-size:12px;color:var(--muted);margin-top:2px}
+.work-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.work-card{background:var(--card);border:1px solid var(--border);border-radius:18px;overflow:hidden;transition:border-color .2s,transform .2s}
+.work-card:hover{border-color:rgba(212,168,75,0.25);transform:translateY(-4px)}
+.work-card-top{height:160px;display:flex;align-items:center;justify-content:center;font-size:52px;background:linear-gradient(135deg,#0d0c18,#16142a)}
+.work-card-body{padding:20px 22px}
+.work-tag{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);background:var(--gold-dim);border:1px solid rgba(212,168,75,0.12);border-radius:4px;padding:3px 8px;margin-bottom:10px}
+.work-title{font-weight:800;font-size:17px;color:var(--white);margin-bottom:8px}
+.work-desc{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:16px}
+.work-nums{display:flex;gap:20px}
+.work-num{text-align:center}
+.work-num-val{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px;color:var(--gold)}
+.work-num-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.soon-card{background:var(--card);border:1px dashed var(--border2);border-radius:18px;padding:40px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:280px}
+.soon-card p{font-size:13px;color:var(--muted);line-height:1.6;margin-top:10px;max-width:240px}
+.services-table{border:1px solid var(--border);border-radius:18px;overflow:hidden}
+.svc-row{display:flex;align-items:center;justify-content:space-between;padding:18px 26px;background:var(--card);border-bottom:1px solid var(--border);transition:background .2s;gap:16px;flex-wrap:wrap}
+.svc-row:last-child{border-bottom:none}
+.svc-row:hover{background:#100f1e}
+.svc-left{display:flex;align-items:center;gap:12px}
+.svc-ico{font-size:18px}
+.svc-name{font-weight:700;font-size:14px;color:var(--white)}
+.svc-desc{font-size:12px;color:var(--muted);margin-top:2px}
+.svc-price{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1px;color:var(--gold);flex-shrink:0}
+.cta-box{background:var(--card);border:1px solid var(--border2);border-radius:22px;padding:52px 44px;text-align:center;position:relative;overflow:hidden}
+.cta-box::before{content:'';position:absolute;top:-80px;left:50%;transform:translateX(-50%);width:400px;height:250px;background:radial-gradient(circle,rgba(212,168,75,.06),transparent 70%);pointer-events:none}
+.cta-box h2{font-family:'Bebas Neue',sans-serif;font-size:clamp(40px,5vw,64px);letter-spacing:1px;color:var(--white);margin-bottom:14px;line-height:.92}
+.cta-box p{font-size:15px;color:var(--muted);max-width:400px;margin:0 auto 28px;line-height:1.8}
+.btn-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.btn-gold{display:inline-flex;align-items:center;gap:8px;background:var(--gold);color:#000;font-weight:800;font-size:14px;padding:13px 26px;border-radius:10px;text-decoration:none;transition:background .2s,transform .1s}
+.btn-gold:hover{background:var(--gold2);transform:translateY(-1px)}
+.btn-ghost{display:inline-flex;align-items:center;gap:8px;background:transparent;color:var(--muted);font-size:13px;padding:13px 22px;border-radius:10px;border:1px solid var(--border2);text-decoration:none;transition:color .2s,border-color .2s}
+.btn-ghost:hover{color:var(--text);border-color:var(--muted)}
+footer{border-top:1px solid var(--border);padding:28px 6%;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.footer-logo{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;color:var(--white)}
+.footer-copy{font-size:12px;color:var(--muted)}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.75)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.fade{opacity:0;transform:translateY(24px);transition:opacity .7s ease,transform .7s ease}
+.fade.on{opacity:1;transform:translateY(0)}
+@media(max-width:768px){.about-grid{grid-template-columns:1fr}.nav-links{display:none}.cta-box{padding:32px 20px}}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="logo">KARIOS<div class="logo-dot"></div></a>
+  <ul class="nav-links">
+    <li><a href="/#about">About</a></li>
+    <li><a href="/#services">Services</a></li>
+    <li><a href="/">Free Analysis</a></li>
+    <li><a href="/about.html" class="active" style="color:var(--gold)">Our Work</a></li>
+  </ul>
+  <a href="https://wa.me/12894757928" class="nav-cta" target="_blank">Work With Us</a>
+</nav>
+
+<div class="hero fade">
+  <a href="/" class="back">← Back to Home</a>
+  <div class="eyebrow">Karios Agency</div>
+  <h1 class="page-h1">Our Work &<br/><em>Story</em></h1>
+  <p class="page-sub">Real work. Real results. Built for store owners who want to stop guessing and start growing.</p>
+</div>
+
+<div class="section fade">
+  <div class="sec-label">Who We Are</div>
+  <div class="about-grid">
+    <div class="about-text">
+      <p>My name is <strong>Karios</strong> — I've spent years studying what makes ecommerce stores succeed and fail. Not from a classroom, but from actually digging into hundreds of real stores and finding the patterns that separate the ones that sell from the ones that don't.</p>
+      <p>I built Karios Agency because I kept seeing the same thing — <strong>store owners with great products but invisible stores</strong>. Bad SEO, slow pages, no trust signals, no strategy. Problems that are completely fixable with the right knowledge.</p>
+      <p>Every service I offer comes from real experience — not templates, not guesswork. When I tell you what's wrong with your store, it's because I've seen that exact problem kill conversions hundreds of times.</p>
+      <div class="skills">
+        <span class="skill">SEO</span>
+        <span class="skill">Store Analysis</span>
+        <span class="skill">Product Research</span>
+        <span class="skill">Ad Strategy</span>
+        <span class="skill">Conversion Optimisation</span>
+        <span class="skill">Social Media</span>
+        <span class="skill">Shopify</span>
+        <span class="skill">Growth Systems</span>
+      </div>
+    </div>
+    <div class="stats">
+      <div class="stat-box"><div class="stat-box-ico">🏪</div><div><div class="stat-box-num">100<span>+</span></div><div class="stat-box-lbl">Stores analysed and audited</div></div></div>
+      <div class="stat-box"><div class="stat-box-ico">🔍</div><div><div class="stat-box-num">47<span>+</span></div><div class="stat-box-lbl">Data points checked per store</div></div></div>
+      <div class="stat-box"><div class="stat-box-ico">🌍</div><div><div class="stat-box-num">10<span>+</span></div><div class="stat-box-lbl">Countries served</div></div></div>
+      <div class="stat-box"><div class="stat-box-ico">⚡</div><div><div class="stat-box-num">&lt;<span>10s</span></div><div class="stat-box-lbl">Full store diagnosis time</div></div></div>
+    </div>
+  </div>
+</div>
+
+<div class="section fade">
+  <div class="sec-label">Portfolio</div>
+  <div class="sec-h">Work We've Done</div>
+  <div class="work-grid">
+    <div class="work-card">
+      <div class="work-card-top">🛍️</div>
+      <div class="work-card-body">
+        <span class="work-tag">Store Analysis + SEO</span>
+        <div class="work-title">Fashion Store — Nigeria</div>
+        <div class="work-desc">Store had traffic but zero sales. Diagnosed missing trust signals, no return policy, and broken mobile experience. Fixed all three in one week.</div>
+        <div class="work-nums">
+          <div class="work-num"><div class="work-num-val">0→12</div><div class="work-num-lbl">Sales week 1</div></div>
+          <div class="work-num"><div class="work-num-val">+340%</div><div class="work-num-lbl">Mobile traffic</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="work-card">
+      <div class="work-card-top">💄</div>
+      <div class="work-card-body">
+        <span class="work-tag">Product Research</span>
+        <div class="work-title">Beauty Brand — South Africa</div>
+        <div class="work-desc">Weekly trending product lists for 4 weeks. Owner added 3 products from our research — all 3 became their best sellers within the month.</div>
+        <div class="work-nums">
+          <div class="work-num"><div class="work-num-val">3/3</div><div class="work-num-lbl">Products sold</div></div>
+          <div class="work-num"><div class="work-num-val">$20/wk</div><div class="work-num-lbl">Investment</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="work-card">
+      <div class="work-card-top">👟</div>
+      <div class="work-card-body">
+        <span class="work-tag">SEO + Store Fix</span>
+        <div class="work-title">Streetwear Store — Philippines</div>
+        <div class="work-desc">Store was invisible on Google. No meta descriptions, no sitemap, generic titles. After SEO fixes organic traffic grew 180% within 3 weeks.</div>
+        <div class="work-nums">
+          <div class="work-num"><div class="work-num-val">Pg5→2</div><div class="work-num-lbl">Google rank</div></div>
+          <div class="work-num"><div class="work-num-val">+180%</div><div class="work-num-lbl">Organic traffic</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="soon-card">
+      <div style="font-size:40px">📸</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;color:var(--white);margin-top:10px">Your Store Here</div>
+      <p>These spots are filling up. Get analysed today and become our next success story.</p>
+      <a href="/" style="margin-top:18px;display:inline-flex;align-items:center;gap:6px;background:var(--gold);color:#000;font-weight:800;font-size:13px;padding:11px 22px;border-radius:8px;text-decoration:none">Analyse My Store →</a>
+    </div>
+  </div>
+</div>
+
+<div class="section fade">
+  <div class="sec-label">What We Offer</div>
+  <div class="sec-h">Services & Pricing</div>
+  <div class="services-table">
+    <div class="svc-row"><div class="svc-left"><span class="svc-ico">🔍</span><div><div class="svc-name">Free Store Analysis</div><div class="svc-desc">47-point diagnosis — speed, SEO, trust, products, ads</div></div></div><div class="svc-price">FREE</div></div>
+    <div class="svc-row"><div class="svc-left"><span class="svc-ico">📈</span><div><div class="svc-name">Full SEO Package</div><div class="svc-desc">Meta tags, sitemap, headings, alt text, content strategy</div></div></div><div class="svc-price">GET A QUOTE</div></div>
+    <div class="svc-row"><div class="svc-left"><span class="svc-ico">🎯</span><div><div class="svc-name">Weekly Product Research</div><div class="svc-desc">5 trending products weekly matched to your niche with supplier links</div></div></div><div class="svc-price">$20/WK</div></div>
+    <div class="svc-row"><div class="svc-left"><span class="svc-ico">📣</span><div><div class="svc-name">Ad Strategy & Setup</div><div class="svc-desc">Which product, which platform, what budget — data-driven</div></div></div><div class="svc-price">GET A QUOTE</div></div>
+    <div class="svc-row"><div class="svc-left"><span class="svc-ico">🚀</span><div><div class="svc-name">Full Store Growth Package</div><div class="svc-desc">SEO + products + ads + social — everything handled monthly</div></div></div><div class="svc-price">GET A QUOTE</div></div>
+  </div>
+</div>
+
+<div class="section fade">
+  <div class="cta-box">
+    <h2>READY TO START<br/>SELLING?</h2>
+    <p>Start with a free store analysis. See exactly what's broken. Then let's fix it together.</p>
+    <div class="btn-row">
+      <a href="/" class="btn-gold">🔍 Analyse My Store Free</a>
+      <a href="https://wa.me/12894757928" class="btn-ghost" target="_blank">💬 WhatsApp Us</a>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-logo">KARIOS</div>
+  <div class="footer-copy">© 2026 Karios Agency — We turn struggling stores into stores that sell</div>
+</footer>
+
+<script>
+const obs = new IntersectionObserver(e=>{
+  e.forEach(el=>{ if(el.isIntersecting) el.target.classList.add('on') })
+},{threshold:.1})
+document.querySelectorAll('.fade').forEach(el=>obs.observe(el))
+</script>
+</body>
+</html>
