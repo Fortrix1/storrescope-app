@@ -983,11 +983,11 @@ footer{
     <li><a href="/about.html">Our Work</a></li>
     <li><a href="#contact">Contact</a></li>
   </ul>
-  <a href="https://wa.me/12894757928" class="nav-cta" target="_blank">Work With Us</a>
+  <a href="https://wa.me/18734712764" class="nav-cta" target="_blank">Work With Us</a>
 </nav>
 
 <!-- HERO -->
-<section class="hero" id="top">
+<section class="hero" id="heroSection">
   <div class="hero-orb hero-orb-1"></div>
   <div class="hero-orb hero-orb-2"></div>
   <div class="hero-lines"></div>
@@ -1045,7 +1045,7 @@ footer{
 </section>
 
 <!-- TICKER -->
-<div class="ticker-wrap">
+<div class="ticker-wrap" id="tickerSection">
   <div class="ticker-track">
     <div class="ticker-item"><span class="ticker-dot"></span>SEO Optimisation</div>
     <div class="ticker-item"><span class="ticker-dot"></span>Store Analysis</div>
@@ -1068,7 +1068,7 @@ footer{
 </div>
 
 <!-- ABOUT STRIP -->
-<section class="about-strip reveal" id="about">
+<section class="about-strip reveal" id="aboutSection">
   <div class="about-strip-left">
     <div class="strip-eyebrow">Who We Are</div>
     <h2>We don't<br/><em>guess.</em><br/>We diagnose.</h2>
@@ -1112,7 +1112,7 @@ footer{
 </section>
 
 <!-- SERVICES -->
-<section class="services reveal" id="services">
+<section class="services reveal" id="servicesSection">
   <div class="section-header">
     <div class="section-header-left">
       <div class="section-eyebrow">What We Do</div>
@@ -1179,11 +1179,14 @@ footer{
       <p>Your analysis shows exactly what's broken. We fix it — SEO, speed, products, ads — everything your store needs to start converting traffic into sales.</p>
     </div>
     <div class="upsell-btns">
-      <a href="https://wa.me/12894757928" class="btn-gold" target="_blank" id="contact">
-        💬 WhatsApp Us Now
+      <a href="https://wa.me/18734712764" class="btn-gold" target="_blank" id="contact">
+        💬 WhatsApp Us
+      </a>
+      <a href="https://t.me/kariosagency" class="btn-outline" target="_blank">
+        ✈ Telegram
       </a>
       <a href="mailto:fortrixtrn@gmail.com" class="btn-outline">
-        ✉ Send An Email
+        ✉ Email Us
       </a>
     </div>
   </div>
@@ -1272,6 +1275,11 @@ window.resetScan = function resetScan(){
   document.getElementById('scanBtn').disabled=false
   document.getElementById('btnText').textContent='ANALYSE'
   document.getElementById('btnIcon').innerHTML='→'
+  // Show all sections again
+  document.getElementById('heroSection').style.display=''
+  document.getElementById('tickerSection').style.display=''
+  document.getElementById('aboutSection').style.display=''
+  document.getElementById('servicesSection').style.display=''
   window.scrollTo({top:0,behavior:'smooth'})
 }
 
@@ -1515,6 +1523,18 @@ function renderResults(d,url){
   el.innerHTML=html
   el.style.display='block'
 
+  // Hide progress bar and reset button
+  document.getElementById('progressWrap').style.display='none'
+  document.getElementById('scanBtn').disabled=false
+  document.getElementById('btnText').textContent='ANALYSE'
+  document.getElementById('btnIcon').innerHTML='→'
+
+  // Hide hero sections so results are at the very top
+  document.getElementById('heroSection').style.display='none'
+  document.getElementById('tickerSection').style.display='none'
+  document.getElementById('aboutSection').style.display='none'
+  document.getElementById('servicesSection').style.display='none'
+
   // Animate score
   let cur2=0
   const t=setInterval(()=>{
@@ -1527,8 +1547,8 @@ function renderResults(d,url){
   document.getElementById('upsell').style.display='block'
   document.getElementById('scanAgain').style.display='block'
 
-  // Scroll to top
-  setTimeout(()=>window.scrollTo({top:0,behavior:'smooth'}),100)
+  // Scroll to very top
+  window.scrollTo({top:0,behavior:'instant'})
 
   // Accordion listeners
   document.querySelectorAll('.acc-head').forEach(h=>{
