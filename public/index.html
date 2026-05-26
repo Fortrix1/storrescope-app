@@ -921,12 +921,20 @@ footer{
 .reveal.visible{opacity:1;transform:translateY(0)}
 
 /* ── ACTIVITY FEED ── */
-.activity-feed{
-  position:fixed;
-  bottom:24px;left:24px;
-  z-index:200;
-  display:flex;flex-direction:column;gap:8px;
-  pointer-events:none;
+.activity-feed{position:fixed;bottom:24px;left:24px;z-index:50;display:flex;flex-direction:column;gap:8px;pointer-events:none;max-width:280px;transition:bottom .3s ease}
+@media(max-width:768px){
+  .activity-feed{
+    bottom:16px;
+    left:50%;
+    transform:translateX(-50%);
+    width:90%;
+    max-width:340px;
+    align-items:center;
+  }
+  .activity-item{
+    text-align:center;
+    width:100%;
+  }
 }
 .activity-item{
   background:rgba(13,12,24,0.95);
@@ -1602,6 +1610,30 @@ function makeAcc(icon,title,score,rows){
 
 <script>
 // ── LIVE ACTIVITY FEED ──────────────────────────────
+
+// Push activity feed above footer when user scrolls near bottom
+function adjustFeedPosition() {
+  const feed   = document.getElementById('activityFeed')
+  const footer = document.querySelector('footer')
+  if (!feed || !footer) return
+
+  const footerTop    = footer.getBoundingClientRect().top
+  const windowHeight = window.innerHeight
+  const feedHeight   = feed.offsetHeight + 24
+
+  if (footerTop < windowHeight) {
+    // Footer is visible — push feed up above it
+    const overlap = windowHeight - footerTop
+    feed.style.bottom = (overlap + 16) + 'px'
+  } else {
+    feed.style.bottom = '24px'
+  }
+}
+
+window.addEventListener('scroll', adjustFeedPosition)
+window.addEventListener('resize', adjustFeedPosition)
+
+
 const ACTIVITIES = [
   {name: 'Zara K.', action: 'just analysed their store', detail: 'Found 4 critical SEO issues', time: 'just now'},
   {name: 'Marcus O.', action: 'discovered why they had no sales', detail: 'Missing trust signals and reviews', time: '2 min ago'},
