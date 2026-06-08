@@ -3,1046 +3,565 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Karios Agency — We Turn Struggling Stores Into Stores That Sell</title>
-<meta name="description" content="Why isn't your store selling? Find out in 10 seconds. Karios Agency — SEO, strategy, and growth systems for ecommerce stores."/>
+<title>Karios Agency — We Don't Guess. We Diagnose.</title>
+<meta name="description" content="Karios Agency turns struggling stores into stores that sell. Free store analysis in under 10 seconds."/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cabinet+Grotesk:wght@300;400;500;700;800;900&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet"/>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-
 :root{
-  --bg:#05040a;
-  --surface:#080712;
-  --card:#0d0c18;
-  --border:#16142a;
-  --border2:#1e1c35;
-  --gold:#d4a84b;
-  --gold2:#f0c060;
-  --gold-glow:rgba(212,168,75,0.12);
-  --gold-dim:rgba(212,168,75,0.06);
-  --amber:#ff9500;
-  --white:#f0ece4;
-  --text:#c8c0b0;
-  --muted:#5a5060;
-  --muted2:#2a2535;
-  --red:#ff3b5c;
-  --green:#00d97e;
-  --green2:rgba(0,217,126,0.08);
+  --bg:#05040a;--gold:#d4a84b;--gold2:#f0c060;
+  --white:#f0ece4;--text:#c8c0b0;--muted:#5a5060;
+  --border:rgba(255,255,255,0.08);
+  --glass:rgba(255,255,255,0.03);
+  --glass-border:rgba(255,255,255,0.1);
 }
-
 html{scroll-behavior:smooth}
+body{font-family:'Cabinet Grotesk',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;min-height:100vh}
 
-body{
-  font-family:'Cabinet Grotesk',sans-serif;
-  background:var(--bg);
-  color:var(--text);
-  min-height:100vh;
-  overflow-x:hidden;
-  cursor:default;
-}
-
-/* ── CUSTOM CURSOR ── */
-.cursor{
-  width:8px;height:8px;
-  background:var(--gold);
-  border-radius:50%;
-  position:fixed;
-  pointer-events:none;
-  z-index:9999;
-  transform:translate(-50%,-50%);
-  transition:transform .1s,width .3s,height .3s,background .3s;
-  mix-blend-mode:difference;
-}
-.cursor-ring{
-  width:36px;height:36px;
-  border:1px solid rgba(212,168,75,0.4);
-  border-radius:50%;
-  position:fixed;
-  pointer-events:none;
-  z-index:9998;
-  transform:translate(-50%,-50%);
-  transition:transform .12s ease,width .3s,height .3s;
-}
-
-/* ── GRAIN OVERLAY ── */
-body::before{
-  content:'';
-  position:fixed;inset:0;
-  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-  pointer-events:none;z-index:1000;opacity:.5;
-}
+/* ── CANVAS BACKGROUND ── */
+#bgCanvas{position:fixed;inset:0;z-index:0;pointer-events:none}
 
 /* ── NAV ── */
 nav{
   position:fixed;top:0;left:0;right:0;z-index:100;
   display:flex;align-items:center;justify-content:space-between;
-  padding:0 6%;height:68px;
-  background:rgba(5,4,10,0.8);
-  backdrop-filter:blur(24px);
-  border-bottom:1px solid var(--border);
+  padding:0 5%;height:64px;
+  background:rgba(5,4,10,0.6);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid rgba(255,255,255,0.06);
 }
-.logo{
-  font-family:'Bebas Neue',sans-serif;
-  font-size:26px;
-  letter-spacing:2px;
-  color:var(--white);
-  display:flex;align-items:center;gap:2px;
-}
-.logo-dot{
-  width:7px;height:7px;
-  background:var(--gold);
-  border-radius:50%;
-  margin-left:3px;
-  animation:pulse 2s infinite;
-}
-.nav-links{
-  display:flex;align-items:center;gap:32px;
-  list-style:none;
-}
-.nav-links a{
-  font-size:13px;font-weight:500;
-  color:var(--muted);
-  text-decoration:none;
-  letter-spacing:.04em;
-  transition:color .2s;
-}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;color:var(--white);text-decoration:none;display:flex;align-items:center;gap:4px}
+.logo-dot{width:6px;height:6px;background:var(--gold);border-radius:50%;margin-bottom:2px;animation:pulse 2s infinite}
+.nav-links{display:flex;align-items:center;gap:28px;list-style:none}
+.nav-links a{font-size:12px;font-weight:600;color:rgba(255,255,255,0.4);text-decoration:none;letter-spacing:.1em;text-transform:uppercase;transition:color .2s}
 .nav-links a:hover{color:var(--white)}
 .nav-cta{
-  background:var(--gold);
-  color:#000;
+  background:transparent;
+  border:1px solid var(--gold);
+  color:var(--gold);
   font-family:'Cabinet Grotesk',sans-serif;
-  font-weight:800;font-size:12px;
-  letter-spacing:.06em;text-transform:uppercase;
-  padding:10px 20px;border-radius:6px;
+  font-weight:700;font-size:12px;
+  letter-spacing:.08em;text-transform:uppercase;
+  padding:9px 20px;border-radius:6px;
   text-decoration:none;
-  transition:background .2s,transform .1s;
-  border:none;cursor:pointer;
+  transition:background .2s,color .2s;
 }
-.nav-cta:hover{background:var(--gold2);transform:translateY(-1px)}
+.nav-cta:hover{background:var(--gold);color:#000}
 
 /* ── HERO ── */
 .hero{
-  min-height:100vh;
-  display:flex;flex-direction:column;
-  align-items:center;justify-content:center;
-  padding:120px 6% 80px;
-  position:relative;
-  overflow:hidden;
-  text-align:center;
-}
-
-/* Background elements */
-.hero-orb{
-  position:absolute;
-  border-radius:50%;
-  pointer-events:none;
-  filter:blur(80px);
-}
-.hero-orb-1{
-  width:600px;height:600px;
-  background:radial-gradient(circle,rgba(212,168,75,0.06),transparent 70%);
-  top:-100px;left:50%;transform:translateX(-50%);
-}
-.hero-orb-2{
-  width:300px;height:300px;
-  background:radial-gradient(circle,rgba(255,149,0,0.04),transparent 70%);
-  bottom:100px;right:10%;
-}
-
-/* Diagonal lines background */
-.hero-lines{
-  position:absolute;inset:0;
-  background-image:repeating-linear-gradient(
-    -45deg,
-    transparent,
-    transparent 80px,
-    rgba(212,168,75,0.015) 80px,
-    rgba(212,168,75,0.015) 81px
-  );
-  pointer-events:none;
-}
-
-/* Floating tag */
-.hero-tag{
-  display:inline-flex;align-items:center;gap:10px;
-  border:1px solid rgba(212,168,75,0.2);
-  background:rgba(212,168,75,0.04);
-  border-radius:100px;
-  padding:8px 18px;
-  font-size:12px;font-weight:600;
-  color:var(--gold);
-  letter-spacing:.1em;text-transform:uppercase;
-  margin-bottom:40px;
-  animation:fadeUp .7s ease both;
-}
-.tag-line{
-  width:20px;height:1px;
-  background:var(--gold);
-  opacity:.5;
-}
-
-/* Main headline */
-.hero-h1{
-  font-family:'Bebas Neue',sans-serif;
-  font-size:clamp(56px,10vw,130px);
-  line-height:.92;
-  letter-spacing:2px;
-  color:var(--white);
-  margin-bottom:8px;
-  animation:fadeUp .7s .1s ease both;
-}
-.hero-h1 .gold{
-  color:var(--gold);
-  position:relative;
-  display:inline-block;
-}
-.hero-h1-italic{
-  font-family:'Instrument Serif',serif;
-  font-style:italic;
-  font-size:clamp(48px,8vw,108px);
-  color:rgba(240,236,228,0.4);
-  letter-spacing:0;
-  display:block;
-  animation:fadeUp .7s .15s ease both;
-}
-
-.hero-sub{
-  font-size:clamp(15px,2vw,18px);
-  color:var(--muted);
-  max-width:520px;
-  line-height:1.8;
-  margin:24px auto 56px;
-  font-weight:400;
-  animation:fadeUp .7s .2s ease both;
-}
-.hero-sub strong{color:var(--text);font-weight:600}
-
-/* ── SCAN BOX ── */
-.scan-section{
-  width:100%;max-width:620px;
-  animation:fadeUp .7s .3s ease both;
   position:relative;z-index:1;
-}
-.scan-label{
-  font-size:11px;font-weight:700;
-  letter-spacing:.12em;text-transform:uppercase;
-  color:var(--gold);
-  margin-bottom:12px;
-  display:flex;align-items:center;gap:8px;
-}
-.scan-label::before{
-  content:'';
-  width:24px;height:1px;
-  background:var(--gold);
-  opacity:.5;
-}
-.scan-wrap{
-  display:flex;
-  background:var(--card);
-  border:1px solid var(--border2);
-  border-radius:12px;
-  overflow:hidden;
-  transition:border-color .3s,box-shadow .3s;
-  box-shadow:0 0 0 0 var(--gold-glow);
-}
-.scan-wrap:focus-within{
-  border-color:rgba(212,168,75,0.4);
-  box-shadow:0 0 0 4px var(--gold-dim),0 0 60px rgba(212,168,75,0.06);
-}
-.scan-input{
-  flex:1;background:transparent;
-  border:none;outline:none;
-  padding:18px 22px;
-  font-family:'Cabinet Grotesk',sans-serif;
-  font-size:15px;font-weight:400;
-  color:var(--white);
-  letter-spacing:.01em;
-}
-.scan-input::placeholder{color:var(--muted)}
-.scan-btn{
-  background:var(--gold);
-  color:#000;border:none;
-  padding:0 28px;
-  font-family:'Bebas Neue',sans-serif;
-  font-size:16px;letter-spacing:2px;
-  cursor:pointer;
-  transition:background .2s,transform .1s;
-  white-space:nowrap;
-  display:flex;align-items:center;gap:10px;
-}
-.scan-btn:hover{background:var(--gold2)}
-.scan-btn:active{transform:scale(.98)}
-.scan-btn:disabled{background:var(--muted2);color:var(--muted);cursor:not-allowed}
-
-.scan-meta{
-  display:flex;align-items:center;gap:20px;
-  margin-top:14px;
-  font-size:12px;color:var(--muted);
-  justify-content:center;
-}
-.scan-meta span{display:flex;align-items:center;gap:5px}
-.scan-meta span::before{
-  content:'';
-  width:5px;height:5px;
-  background:var(--green);
-  border-radius:50%;
-}
-
-/* ── SCROLL INDICATOR ── */
-.scroll-hint{
-  position:absolute;bottom:40px;left:50%;transform:translateX(-50%);
-  display:flex;flex-direction:column;align-items:center;gap:8px;
-  font-size:11px;color:var(--muted);
-  letter-spacing:.1em;text-transform:uppercase;
-  animation:fadeUp .7s .6s ease both;
-}
-.scroll-mouse{
-  width:22px;height:34px;
-  border:1.5px solid var(--muted2);
-  border-radius:11px;
-  position:relative;
-}
-.scroll-mouse::after{
-  content:'';
-  position:absolute;
-  top:6px;left:50%;transform:translateX(-50%);
-  width:3px;height:6px;
-  background:var(--gold);
-  border-radius:2px;
-  animation:scrollAnim 2s infinite;
-}
-@keyframes scrollAnim{
-  0%,100%{opacity:1;transform:translateX(-50%) translateY(0)}
-  50%{opacity:.3;transform:translateX(-50%) translateY(6px)}
-}
-
-/* ── TICKER ── */
-.ticker-wrap{
-  border-top:1px solid var(--border);
-  border-bottom:1px solid var(--border);
-  background:var(--surface);
-  padding:14px 0;
-  overflow:hidden;
-  position:relative;
-  margin:0;
-}
-.ticker-track{
-  display:flex;gap:0;
-  width:max-content;
-  animation:ticker 30s linear infinite;
-}
-.ticker-item{
-  display:flex;align-items:center;gap:12px;
-  padding:0 32px;
-  font-size:12px;font-weight:600;
-  letter-spacing:.08em;text-transform:uppercase;
-  color:var(--muted);
-  white-space:nowrap;
-}
-.ticker-dot{
-  width:4px;height:4px;
-  background:var(--gold);
-  border-radius:50%;
-  flex-shrink:0;
-}
-@keyframes ticker{
-  from{transform:translateX(0)}
-  to{transform:translateX(-50%)}
-}
-
-/* ── ABOUT STRIP (visible before analysis) ── */
-.about-strip{
-  padding:70px 6%;
-  max-width:1100px;
-  margin:0 auto;
+  min-height:100vh;
   display:grid;
   grid-template-columns:1fr 1fr;
-  gap:80px;
   align-items:center;
+  padding:80px 5% 120px;
+  gap:40px;
 }
-.about-strip-left{}
-.strip-eyebrow{
+
+/* LEFT SIDE */
+.hero-left{display:flex;flex-direction:column;justify-content:center}
+.hero-eyebrow{
   font-size:11px;font-weight:700;
-  letter-spacing:.12em;text-transform:uppercase;
-  color:var(--gold);
-  margin-bottom:20px;
-  display:flex;align-items:center;gap:10px;
+  letter-spacing:.15em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:24px;
 }
-.strip-eyebrow::after{
-  content:'';flex:1;height:1px;
-  background:linear-gradient(90deg,var(--border2),transparent);
-}
-.about-strip h2{
+.hero-h1{
   font-family:'Bebas Neue',sans-serif;
-  font-size:clamp(40px,5vw,64px);
-  letter-spacing:1px;
+  font-size:clamp(52px,7vw,90px);
+  line-height:.92;letter-spacing:1px;
   color:var(--white);
-  line-height:.95;
-  margin-bottom:20px;
-}
-.about-strip h2 em{
-  font-family:'Instrument Serif',serif;
-  font-style:italic;
-  color:var(--gold);
-  letter-spacing:0;
-}
-.about-strip p{
-  font-size:16px;color:var(--muted);
-  line-height:1.8;margin-bottom:16px;
-}
-.about-strip p strong{color:var(--text)}
-.about-cta{
-  display:inline-flex;align-items:center;gap:10px;
-  margin-top:24px;
-  font-size:13px;font-weight:700;
-  letter-spacing:.06em;text-transform:uppercase;
-  color:var(--gold);
-  text-decoration:none;
-  border-bottom:1px solid rgba(212,168,75,0.3);
-  padding-bottom:4px;
-  transition:color .2s,border-color .2s;
-}
-.about-cta:hover{color:var(--gold2);border-color:var(--gold)}
-.about-cta-arrow{transition:transform .2s}
-.about-cta:hover .about-cta-arrow{transform:translateX(4px)}
-
-.about-strip-right{
-  display:flex;flex-direction:column;gap:16px;
-}
-.stat-card{
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:16px;
-  padding:24px 28px;
-  display:flex;align-items:center;gap:20px;
-  transition:border-color .2s,transform .2s;
-}
-.stat-card:hover{border-color:rgba(212,168,75,0.2);transform:translateX(4px)}
-.stat-icon{
-  width:48px;height:48px;
-  background:var(--gold-dim);
-  border:1px solid rgba(212,168,75,0.1);
-  border-radius:12px;
-  display:flex;align-items:center;justify-content:center;
-  font-size:20px;flex-shrink:0;
-}
-.stat-info{}
-.stat-num{
-  font-family:'Bebas Neue',sans-serif;
-  font-size:32px;letter-spacing:1px;
-  color:var(--white);line-height:1;
-}
-.stat-num span{color:var(--gold)}
-.stat-desc{font-size:13px;color:var(--muted);margin-top:2px}
-
-/* ── SERVICES ── */
-.services{
-  padding:70px 6%;
-  max-width:1100px;
-  margin:0 auto;
-}
-.section-header{
-  display:flex;align-items:flex-end;
-  justify-content:space-between;
-  margin-bottom:56px;
-  gap:24px;
-  flex-wrap:wrap;
-}
-.section-header-left{}
-.section-eyebrow{
-  font-size:11px;font-weight:700;
-  letter-spacing:.12em;text-transform:uppercase;
-  color:var(--gold);margin-bottom:12px;
-}
-.section-title{
-  font-family:'Bebas Neue',sans-serif;
-  font-size:clamp(40px,5vw,72px);
-  letter-spacing:1px;
-  color:var(--white);
-  line-height:.92;
-}
-.section-title em{
-  font-family:'Instrument Serif',serif;
-  font-style:italic;color:rgba(240,236,228,0.35);
-  letter-spacing:0;
-}
-.section-sub{
-  font-size:15px;color:var(--muted);
-  max-width:320px;line-height:1.7;
-}
-
-.services-grid{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:2px;
-  border:1px solid var(--border);
-  border-radius:20px;
-  overflow:hidden;
-}
-.service-card{
-  background:var(--card);
-  padding:36px 32px;
-  position:relative;
-  overflow:hidden;
-  transition:background .2s;
-  cursor:default;
-}
-.service-card::after{
-  content:'';
-  position:absolute;
-  bottom:0;left:0;right:0;height:2px;
-  background:linear-gradient(90deg,var(--gold),transparent);
-  transform:scaleX(0);transform-origin:left;
-  transition:transform .3s;
-}
-.service-card:hover{background:#100f1e}
-.service-card:hover::after{transform:scaleX(1)}
-.service-num{
-  font-family:'Bebas Neue',sans-serif;
-  font-size:48px;letter-spacing:1px;
-  color:var(--muted2);
-  line-height:1;
-  margin-bottom:20px;
-}
-.service-icon{
-  width:44px;height:44px;
-  background:var(--gold-dim);
-  border:1px solid rgba(212,168,75,0.12);
-  border-radius:10px;
-  display:flex;align-items:center;justify-content:center;
-  font-size:20px;
-  margin-bottom:20px;
-}
-.service-title{
-  font-family:'Cabinet Grotesk',sans-serif;
-  font-weight:800;font-size:18px;
-  color:var(--white);
-  margin-bottom:10px;
-  letter-spacing:-.3px;
-}
-.service-desc{
-  font-size:14px;color:var(--muted);
-  line-height:1.7;
-}
-.service-tag{
-  display:inline-block;
-  margin-top:16px;
-  font-size:11px;font-weight:600;
-  letter-spacing:.06em;text-transform:uppercase;
-  color:var(--gold);
-  background:var(--gold-dim);
-  border:1px solid rgba(212,168,75,0.12);
-  border-radius:4px;
-  padding:3px 8px;
-}
-
-/* ── ANALYSER SECTION ── */
-.analyser-section{
-  padding:70px 6%;
-  position:relative;
-  overflow:hidden;
-}
-.analyser-bg{
-  position:absolute;inset:0;
-  background:linear-gradient(180deg,transparent,rgba(212,168,75,0.03),transparent);
-  pointer-events:none;
-}
-.analyser-inner{
-  max-width:800px;margin:0 auto;
-  text-align:center;position:relative;z-index:1;
-}
-.analyser-title{
-  font-family:'Bebas Neue',sans-serif;
-  font-size:clamp(48px,7vw,96px);
-  letter-spacing:1px;
-  color:var(--white);
-  line-height:.92;
-  margin-bottom:20px;
-}
-.analyser-title span{color:var(--gold)}
-.analyser-sub{
-  font-size:17px;color:var(--muted);
-  line-height:1.8;max-width:500px;
-  margin:0 auto 48px;
-}
-
-/* ── PROGRESS ── */
-.progress-wrap{
-  width:100%;max-width:620px;
-  margin:24px auto 0;
-  display:none;
-}
-.progress-label{
-  display:flex;justify-content:space-between;
-  font-size:12px;color:var(--muted);
-  margin-bottom:8px;
-}
-.progress-track{
-  background:var(--border);
-  border-radius:100px;height:3px;overflow:hidden;
-}
-.progress-fill{
-  height:100%;border-radius:100px;
-  background:linear-gradient(90deg,var(--gold),var(--gold2));
-  width:0%;transition:width .5s ease;
-  box-shadow:0 0 10px rgba(212,168,75,.4);
-}
-.progress-steps{
-  display:flex;flex-direction:column;gap:6px;
-  margin-top:16px;
-}
-.p-step{
-  display:flex;align-items:center;gap:8px;
-  font-size:12px;color:var(--muted2);
-  transition:color .3s;
-}
-.p-step.active{color:var(--text)}
-.p-step.done{color:var(--gold)}
-.p-dot{
-  width:6px;height:6px;border-radius:50%;
-  background:var(--muted2);flex-shrink:0;
-  transition:background .3s;
-}
-.p-step.active .p-dot{background:var(--gold);box-shadow:0 0 6px var(--gold);animation:pulse 1s infinite}
-.p-step.done .p-dot{background:var(--gold)}
-
-/* ── ERROR ── */
-.error-msg{
-  display:none;
-  background:rgba(255,59,92,.07);
-  border:1px solid rgba(255,59,92,.2);
-  border-radius:10px;
-  padding:12px 18px;
-  font-size:13px;color:var(--red);
-  margin-top:12px;
-  text-align:center;
-}
-
-/* ── RESULTS ── */
-#results{
-  display:none;
-  padding:60px 6% 80px;
-  max-width:960px;
-  margin:0 auto;
-}
-
-.result-top{
-  display:flex;align-items:flex-start;
-  justify-content:space-between;
-  gap:24px;margin-bottom:48px;
-  flex-wrap:wrap;
-}
-.result-store h2{
-  font-family:'Bebas Neue',sans-serif;
-  font-size:36px;letter-spacing:1px;
-  color:var(--white);margin-bottom:4px;
-}
-.result-store p{font-size:13px;color:var(--muted)}
-.result-store a{color:var(--gold);text-decoration:none}
-.result-store a:hover{text-decoration:underline}
-
-/* Score ring */
-.score-ring-wrap{
-  display:flex;flex-direction:column;
-  align-items:center;gap:6px;flex-shrink:0;
-}
-.score-ring{width:96px;height:96px;position:relative}
-.score-ring svg{transform:rotate(-90deg)}
-.ring-track{fill:none;stroke:var(--border);stroke-width:7}
-.ring-fill{
-  fill:none;stroke-width:7;stroke-linecap:round;
-  stroke-dasharray:283;stroke-dashoffset:283;
-  transition:stroke-dashoffset 1.5s cubic-bezier(.4,0,.2,1);
-}
-.ring-num{
-  position:absolute;inset:0;
-  display:flex;flex-direction:column;
-  align-items:center;justify-content:center;
-  font-family:'Bebas Neue',sans-serif;
-  font-size:28px;letter-spacing:1px;
-  line-height:1;
-}
-.ring-num small{font-size:11px;color:var(--muted);font-family:'Cabinet Grotesk',sans-serif;font-weight:400}
-.ring-label{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;text-align:center}
-
-/* Charts row */
-.charts-grid{
-  display:grid;
-  grid-template-columns:1fr 1.6fr 1fr;
-  gap:12px;
   margin-bottom:24px;
 }
-.chart-box{
-  background:var(--card);
-  border:1px solid var(--border);
+.hero-h1 .gold{color:var(--gold)}
+.hero-p{
+  font-size:15px;color:var(--muted);
+  line-height:1.8;max-width:380px;
+  margin-bottom:36px;
+}
+.hero-btn{
+  display:inline-flex;align-items:center;gap:10px;
+  background:transparent;
+  border:1px solid rgba(255,255,255,0.2);
+  color:var(--white);
+  font-family:'Cabinet Grotesk',sans-serif;
+  font-weight:700;font-size:13px;
+  letter-spacing:.06em;text-transform:uppercase;
+  padding:13px 24px;border-radius:6px;
+  text-decoration:none;cursor:pointer;
+  transition:border-color .2s,background .2s;
+  width:fit-content;
+}
+.hero-btn:hover{border-color:var(--gold);background:rgba(212,168,75,0.05)}
+.hero-btn-arrow{font-size:16px;transition:transform .2s}
+.hero-btn:hover .hero-btn-arrow{transform:translateX(4px)}
+
+/* RIGHT SIDE — Glass Grid */
+.hero-right{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:12px;
+  position:relative;
+}
+
+/* SHATTERED GLASS CARD */
+.glass-card{
+  position:relative;
   border-radius:16px;
-  padding:20px;
+  padding:28px 20px;
   display:flex;flex-direction:column;
-  align-items:center;gap:12px;
-}
-.chart-box-title{
-  font-size:11px;font-weight:700;
-  letter-spacing:.08em;text-transform:uppercase;
-  color:var(--muted);text-align:center;
-}
-.bar-chart{width:100%;display:flex;flex-direction:column;gap:10px}
-.brow{display:flex;align-items:center;gap:8px;font-size:11px}
-.blabel{width:72px;color:var(--muted);text-align:right;flex-shrink:0;font-size:10px}
-.btrack{flex:1;height:6px;background:var(--border);border-radius:100px;overflow:hidden}
-.bfill{height:100%;border-radius:100px;transition:width 1.2s cubic-bezier(.4,0,.2,1)}
-.bval{width:28px;text-align:right;font-size:10px;font-weight:700;flex-shrink:0}
-
-/* Critical box */
-.crit-box{
-  background:rgba(255,59,92,.05);
-  border:1px solid rgba(255,59,92,.15);
-  border-radius:16px;
-  padding:24px;
-  margin-bottom:20px;
-}
-.crit-title{
-  font-size:11px;font-weight:700;
-  letter-spacing:.1em;text-transform:uppercase;
-  color:var(--red);margin-bottom:14px;
-  display:flex;align-items:center;gap:8px;
-}
-.crit-item{
-  display:flex;align-items:flex-start;gap:10px;
-  padding:9px 0;
-  border-bottom:1px solid rgba(255,59,92,.08);
-  font-size:13px;line-height:1.6;
-}
-.crit-item:last-child{border-bottom:none}
-.crit-arrow{color:var(--red);flex-shrink:0;font-weight:700}
-
-/* Analysis accordion */
-.acc-list{display:flex;flex-direction:column;gap:10px}
-.acc-item{
-  background:var(--card);
-  border:1px solid var(--border);
-  border-radius:14px;
+  align-items:center;justify-content:center;
+  gap:10px;
+  text-align:center;
+  cursor:pointer;
   overflow:hidden;
-}
-.acc-head{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:16px 20px;cursor:pointer;
-  transition:background .15s;user-select:none;
-}
-.acc-head:hover{background:#100f1e}
-.acc-head-l{display:flex;align-items:center;gap:10px}
-.acc-ico{font-size:16px}
-.acc-name{font-weight:700;font-size:14px;color:var(--white)}
-.acc-head-r{display:flex;align-items:center;gap:10px}
-.acc-score{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px}
-.acc-chev{font-size:10px;color:var(--muted);transition:transform .2s}
-.acc-body{max-height:0;overflow:hidden;transition:max-height .3s ease,padding .3s}
-.acc-body.open{max-height:600px;padding:0 20px 20px}
-.acc-chev.open{transform:rotate(180deg)}
-.check-row{
-  display:flex;align-items:flex-start;
-  justify-content:space-between;gap:12px;
-  padding:9px 0;
-  border-bottom:1px solid var(--border);
-  font-size:13px;
-}
-.check-row:last-child{border-bottom:none}
-.check-lbl{color:var(--muted);flex:1}
-.check-val{font-weight:600;text-align:right;flex-shrink:0}
-.good{color:var(--green)}
-.warn{color:#ffb800}
-.bad{color:var(--red)}
-.neutral{color:var(--text)}
+  min-height:180px;
 
-/* Verdict */
-.verdict{
-  background:linear-gradient(135deg,rgba(212,168,75,0.06),rgba(212,168,75,0.02));
-  border:1px solid rgba(212,168,75,0.15);
-  border-radius:20px;
-  padding:32px;margin-top:20px;
-}
-.verdict h3{
-  font-family:'Bebas Neue',sans-serif;
-  font-size:28px;letter-spacing:1px;
-  color:var(--white);margin-bottom:20px;
-}
-.verdict-items{display:flex;flex-direction:column;gap:12px;margin-bottom:24px}
-.v-item{display:flex;align-items:flex-start;gap:12px;font-size:14px;line-height:1.6}
-.v-num{
-  width:22px;height:22px;
-  background:var(--gold-dim);
-  border:1px solid rgba(212,168,75,0.2);
-  border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  font-size:10px;font-weight:700;color:var(--gold);
-  flex-shrink:0;margin-top:1px;
+  /* Glass effect */
+  background:rgba(255,255,255,0.03);
+  border:1px solid rgba(255,255,255,0.08);
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+
+  /* Shattered glass look with box shadow */
+  box-shadow:
+    0 4px 24px rgba(0,0,0,0.4),
+    inset 0 1px 0 rgba(255,255,255,0.12),
+    inset 0 -1px 0 rgba(0,0,0,0.3);
+
+  transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease;
+  transform-style:preserve-3d;
 }
 
-/* Ad box */
-.ad-box{
-  background:rgba(255,149,0,.05);
-  border:1px solid rgba(255,149,0,.15);
-  border-radius:14px;
-  padding:20px;margin-top:16px;
-}
-.ad-box h4{
-  font-size:12px;font-weight:700;
-  letter-spacing:.08em;text-transform:uppercase;
-  color:var(--amber);margin-bottom:10px;
-  display:flex;align-items:center;gap:6px;
-}
-.ad-box p{font-size:14px;color:var(--muted);line-height:1.7}
-.ad-box strong{color:var(--text)}
-
-/* ── UPSELL ── */
-.upsell{
-  max-width:960px;margin:0 auto 80px;
-  padding:0 6%;
-  display:none;
-}
-.upsell-card{
-  background:var(--card);
-  border:1px solid var(--border2);
-  border-radius:24px;
-  padding:56px 48px;
-  display:flex;align-items:center;
-  justify-content:space-between;gap:40px;
-  position:relative;overflow:hidden;
-  flex-wrap:wrap;
-}
-.upsell-card::before{
+/* Shattered crack lines via SVG filter */
+.glass-card::before{
   content:'';
-  position:absolute;top:-150px;right:-150px;
-  width:400px;height:400px;
-  background:radial-gradient(circle,rgba(212,168,75,.05),transparent 70%);
+  position:absolute;inset:0;
+  background:
+    linear-gradient(135deg,rgba(255,255,255,0.04) 0%,transparent 50%,rgba(255,255,255,0.02) 100%);
+  border-radius:16px;
   pointer-events:none;
 }
-.upsell-card::after{
+
+/* Top glow line */
+.glass-card::after{
   content:'';
-  position:absolute;top:0;left:0;bottom:0;
-  width:3px;
-  background:linear-gradient(180deg,var(--gold),transparent);
+  position:absolute;
+  top:0;left:15%;right:15%;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,0.3),transparent);
+  pointer-events:none;
 }
-.upsell-left h2{
+
+.glass-card:hover{
+  border-color:rgba(212,168,75,0.3);
+  box-shadow:
+    0 8px 40px rgba(0,0,0,0.5),
+    0 0 30px rgba(212,168,75,0.08),
+    inset 0 1px 0 rgba(255,255,255,0.2),
+    inset 0 -1px 0 rgba(0,0,0,0.3);
+}
+
+/* Crack overlay canvas per card */
+.card-cracks{
+  position:absolute;inset:0;
+  pointer-events:none;
+  border-radius:16px;
+  opacity:0.15;
+}
+
+.card-icon{
+  font-size:28px;
+  position:relative;z-index:1;
+  transition:transform .3s ease,filter .3s ease;
+  filter:drop-shadow(0 0 8px rgba(255,255,255,0.2));
+}
+.glass-card:hover .card-icon{
+  transform:scale(1.1) translateY(-2px);
+  filter:drop-shadow(0 0 16px rgba(212,168,75,0.5));
+}
+.card-name{
   font-family:'Bebas Neue',sans-serif;
-  font-size:40px;letter-spacing:1px;
+  font-size:16px;letter-spacing:2px;
   color:var(--white);
-  line-height:.95;margin-bottom:14px;
-  max-width:400px;
+  position:relative;z-index:1;
 }
-.upsell-left p{
-  font-size:15px;color:var(--muted);
-  line-height:1.7;max-width:420px;
+.card-desc{
+  font-size:11px;color:rgba(255,255,255,0.35);
+  line-height:1.5;position:relative;z-index:1;
 }
-.upsell-btns{display:flex;flex-direction:column;gap:10px;flex-shrink:0}
-.btn-gold{
-  display:inline-flex;align-items:center;gap:8px;
-  background:var(--gold);color:#000;
-  font-family:'Cabinet Grotesk',sans-serif;
-  font-weight:800;font-size:14px;
-  padding:14px 28px;border-radius:10px;
-  text-decoration:none;
-  transition:background .2s,transform .1s;
-  white-space:nowrap;
-}
-.btn-gold:hover{background:var(--gold2);transform:translateY(-1px)}
-.btn-outline{
-  display:inline-flex;align-items:center;gap:8px;
-  background:transparent;color:var(--muted);
-  font-size:13px;padding:10px 20px;
-  border-radius:10px;border:1px solid var(--border2);
-  text-decoration:none;
-  transition:color .2s,border-color .2s;
-  text-align:center;justify-content:center;
-}
-.btn-outline:hover{color:var(--text);border-color:var(--muted)}
 
-/* ── SCAN AGAIN ── */
-.scan-again{text-align:center;padding:0 6% 60px;display:none}
-.btn-ghost{
-  background:transparent;
-  border:1px solid var(--border2);
-  color:var(--muted);
-  font-family:'Cabinet Grotesk',sans-serif;
-  font-size:13px;
-  padding:10px 24px;border-radius:8px;
-  cursor:pointer;
-  transition:color .2s,border-color .2s;
+/* Ripple */
+.ripple{
+  position:absolute;border-radius:50%;
+  background:rgba(212,168,75,0.12);
+  transform:scale(0);
+  animation:rippleOut .7s ease-out forwards;
+  pointer-events:none;
 }
-.btn-ghost:hover{color:var(--text);border-color:var(--muted)}
+@keyframes rippleOut{to{transform:scale(5);opacity:0}}
 
-/* ── FOOTER ── */
-footer{
-  border-top:1px solid var(--border);
-  padding:32px 6%;
-  display:flex;align-items:center;
-  justify-content:space-between;
-  flex-wrap:wrap;gap:16px;
+/* ── STATS BAR ── */
+.stats-bar{
+  position:fixed;bottom:0;left:0;right:0;z-index:99;
+  background:rgba(5,4,10,0.85);
+  backdrop-filter:blur(20px);
+  border-top:1px solid rgba(255,255,255,0.06);
+  padding:16px 5%;
+  display:flex;align-items:center;gap:0;
 }
-.footer-logo{
+.stat-item{
+  display:flex;align-items:center;gap:14px;
+  padding:0 32px;
+  border-right:1px solid rgba(255,255,255,0.06);
+  flex:1;
+}
+.stat-item:first-child{padding-left:0}
+.stat-item:last-child{border-right:none}
+.stat-ico{
+  width:36px;height:36px;
+  background:rgba(212,168,75,0.08);
+  border:1px solid rgba(212,168,75,0.15);
+  border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:16px;flex-shrink:0;
+}
+.stat-text{}
+.stat-num{
   font-family:'Bebas Neue',sans-serif;
-  font-size:20px;letter-spacing:2px;
-  color:var(--white);
+  font-size:22px;letter-spacing:1px;
+  color:var(--white);line-height:1;
 }
-.footer-links{
-  display:flex;gap:24px;list-style:none;
-}
-.footer-links a{
-  font-size:12px;color:var(--muted);
-  text-decoration:none;
-  transition:color .2s;
-}
-.footer-links a:hover{color:var(--white)}
-.footer-copy{font-size:12px;color:var(--muted)}
+.stat-lbl{font-size:11px;color:var(--muted);margin-top:1px}
 
-/* ── ANIMATIONS ── */
-@keyframes fadeUp{
-  from{opacity:0;transform:translateY(24px)}
-  to{opacity:1;transform:translateY(0)}
+/* ── ACTIVITY POPUP ── */
+.activity-feed{
+  position:fixed;
+  bottom:80px;left:24px;
+  z-index:98;
+  display:flex;flex-direction:column;gap:8px;
+  pointer-events:none;
+  max-width:300px;
+  transition:bottom .3s ease;
 }
-@keyframes pulse{
-  0%,100%{opacity:1;transform:scale(1)}
-  50%{opacity:.4;transform:scale(.75)}
-}
-@keyframes spin{to{transform:rotate(360deg)}}
-.spinner{
-  width:14px;height:14px;
-  border:2px solid rgba(0,0,0,.2);
-  border-top-color:#000;
-  border-radius:50%;
-  animation:spin .6s linear infinite;
-  display:inline-block;
-}
-
-/* Scroll reveal */
-.reveal{
-  opacity:0;transform:translateY(32px);
-  transition:opacity .7s ease,transform .7s ease;
-}
-.reveal.visible{opacity:1;transform:translateY(0)}
-
-/* ── ACTIVITY FEED ── */
-.activity-feed{position:fixed;bottom:24px;left:24px;z-index:50;display:flex;flex-direction:column;gap:8px;pointer-events:none;max-width:280px;transition:bottom .3s ease}
-@media(max-width:768px){
-  .activity-feed{
-    bottom:16px;
-    left:50%;
-    transform:translateX(-50%);
-    width:90%;
-    max-width:340px;
-    align-items:center;
-  }
-  .activity-item{
-    text-align:center;
-    width:100%;
-  }
-}
-.activity-item{
-  background:rgba(13,12,24,0.95);
-  border:1px solid var(--border2);
+.act-item{
+  display:flex;align-items:flex-start;gap:10px;
+  background:rgba(13,12,24,0.92);
+  border:1px solid rgba(255,255,255,0.08);
   border-left:2px solid var(--gold);
   border-radius:10px;
   padding:10px 14px;
   font-size:12px;
-  color:var(--text);
-  max-width:280px;
-  backdrop-filter:blur(12px);
+  backdrop-filter:blur(16px);
   animation:slideIn .4s ease both;
   line-height:1.5;
 }
-.activity-item strong{color:var(--gold)}
-.activity-item .a-time{
+.act-avatar{
+  width:28px;height:28px;border-radius:50%;
+  background:linear-gradient(135deg,var(--gold),#8b5e1a);
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;color:#000;flex-shrink:0;
+}
+.act-text{}
+.act-name{color:var(--white);font-weight:600}
+.act-detail{color:rgba(255,255,255,0.4);font-size:10px;margin-top:2px}
+.act-time{color:var(--gold);font-size:10px;margin-top:3px;display:block}
+
+@keyframes slideIn{from{opacity:0;transform:translateX(-16px)}to{opacity:1;transform:translateX(0)}}
+@keyframes slideOut{from{opacity:1;transform:translateX(0)}to{opacity:0;transform:translateX(-16px)}}
+
+/* ── SCAN OVERLAY ── */
+.scan-overlay{
+  position:fixed;inset:0;z-index:200;
+  background:rgba(5,4,10,0.97);
+  backdrop-filter:blur(20px);
+  display:none;
+  flex-direction:column;
+  align-items:center;justify-content:center;
+  padding:40px;
+}
+.scan-overlay.active{display:flex}
+.scan-close{
+  position:absolute;top:24px;right:24px;
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:8px;
   color:var(--muted);
-  font-size:10px;
-  margin-top:3px;
-  display:block;
+  font-size:18px;cursor:pointer;
+  width:36px;height:36px;
+  display:flex;align-items:center;justify-content:center;
+  transition:color .2s;
 }
-@keyframes slideIn{
-  from{opacity:0;transform:translateX(-20px)}
-  to{opacity:1;transform:translateX(0)}
+.scan-close:hover{color:var(--white)}
+.scan-title{
+  font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(36px,5vw,64px);
+  letter-spacing:1px;
+  color:var(--white);
+  text-align:center;
+  margin-bottom:8px;
 }
-@keyframes slideOut{
-  from{opacity:1;transform:translateX(0)}
-  to{opacity:0;transform:translateX(-20px)}
+.scan-title span{color:var(--gold)}
+.scan-sub{font-size:14px;color:var(--muted);text-align:center;margin-bottom:36px}
+.scan-wrap{
+  width:100%;max-width:560px;
+  display:flex;
+  background:rgba(255,255,255,0.04);
+  border:1px solid rgba(255,255,255,0.1);
+  border-radius:12px;
+  overflow:hidden;
+  transition:border-color .3s,box-shadow .3s;
 }
+.scan-wrap:focus-within{
+  border-color:rgba(212,168,75,0.4);
+  box-shadow:0 0 0 4px rgba(212,168,75,0.06);
+}
+.scan-input{
+  flex:1;background:transparent;border:none;outline:none;
+  padding:16px 20px;
+  font-family:'Cabinet Grotesk',sans-serif;
+  font-size:15px;color:var(--white);
+}
+.scan-input::placeholder{color:var(--muted)}
+.scan-btn{
+  background:var(--gold);color:#000;border:none;
+  padding:0 24px;
+  font-family:'Bebas Neue',sans-serif;
+  font-size:16px;letter-spacing:2px;
+  cursor:pointer;white-space:nowrap;
+  transition:background .2s;
+  display:flex;align-items:center;gap:8px;
+}
+.scan-btn:hover{background:var(--gold2)}
+.scan-btn:disabled{background:rgba(255,255,255,0.1);color:var(--muted);cursor:not-allowed}
+.scan-meta{
+  display:flex;gap:20px;margin-top:14px;
+  font-size:11px;color:var(--muted);justify-content:center;
+}
+.scan-meta span{display:flex;align-items:center;gap:5px}
+.scan-meta span::before{content:'';width:4px;height:4px;background:#00d97e;border-radius:50%}
+.err-msg{display:none;font-size:13px;color:#ff3b5c;text-align:center;margin-top:10px}
+
+/* Progress */
+.prog-wrap{width:100%;max-width:560px;margin-top:24px;display:none}
+.prog-label{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:8px}
+.prog-track{background:rgba(255,255,255,0.06);border-radius:100px;height:2px;overflow:hidden}
+.prog-fill{height:100%;border-radius:100px;background:linear-gradient(90deg,var(--gold),var(--gold2));width:0%;transition:width .5s ease;box-shadow:0 0 8px rgba(212,168,75,.4)}
+.prog-steps{display:flex;flex-direction:column;gap:6px;margin-top:16px}
+.p-step{display:flex;align-items:center;gap:8px;font-size:12px;color:rgba(255,255,255,0.15);transition:color .3s}
+.p-step.active{color:var(--text)}
+.p-step.done{color:var(--gold)}
+.p-dot{width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,0.1);flex-shrink:0;transition:background .3s}
+.p-step.active .p-dot{background:var(--gold);box-shadow:0 0 6px var(--gold);animation:pulse 1s infinite}
+.p-step.done .p-dot{background:var(--gold)}
+
+/* ── RESULTS ── */
+#results{
+  display:none;position:relative;z-index:1;
+  max-width:900px;margin:0 auto;
+  padding:80px 5% 140px;
+}
+.res-back{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:12px;color:var(--muted);
+  background:none;border:none;cursor:pointer;
+  margin-bottom:32px;
+  transition:color .2s;
+  letter-spacing:.06em;text-transform:uppercase;
+}
+.res-back:hover{color:var(--gold)}
+
+.res-header{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin-bottom:40px;flex-wrap:wrap}
+.res-store h2{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:1px;color:var(--white);margin-bottom:4px}
+.res-store p{font-size:13px;color:var(--muted)}
+.res-store a{color:var(--gold);text-decoration:none}
+
+/* Score ring */
+.score-ring{position:relative;width:90px;height:90px;flex-shrink:0}
+.score-ring svg{transform:rotate(-90deg)}
+.ring-track{fill:none;stroke:rgba(255,255,255,0.06);stroke-width:7}
+.ring-fill{fill:none;stroke-width:7;stroke-linecap:round;stroke-dasharray:283;stroke-dashoffset:283;transition:stroke-dashoffset 1.5s cubic-bezier(.4,0,.2,1)}
+.ring-num{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:1px;line-height:1}
+.ring-num small{font-size:10px;color:var(--muted);font-family:'Cabinet Grotesk',sans-serif;font-weight:400}
+
+/* Charts */
+.charts-row{display:grid;grid-template-columns:1fr 1.8fr 1fr;gap:10px;margin-bottom:20px}
+.chart-box{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:18px;display:flex;flex-direction:column;align-items:center;gap:10px}
+.chart-box-t{font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-align:center}
+.bar-chart{width:100%;display:flex;flex-direction:column;gap:8px}
+.brow{display:flex;align-items:center;gap:6px;font-size:10px}
+.blabel{width:64px;color:var(--muted);text-align:right;flex-shrink:0;font-size:9px}
+.btrack{flex:1;height:5px;background:rgba(255,255,255,0.06);border-radius:100px;overflow:hidden}
+.bfill{height:100%;border-radius:100px;transition:width 1.2s cubic-bezier(.4,0,.2,1)}
+.bval{width:24px;text-align:right;font-size:9px;font-weight:700;flex-shrink:0}
+
+/* Critical */
+.crit-box{background:rgba(255,59,92,.05);border:1px solid rgba(255,59,92,.12);border-radius:14px;padding:20px;margin-bottom:16px}
+.crit-t{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#ff3b5c;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.crit-item{display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid rgba(255,59,92,.07);font-size:13px;line-height:1.6}
+.crit-item:last-child{border-bottom:none}
+.crit-arr{color:#ff3b5c;flex-shrink:0;font-weight:700}
+
+/* Accordion */
+.acc-list{display:flex;flex-direction:column;gap:8px}
+.acc-item{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:12px;overflow:hidden}
+.acc-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;cursor:pointer;transition:background .15s;user-select:none}
+.acc-head:hover{background:rgba(255,255,255,0.04)}
+.acc-head-l{display:flex;align-items:center;gap:8px}
+.acc-ico{font-size:15px}
+.acc-name{font-weight:700;font-size:13px;color:var(--white)}
+.acc-head-r{display:flex;align-items:center;gap:8px}
+.acc-sc{font-family:'Bebas Neue',sans-serif;font-size:15px;letter-spacing:1px}
+.acc-chev{font-size:9px;color:var(--muted);transition:transform .2s}
+.acc-body{max-height:0;overflow:hidden;transition:max-height .3s ease,padding .3s}
+.acc-body.open{max-height:600px;padding:0 18px 18px}
+.acc-chev.open{transform:rotate(180deg)}
+.check-row{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:12px}
+.check-row:last-child{border-bottom:none}
+.check-lbl{color:var(--muted);flex:1}
+.check-val{font-weight:600;text-align:right;flex-shrink:0}
+.good{color:#00d97e}.warn{color:#ffb800}.bad{color:#ff3b5c}.neutral{color:var(--text)}
+
+/* Verdict */
+.verdict{background:rgba(212,168,75,.05);border:1px solid rgba(212,168,75,.12);border-radius:16px;padding:28px;margin-top:16px}
+.verdict h3{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:1px;color:var(--white);margin-bottom:16px}
+.v-items{display:flex;flex-direction:column;gap:10px;margin-bottom:20px}
+.v-item{display:flex;align-items:flex-start;gap:10px;font-size:13px;line-height:1.6}
+.v-num{width:20px;height:20px;background:rgba(212,168,75,.1);border:1px solid rgba(212,168,75,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--gold);flex-shrink:0;margin-top:1px}
+
+/* Upsell */
+.upsell-bar{
+  display:none;
+  max-width:900px;margin:0 auto;padding:0 5% 100px;
+}
+.upsell-inner{
+  background:rgba(255,255,255,0.03);
+  border:1px solid rgba(255,255,255,0.08);
+  border-left:2px solid var(--gold);
+  border-radius:16px;padding:32px 36px;
+  display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;
+}
+.upsell-inner h2{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:1px;color:var(--white);margin-bottom:8px}
+.upsell-inner p{font-size:14px;color:var(--muted);max-width:380px;line-height:1.7}
+.upsell-btns{display:flex;gap:10px;flex-wrap:wrap;flex-shrink:0}
+.btn-gold{display:inline-flex;align-items:center;gap:7px;background:var(--gold);color:#000;font-weight:800;font-size:13px;padding:12px 22px;border-radius:8px;text-decoration:none;transition:background .2s,transform .1s;white-space:nowrap}
+.btn-gold:hover{background:var(--gold2);transform:translateY(-1px)}
+.btn-out{display:inline-flex;align-items:center;gap:7px;background:transparent;color:var(--muted);font-size:12px;padding:12px 18px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);text-decoration:none;transition:color .2s,border-color .2s;white-space:nowrap}
+.btn-out:hover{color:var(--text);border-color:rgba(255,255,255,0.2)}
+
+.scan-again{text-align:center;padding:0 0 40px;display:none}
+.btn-ghost{background:transparent;border:1px solid rgba(255,255,255,0.08);color:var(--muted);font-family:'Cabinet Grotesk',sans-serif;font-size:12px;padding:9px 20px;border-radius:8px;cursor:pointer;transition:color .2s,border-color .2s}
+.btn-ghost:hover{color:var(--text);border-color:rgba(255,255,255,0.15)}
+
+/* ── SCROLL HINT ── */
+.scroll-hint{position:absolute;bottom:100px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:8px;font-size:10px;color:rgba(255,255,255,0.2);letter-spacing:.12em;text-transform:uppercase;animation:fadeUp .7s .8s ease both}
+.scroll-mouse{width:20px;height:30px;border:1.5px solid rgba(255,255,255,0.15);border-radius:10px;position:relative}
+.scroll-mouse::after{content:'';position:absolute;top:5px;left:50%;transform:translateX(-50%);width:2px;height:5px;background:var(--gold);border-radius:2px;animation:scrollAnim 2s infinite}
+@keyframes scrollAnim{0%,100%{opacity:1;transform:translateX(-50%) translateY(0)}50%{opacity:.2;transform:translateX(-50%) translateY(5px)}}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.7)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner{width:13px;height:13px;border:2px solid rgba(0,0,0,.2);border-top-color:#000;border-radius:50%;animation:spin .6s linear infinite;display:inline-block}
+
+/* Fade in animations */
+.fade-in{opacity:0;transform:translateY(24px);animation:fadeUp .7s ease both}
+.fade-in-1{animation-delay:.1s}
+.fade-in-2{animation-delay:.2s}
+.fade-in-3{animation-delay:.3s}
+.fade-in-4{animation-delay:.4s}
 
 /* ── RESPONSIVE ── */
-@media(max-width:768px){
-  .about-strip{grid-template-columns:1fr;gap:48px}
-  .services-grid{grid-template-columns:1fr}
-  .charts-grid{grid-template-columns:1fr}
-  .upsell-card{padding:32px 24px}
+@media(max-width:900px){
+  .hero{grid-template-columns:1fr;padding:100px 5% 160px}
+  .hero-right{grid-template-columns:1fr 1fr}
   .nav-links{display:none}
-  .hero-h1{letter-spacing:0}
+  .stats-bar{padding:12px 4%}
+  .stat-item{padding:0 16px}
+  .charts-row{grid-template-columns:1fr}
+}
+@media(max-width:480px){
+  .hero-right{grid-template-columns:1fr 1fr}
+  .glass-card{min-height:140px;padding:20px 12px}
+  .card-name{font-size:13px}
 }
 </style>
 </head>
 <body>
 
-<!-- Custom cursor -->
-<div class="cursor" id="cursor"></div>
-<div class="cursor-ring" id="cursorRing"></div>
+<!-- Neural network canvas -->
+<canvas id="bgCanvas"></canvas>
 
 <!-- NAV -->
 <nav>
-  <div class="logo">KARIOS<div class="logo-dot"></div></div>
+  <a href="/" class="logo">KARIOS<div class="logo-dot"></div></a>
   <ul class="nav-links">
-    <li><a href="#about">About</a></li>
     <li><a href="#services">Services</a></li>
+    <li><a href="/about.html">About</a></li>
+    <li><a href="/about.html">Case Studies</a></li>
     <li><a href="/about.html">Our Work</a></li>
-    <li><a href="#contact">Contact</a></li>
   </ul>
   <a href="https://wa.me/18734712764" class="nav-cta" target="_blank">Work With Us</a>
 </nav>
 
 <!-- HERO -->
 <section class="hero" id="heroSection">
-  <div class="hero-orb hero-orb-1"></div>
-  <div class="hero-orb hero-orb-2"></div>
-  <div class="hero-lines"></div>
-
-  <div class="hero-tag">
-    <span class="tag-line"></span>
-    Karios Agency — Growth Systems for Ecommerce
-    <span class="tag-line"></span>
+  <!-- LEFT -->
+  <div class="hero-left">
+    <div class="hero-eyebrow fade-in fade-in-1">Strategy. Growth. Results.</div>
+    <h1 class="hero-h1 fade-in fade-in-2">
+      WE DON'T<br/>
+      <span class="gold">GUESS.</span><br/>
+      WE DIAGNOSE.
+    </h1>
+    <p class="hero-p fade-in fade-in-3">
+      Karios is a digital growth agency built for stores that are ready to scale.
+      We combine data, strategy, and real analysis to unlock measurable growth.
+    </p>
+    <button class="hero-btn fade-in fade-in-4" onclick="openScan()">
+      Analyse My Store Free
+      <span class="hero-btn-arrow">↗</span>
+    </button>
   </div>
 
-  <h1 class="hero-h1">
-    WHY ISN'T YOUR<br/>
-    STORE <span class="gold">SELLING?</span>
-  </h1>
-  <span class="hero-h1-italic">We'll tell you in 10 seconds.</span>
-
-  <p class="hero-sub">
-    <strong>Then fix it for good.</strong> Karios Agency turns struggling stores into stores that sell —
-    through SEO, strategy, and growth systems built specifically for your niche.
-  </p>
-
-  <div class="scan-section">
-    <div class="scan-label">Analyse Your Store Free</div>
-    <div class="scan-wrap">
-      <input class="scan-input" id="urlInput" type="url"
-        placeholder="https://yourstore.com"
-        autocomplete="off" spellcheck="false"/>
-      <button class="scan-btn" id="scanBtn" onclick="startScan()">
-        <span id="btnText">ANALYSE</span>
-        <span id="btnIcon">→</span>
-      </button>
+  <!-- RIGHT — Glass Cards -->
+  <div class="hero-right" id="servicesSection">
+    <div class="glass-card" onclick="openScan()" data-tilt>
+      <canvas class="card-cracks"></canvas>
+      <div class="card-icon">🔍</div>
+      <div class="card-name">DIAGNOSE</div>
+      <div class="card-desc">47 checks on your live store</div>
     </div>
-    <div class="scan-meta">
-      <span>47 checks run</span>
-      <span>Results in under 10s</span>
-      <span>100% free</span>
+    <div class="glass-card" onclick="window.location='/about.html'" data-tilt>
+      <canvas class="card-cracks"></canvas>
+      <div class="card-icon">📈</div>
+      <div class="card-name">SEO</div>
+      <div class="card-desc">Rank higher on Google</div>
     </div>
-    <div class="error-msg" id="errorMsg"></div>
-    <div class="progress-wrap" id="progressWrap">
-      <div class="progress-label">
-        <span id="pText">Connecting...</span>
-        <span id="pPct">0%</span>
-      </div>
-      <div class="progress-track">
-        <div class="progress-fill" id="pBar"></div>
-      </div>
-      <div class="progress-steps" id="pSteps"></div>
+    <div class="glass-card" onclick="window.location='/about.html'" data-tilt>
+      <canvas class="card-cracks"></canvas>
+      <div class="card-icon">🎯</div>
+      <div class="card-name">PRODUCTS</div>
+      <div class="card-desc">Weekly trending picks</div>
+    </div>
+    <div class="glass-card" onclick="window.location='/about.html'" data-tilt>
+      <canvas class="card-cracks"></canvas>
+      <div class="card-icon">📣</div>
+      <div class="card-name">ADS</div>
+      <div class="card-desc">When and what to promote</div>
+    </div>
+    <div class="glass-card" onclick="window.location='/about.html'" data-tilt>
+      <canvas class="card-cracks"></canvas>
+      <div class="card-icon">🚀</div>
+      <div class="card-name">GROWTH</div>
+      <div class="card-desc">Systems that scale</div>
+    </div>
+    <div class="glass-card" onclick="window.location='/about.html'" data-tilt>
+      <canvas class="card-cracks"></canvas>
+      <div class="card-icon">📊</div>
+      <div class="card-name">ANALYTICS</div>
+      <div class="card-desc">Data that drives results</div>
     </div>
   </div>
 
@@ -1052,150 +571,50 @@ footer{
   </div>
 </section>
 
-<!-- TICKER -->
-<div class="ticker-wrap" id="tickerSection">
-  <div class="ticker-track">
-    <div class="ticker-item"><span class="ticker-dot"></span>SEO Optimisation</div>
-    <div class="ticker-item"><span class="ticker-dot"></span>Store Analysis</div>
-    <div class="ticker-item"><span class="ticker-dot"></span>Product Research</div>
-    <div class="ticker-item"><span class="ticker-dot"></span>Ad Strategy</div>
-    <div class="ticker-item"><span class="ticker-dot"></span>Conversion Rate Optimisation</div>
-    <div class="ticker-item"><span class="ticker-dot"></span>Growth Systems</div>
-    <div class="ticker-item"><span class="ticker-dot"></span>Social Media Strategy</div>
-    <div class="ticker-item"><span class="ticker-dot"></span>Karios Agency</div>
-    <!-- Duplicate for seamless loop -->
-    <div class="ticker-item"><span class="ticker-dot"></span>SEO Optimisation</div>
-    <div class="ticker-item"><span class="ticker-dot"></span>Store Analysis</div>
-    <div class="ticker-item"><span class="ticker-dot"></span>Product Research</div>
-    <div class="ticker-item"><span class="ticker-dot"></span>Ad Strategy</div>
-    <div class="ticker-item"><span class="ticker-dot"></span>Conversion Rate Optimisation</div>
-    <div class="ticker-item"><span class="ticker-dot"></span>Growth Systems</div>
-    <div class="ticker-item"><span class="ticker-dot"></span>Social Media Strategy</div>
-    <div class="ticker-item"><span class="ticker-dot"></span>Karios Agency</div>
+<!-- SCAN OVERLAY -->
+<div class="scan-overlay" id="scanOverlay">
+  <button class="scan-close" onclick="closeScan()">✕</button>
+  <div class="scan-title">YOUR STORE.<br/><span>DIAGNOSED.</span></div>
+  <p class="scan-sub">Paste your URL. We check 47 data points in under 10 seconds.</p>
+  <div class="scan-wrap">
+    <input class="scan-input" id="urlInput" type="url"
+      placeholder="https://yourstore.com"
+      autocomplete="off" spellcheck="false"/>
+    <button class="scan-btn" id="scanBtn" onclick="startScan()">
+      <span id="btnText">SCAN</span>
+      <span id="btnIcon">→</span>
+    </button>
+  </div>
+  <div class="scan-meta">
+    <span>47 checks</span>
+    <span>Under 10 seconds</span>
+    <span>100% free</span>
+  </div>
+  <div class="err-msg" id="errMsg"></div>
+  <div class="prog-wrap" id="progWrap">
+    <div class="prog-label">
+      <span id="pText">Connecting...</span>
+      <span id="pPct">0%</span>
+    </div>
+    <div class="prog-track"><div class="prog-fill" id="pBar"></div></div>
+    <div class="prog-steps" id="pSteps"></div>
   </div>
 </div>
-
-<!-- ABOUT STRIP -->
-<section class="about-strip reveal" id="aboutSection">
-  <div class="about-strip-left">
-    <div class="strip-eyebrow">Who We Are</div>
-    <h2>We don't<br/><em>guess.</em><br/>We diagnose.</h2>
-    <p>Most agencies tell you to "improve your SEO" without showing you exactly what's broken. At Karios Agency, <strong>every recommendation comes from real data</strong> pulled directly from your live store.</p>
-    <p>We've worked with stores across fashion, beauty, home decor, digital products and more — finding the exact issues that stop browsers from becoming buyers.</p>
-    <a href="#analyser" class="about-cta">
-      See what's wrong with your store
-      <span class="about-cta-arrow">→</span>
-    </a>
-  </div>
-  <div class="about-strip-right">
-    <div class="stat-card">
-      <div class="stat-icon">🔍</div>
-      <div class="stat-info">
-        <div class="stat-num">47<span>+</span></div>
-        <div class="stat-desc">Data points checked per store</div>
-      </div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon">⚡</div>
-      <div class="stat-info">
-        <div class="stat-num">&lt;<span>10s</span></div>
-        <div class="stat-desc">Time to get your full analysis</div>
-      </div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon">🎯</div>
-      <div class="stat-info">
-        <div class="stat-num">6<span> Areas</span></div>
-        <div class="stat-desc">Speed, SEO, Products, Trust, Mobile, Ads</div>
-      </div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-icon">💡</div>
-      <div class="stat-info">
-        <div class="stat-num">100<span>%</span></div>
-        <div class="stat-desc">Free — no signup, no catch</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- SERVICES -->
-<section class="services reveal" id="servicesSection">
-  <div class="section-header">
-    <div class="section-header-left">
-      <div class="section-eyebrow">What We Do</div>
-      <div class="section-title">Every service<br/><em>your store needs</em></div>
-    </div>
-    <p class="section-sub">One agency. Everything handled. You focus on your products — we handle the growth.</p>
-  </div>
-  <div class="services-grid">
-    <div class="service-card">
-      <div class="service-num">01</div>
-      <div class="service-icon">🔍</div>
-      <div class="service-title">Store Diagnosis</div>
-      <div class="service-desc">Full audit of your store — speed, SEO, trust signals, products, and conversion blockers. You get a prioritised fix list, not vague advice.</div>
-      <span class="service-tag">Free Tool Available</span>
-    </div>
-    <div class="service-card">
-      <div class="service-num">02</div>
-      <div class="service-icon">📈</div>
-      <div class="service-title">SEO & Visibility</div>
-      <div class="service-desc">We optimise your store to rank on Google for the keywords your buyers actually search. More visibility, more organic traffic, more sales.</div>
-      <span class="service-tag">Most Popular</span>
-    </div>
-    <div class="service-card">
-      <div class="service-num">03</div>
-      <div class="service-icon">🎯</div>
-      <div class="service-title">Product Research</div>
-      <div class="service-desc">Weekly lists of trending products matched to your niche — with supplier links and demand data. Never guess what to sell again.</div>
-      <span class="service-tag">Weekly Delivery</span>
-    </div>
-    <div class="service-card">
-      <div class="service-num">04</div>
-      <div class="service-icon">📣</div>
-      <div class="service-title">Ad Strategy</div>
-      <div class="service-desc">We tell you exactly when to run ads, which product to promote, what platform to use, and what budget makes sense for your store right now.</div>
-      <span class="service-tag">Data-Driven</span>
-    </div>
-    <div class="service-card">
-      <div class="service-num">05</div>
-      <div class="service-icon">📱</div>
-      <div class="service-title">Social Media</div>
-      <div class="service-desc">Content strategy and social media setup built around your niche. We connect your store to the platforms where your buyers actually spend time.</div>
-      <span class="service-tag">Platform Specific</span>
-    </div>
-    <div class="service-card">
-      <div class="service-num">06</div>
-      <div class="service-icon">🚀</div>
-      <div class="service-title">Growth Systems</div>
-      <div class="service-desc">Email flows, review collection, upsell strategy, retention — the systems that turn one-time buyers into repeat customers and grow revenue automatically.</div>
-      <span class="service-tag">Long-Term Growth</span>
-    </div>
-  </div>
-</section>
-
-
 
 <!-- RESULTS -->
 <div id="results"></div>
 
 <!-- UPSELL -->
-<div class="upsell" id="upsell">
-  <div class="upsell-card">
-    <div class="upsell-left">
+<div class="upsell-bar" id="upsell">
+  <div class="upsell-inner">
+    <div>
       <h2>Need Someone To Fix All Of This?</h2>
-      <p>Your analysis shows exactly what's broken. We fix it — SEO, speed, products, ads — everything your store needs to start converting traffic into sales.</p>
+      <p>We fix everything your analysis flagged — SEO, speed, products, ads. Done properly so you start getting real sales.</p>
     </div>
     <div class="upsell-btns">
-      <a href="https://wa.me/18734712764" class="btn-gold" target="_blank" id="contact">
-        💬 WhatsApp Us
-      </a>
-      <a href="https://t.me/kariosagency" class="btn-outline" target="_blank">
-        ✈ Telegram
-      </a>
-      <a href="mailto:fortrixtrn@gmail.com" class="btn-outline">
-        ✉ Email Us
-      </a>
+      <a href="https://wa.me/18734712764" class="btn-gold" target="_blank">💬 WhatsApp</a>
+      <a href="https://t.me/kariosagency" class="btn-out" target="_blank">✈ Telegram</a>
+      <a href="mailto:fortrixtrn@gmail.com" class="btn-out">✉ Email</a>
     </div>
   </div>
 </div>
@@ -1204,225 +623,348 @@ footer{
   <button class="btn-ghost" onclick="resetScan()">← Analyse another store</button>
 </div>
 
-<!-- FOOTER -->
-<footer>
-  <div class="footer-logo">KARIOS</div>
-  <ul class="footer-links">
-    <li><a href="#about">About</a></li>
-    <li><a href="#services">Services</a></li>
-    <li><a href="/about.html">Our Work</a></li>
-    <li><a href="mailto:fortrixtrn@gmail.com">Contact</a></li>
-  </ul>
-  <div class="footer-copy">© 2026 Karios Agency</div>
-</footer>
+<!-- STATS BAR -->
+<div class="stats-bar" id="statsBar">
+  <div class="stat-item">
+    <div class="stat-ico">🔍</div>
+    <div class="stat-text">
+      <div class="stat-num">47+</div>
+      <div class="stat-lbl">Data points checked per store</div>
+    </div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-ico">⚡</div>
+    <div class="stat-text">
+      <div class="stat-num">&lt;10S</div>
+      <div class="stat-lbl">Time to get your full analysis</div>
+    </div>
+  </div>
+  <div class="stat-item">
+    <div class="stat-ico">📊</div>
+    <div class="stat-text">
+      <div class="stat-num">200%</div>
+      <div class="stat-lbl">Avg. growth achieved by our clients</div>
+    </div>
+  </div>
+</div>
+
+<!-- ACTIVITY FEED -->
+<div class="activity-feed" id="activityFeed"></div>
 
 <script>
-// ── CURSOR ──────────────────────────────────────────
-const cur  = document.getElementById('cursor')
-const curR = document.getElementById('cursorRing')
-let mx=0,my=0,rx=0,ry=0
-document.addEventListener('mousemove',e=>{
-  mx=e.clientX;my=e.clientY
-  cur.style.left=mx+'px';cur.style.top=my+'px'
-})
-function animateCursor(){
-  rx+=(mx-rx)*.12;ry+=(my-ry)*.12
-  curR.style.left=rx+'px';curR.style.top=ry+'px'
-  requestAnimationFrame(animateCursor)
+// ══════════════════════════════════════════════════════
+//  NEURAL NETWORK CANVAS BACKGROUND
+// ══════════════════════════════════════════════════════
+const canvas = document.getElementById('bgCanvas')
+const ctx    = canvas.getContext('2d')
+let W, H, nodes = [], animFrame
+
+function resizeCanvas() {
+  W = canvas.width  = window.innerWidth
+  H = canvas.height = window.innerHeight
 }
-animateCursor()
-document.querySelectorAll('a,button,.service-card,.stat-card').forEach(el=>{
-  el.addEventListener('mouseenter',()=>{
-    cur.style.transform='translate(-50%,-50%) scale(2.5)'
-    curR.style.transform='translate(-50%,-50%) scale(1.4)'
-  })
-  el.addEventListener('mouseleave',()=>{
-    cur.style.transform='translate(-50%,-50%) scale(1)'
-    curR.style.transform='translate(-50%,-50%) scale(1)'
-  })
-})
 
-// ── SCROLL REVEAL ────────────────────────────────────
-const observer = new IntersectionObserver(entries=>{
-  entries.forEach(e=>{
-    if(e.isIntersecting) e.target.classList.add('visible')
-  })
-},{threshold:.1})
-document.querySelectorAll('.reveal').forEach(el=>observer.observe(el))
-
-// ── ANALYSIS ENGINE ──────────────────────────────────
-const STEPS=[
-  'Connecting to store...',
-  'Checking speed & performance...',
-  'Scanning SEO signals...',
-  'Analysing product catalogue...',
-  'Checking trust & credibility...',
-  'Evaluating ad readiness...',
-  'Building your report...',
-]
-
-let scanning=false
-
-window.startScan2 = function startScan2(){
-  const url=document.getElementById('urlInput2').value.trim()
-  if(url) {
-    document.getElementById('urlInput').value=url
-    startScan()
-    document.getElementById('top').scrollIntoView({behavior:'smooth'})
+function initNodes() {
+  nodes = []
+  const count = Math.floor((W * H) / 14000)
+  for (let i = 0; i < count; i++) {
+    nodes.push({
+      x:  Math.random() * W,
+      y:  Math.random() * H,
+      vx: (Math.random() - 0.5) * 0.3,
+      vy: (Math.random() - 0.5) * 0.3,
+      r:  Math.random() * 1.5 + 0.5,
+    })
   }
 }
 
-window.resetScan = function resetScan(){
-  document.getElementById('results').style.display='none'
-  document.getElementById('results').innerHTML=''
-  document.getElementById('upsell').style.display='none'
-  document.getElementById('scanAgain').style.display='none'
-  document.getElementById('urlInput').value=''
-  document.getElementById('progressWrap').style.display='none'
-  document.getElementById('errorMsg').style.display='none'
-  document.getElementById('scanBtn').disabled=false
-  document.getElementById('btnText').textContent='ANALYSE'
-  document.getElementById('btnIcon').innerHTML='→'
-  // Show all sections again
-  document.getElementById('heroSection').style.display=''
-  document.getElementById('tickerSection').style.display=''
-  document.getElementById('aboutSection').style.display=''
-  document.getElementById('servicesSection').style.display=''
-  window.scrollTo({top:0,behavior:'smooth'})
+function drawNetwork() {
+  ctx.clearRect(0, 0, W, H)
+
+  // Update positions
+  nodes.forEach(n => {
+    n.x += n.vx; n.y += n.vy
+    if (n.x < 0 || n.x > W) n.vx *= -1
+    if (n.y < 0 || n.y > H) n.vy *= -1
+  })
+
+  // Draw connections
+  for (let i = 0; i < nodes.length; i++) {
+    for (let j = i + 1; j < nodes.length; j++) {
+      const dx   = nodes[i].x - nodes[j].x
+      const dy   = nodes[i].y - nodes[j].y
+      const dist = Math.sqrt(dx*dx + dy*dy)
+      if (dist < 120) {
+        const alpha = (1 - dist/120) * 0.12
+        ctx.beginPath()
+        ctx.moveTo(nodes[i].x, nodes[i].y)
+        ctx.lineTo(nodes[j].x, nodes[j].y)
+        ctx.strokeStyle = `rgba(212,168,75,${alpha})`
+        ctx.lineWidth   = 0.5
+        ctx.stroke()
+      }
+    }
+  }
+
+  // Draw nodes
+  nodes.forEach(n => {
+    ctx.beginPath()
+    ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2)
+    ctx.fillStyle = 'rgba(212,168,75,0.3)'
+    ctx.fill()
+  })
+
+  animFrame = requestAnimationFrame(drawNetwork)
 }
 
-function showErr(msg){
-  const b=document.getElementById('errorMsg')
-  b.textContent=msg;b.style.display='block'
-  document.getElementById('scanBtn').disabled=false
-  document.getElementById('btnText').textContent='ANALYSE'
-  document.getElementById('btnIcon').innerHTML='→'
-  document.getElementById('progressWrap').style.display='none'
+resizeCanvas()
+initNodes()
+drawNetwork()
+window.addEventListener('resize', () => { resizeCanvas(); initNodes() })
+
+// ══════════════════════════════════════════════════════
+//  GLASS CARD CRACKS
+// ══════════════════════════════════════════════════════
+function drawCracks(canvas) {
+  const ctx = canvas.getContext('2d')
+  const w   = canvas.width  = canvas.parentElement.offsetWidth  || 180
+  const h   = canvas.height = canvas.parentElement.offsetHeight || 200
+
+  ctx.clearRect(0, 0, w, h)
+  ctx.strokeStyle = 'rgba(255,255,255,0.6)'
+  ctx.lineWidth   = 0.5
+
+  // Generate random crack lines from a center point
+  const cx = w * (0.3 + Math.random() * 0.4)
+  const cy = h * (0.3 + Math.random() * 0.4)
+  const lines = 6 + Math.floor(Math.random() * 4)
+
+  for (let i = 0; i < lines; i++) {
+    const angle  = (i / lines) * Math.PI * 2 + Math.random() * 0.5
+    const length = 30 + Math.random() * 60
+    const ex     = cx + Math.cos(angle) * length
+    const ey     = cy + Math.sin(angle) * length
+
+    ctx.beginPath()
+    ctx.moveTo(cx, cy)
+
+    // Add sub-cracks
+    const mx = (cx + ex) / 2 + (Math.random()-0.5) * 20
+    const my = (cy + ey) / 2 + (Math.random()-0.5) * 20
+    ctx.quadraticCurveTo(mx, my, ex, ey)
+    ctx.stroke()
+
+    // Branch cracks
+    if (Math.random() > 0.5) {
+      const bx = mx + Math.cos(angle + 1.2) * (length * 0.3)
+      const by = my + Math.sin(angle + 1.2) * (length * 0.3)
+      ctx.beginPath()
+      ctx.moveTo(mx, my)
+      ctx.lineTo(bx, by)
+      ctx.stroke()
+    }
+  }
 }
 
-function setProgress(pct,text){
-  document.getElementById('pBar').style.width=pct+'%'
-  document.getElementById('pText').textContent=text
-  document.getElementById('pPct').textContent=pct+'%'
+document.querySelectorAll('.card-cracks').forEach(c => {
+  setTimeout(() => drawCracks(c), 100)
+})
+
+// ══════════════════════════════════════════════════════
+//  GLASS CARD 3D TILT + RIPPLE
+// ══════════════════════════════════════════════════════
+document.querySelectorAll('.glass-card').forEach(card => {
+  card.addEventListener('mousemove', e => {
+    const rect = card.getBoundingClientRect()
+    const cx   = rect.left + rect.width  / 2
+    const cy   = rect.top  + rect.height / 2
+    const dx   = (e.clientX - cx) / (rect.width  / 2)
+    const dy   = (e.clientY - cy) / (rect.height / 2)
+    card.style.transform  = `perspective(500px) rotateX(${-dy*10}deg) rotateY(${dx*10}deg) scale(1.04)`
+    card.style.transition = 'transform .1s ease'
+    card.style.borderColor = `rgba(212,168,75,${0.1 + Math.abs(dx+dy)*0.15})`
+  })
+
+  card.addEventListener('mouseleave', () => {
+    card.style.transform   = 'perspective(500px) rotateX(0) rotateY(0) scale(1)'
+    card.style.transition  = 'transform .5s ease, border-color .3s'
+    card.style.borderColor = ''
+  })
+
+  card.addEventListener('click', e => {
+    const rect   = card.getBoundingClientRect()
+    const ripple = document.createElement('div')
+    ripple.className   = 'ripple'
+    const size         = Math.max(rect.width, rect.height)
+    ripple.style.width = ripple.style.height = size + 'px'
+    ripple.style.left  = (e.clientX - rect.left - size/2) + 'px'
+    ripple.style.top   = (e.clientY - rect.top  - size/2) + 'px'
+    card.appendChild(ripple)
+    setTimeout(() => ripple.remove(), 800)
+
+    card.style.transform  = 'perspective(500px) scale(0.95)'
+    card.style.transition = 'transform .1s ease'
+    setTimeout(() => {
+      card.style.transform  = 'perspective(500px) scale(1.04)'
+      card.style.transition = 'transform .4s cubic-bezier(.34,1.56,.64,1)'
+    }, 100)
+  })
+
+  // Touch
+  card.addEventListener('touchstart', e => {
+    card.style.transform  = 'scale(0.96)'
+    card.style.transition = 'transform .15s ease'
+    const t      = e.touches[0]
+    const rect   = card.getBoundingClientRect()
+    const ripple = document.createElement('div')
+    ripple.className   = 'ripple'
+    const size         = Math.max(rect.width, rect.height)
+    ripple.style.width = ripple.style.height = size + 'px'
+    ripple.style.left  = (t.clientX - rect.left - size/2) + 'px'
+    ripple.style.top   = (t.clientY - rect.top  - size/2) + 'px'
+    card.appendChild(ripple)
+    setTimeout(() => ripple.remove(), 800)
+  }, {passive:true})
+
+  card.addEventListener('touchend', () => {
+    card.style.transform  = 'scale(1)'
+    card.style.transition = 'transform .4s cubic-bezier(.34,1.56,.64,1)'
+  }, {passive:true})
+})
+
+// ══════════════════════════════════════════════════════
+//  SCAN OVERLAY
+// ══════════════════════════════════════════════════════
+window.openScan = function() {
+  document.getElementById('scanOverlay').classList.add('active')
+  setTimeout(() => document.getElementById('urlInput').focus(), 100)
+}
+window.closeScan = function() {
+  document.getElementById('scanOverlay').classList.remove('active')
+}
+document.getElementById('urlInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') startScan()
+  if (e.key === 'Escape') closeScan()
+})
+
+// ══════════════════════════════════════════════════════
+//  ANALYSIS ENGINE
+// ══════════════════════════════════════════════════════
+const STEPS = [
+  'Connecting to store...','Checking speed & performance...',
+  'Scanning SEO signals...','Analysing product catalogue...',
+  'Checking trust & credibility...','Evaluating ad readiness...',
+  'Building your report...'
+]
+let scanning = false
+
+function setProgress(pct, text) {
+  document.getElementById('pBar').style.width  = pct + '%'
+  document.getElementById('pText').textContent = text
+  document.getElementById('pPct').textContent  = pct + '%'
 }
 
-function updateSteps(idx){
-  document.getElementById('pSteps').innerHTML=STEPS.map((s,i)=>`
+function updateSteps(idx) {
+  document.getElementById('pSteps').innerHTML = STEPS.map((s,i) => `
     <div class="p-step ${i<idx?'done':i===idx?'active':''}">
       <span class="p-dot"></span>${s}
     </div>`).join('')
 }
 
-window.startScan = async function startScan(){
-  if(scanning)return
-  const url=document.getElementById('urlInput').value.trim()
-  if(!url){showErr('Please enter a store URL');return}
-  let clean=url
-  if(!clean.startsWith('http'))clean='https://'+clean
-  try{new URL(clean)}catch{showErr("That doesn't look like a valid URL");return}
+window.startScan = async function() {
+  if (scanning) return
+  const url = document.getElementById('urlInput').value.trim()
+  if (!url) { showErr('Please enter a store URL'); return }
+  let clean = url
+  if (!clean.startsWith('http')) clean = 'https://' + clean
+  try { new URL(clean) } catch { showErr("Invalid URL — try: https://yourstore.com"); return }
 
-  scanning=true
-  document.getElementById('errorMsg').style.display='none'
-  document.getElementById('scanBtn').disabled=true
-  document.getElementById('btnText').textContent='Scanning'
-  document.getElementById('btnIcon').innerHTML='<span class="spinner"></span>'
-  document.getElementById('progressWrap').style.display='block'
-  updateSteps(0);setProgress(5,STEPS[0])
+  scanning = true
+  document.getElementById('errMsg').style.display = 'none'
+  document.getElementById('scanBtn').disabled = true
+  document.getElementById('btnText').textContent = 'Scanning'
+  document.getElementById('btnIcon').innerHTML = '<span class="spinner"></span>'
+  document.getElementById('progWrap').style.display = 'block'
+  updateSteps(0); setProgress(5, STEPS[0])
 
-  let step=0
-  const st=setInterval(()=>{
+  let step = 0
+  const st = setInterval(() => {
     step++
-    if(step<STEPS.length){updateSteps(step);setProgress(Math.round(step/STEPS.length*85),STEPS[step])}
-  },1200)
+    if (step < STEPS.length) { updateSteps(step); setProgress(Math.round(step/STEPS.length*85), STEPS[step]) }
+  }, 1200)
 
-  try{
-    const r=await fetch('/api/analyse',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({url:clean})
+  try {
+    const r = await fetch('/api/analyse', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({url: clean})
     })
     clearInterval(st)
-    if(!r.ok)throw new Error('failed')
-    const d=await r.json()
-    updateSteps(STEPS.length);setProgress(100,'Report ready!')
-    await new Promise(r=>setTimeout(r,500))
-    renderResults(d,clean)
-  }catch(e){
+    if (!r.ok) throw new Error('failed')
+    const d = await r.json()
+    updateSteps(STEPS.length); setProgress(100, 'Report ready!')
+    await new Promise(r => setTimeout(r, 500))
+    closeScan()
+    renderResults(d, clean)
+  } catch(e) {
     clearInterval(st)
-    showErr('Could not reach that store. Make sure the URL is correct and the store is live.')
+    showErr('Could not reach that store. Check the URL and try again.')
+    document.getElementById('scanBtn').disabled = false
+    document.getElementById('btnText').textContent = 'SCAN'
+    document.getElementById('btnIcon').innerHTML = '→'
+    document.getElementById('progWrap').style.display = 'none'
   }
-  scanning=false
+  scanning = false
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-  const inp = document.getElementById('urlInput')
-  if(inp) inp.addEventListener('keydown',e=>{
-    if(e.key==='Enter')startScan()
-  })
-})
-
-// ── SCORE HELPERS ────────────────────────────────────
-function scoreColor(s){
-  if(s>=70)return'var(--green)'
-  if(s>=40)return'#ffb800'
-  return'var(--red)'
-}
-function scoreLabel(s){
-  if(s>=80)return{l:'Strong Store',c:'var(--green)'}
-  if(s>=60)return{l:'Needs Work',c:'#ffb800'}
-  if(s>=40)return{l:'Struggling',c:'#ffb800'}
-  return{l:'Critical Issues',c:'var(--red)'}
-}
-function vc(val,goodFn){
-  if(val===null||val===undefined)return'neutral'
-  if(typeof goodFn==='function')return goodFn(val)?'good':'bad'
-  if(typeof val==='boolean')return val?'good':'bad'
-  return'neutral'
+function showErr(msg) {
+  const b = document.getElementById('errMsg')
+  b.textContent = msg; b.style.display = 'block'
 }
 
-// ── RENDER RESULTS ───────────────────────────────────
-function renderResults(d,url){
-  const overall=d.overall_score||0
-  const sl=scoreLabel(overall)
-  const offset=283-(overall/100)*283
-  const criticals=d.critical_issues||[]
-  const fixes=d.top_fixes||[]
+// ══════════════════════════════════════════════════════
+//  RENDER RESULTS
+// ══════════════════════════════════════════════════════
+function scoreColor(s) {
+  if (s >= 70) return '#00d97e'
+  if (s >= 40) return '#ffb800'
+  return '#ff3b5c'
+}
+function scoreLabel(s) {
+  if (s >= 80) return {l:'Strong Store', c:'#00d97e'}
+  if (s >= 60) return {l:'Needs Work',   c:'#ffb800'}
+  if (s >= 40) return {l:'Struggling',   c:'#ffb800'}
+  return {l:'Critical Issues', c:'#ff3b5c'}
+}
 
-  const html=`
-  <div style="text-align:center;padding:16px 0 0;font-size:12px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase">
-    Analysis complete — scroll down for your full report
-  </div>
+function renderResults(d, url) {
+  const overall = d.overall_score || 0
+  const sl      = scoreLabel(overall)
+  const offset  = 283 - (overall/100) * 283
+  const crits   = d.critical_issues || []
+  const fixes   = d.top_fixes || []
 
-  <!-- Charts -->
-  <div class="charts-grid" style="margin-top:32px">
+  const html = `
+  <button class="res-back" onclick="resetScan()">← Analyse another store</button>
 
+  <div class="charts-row">
     <div class="chart-box">
-      <div class="chart-box-title">Overall Health</div>
-      <div style="position:relative;width:100px;height:100px">
-        <svg width="100" height="100" viewBox="0 0 100 100" style="transform:rotate(-90deg)">
+      <div class="chart-box-t">Overall Health</div>
+      <div class="score-ring">
+        <svg width="90" height="90" viewBox="0 0 100 100">
           <circle class="ring-track" cx="50" cy="50" r="45"/>
-          <circle class="ring-fill" cx="50" cy="50" r="45"
-            stroke="${scoreColor(overall)}"
-            style="stroke-dashoffset:${offset}"/>
+          <circle class="ring-fill" cx="50" cy="50" r="45" stroke="${scoreColor(overall)}" style="stroke-dashoffset:${offset}"/>
         </svg>
-        <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
-          <span style="font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:1px;color:${scoreColor(overall)}" id="scoreNum">0</span>
-          <span style="font-size:10px;color:var(--muted)">/100</span>
+        <div class="ring-num" style="color:${scoreColor(overall)}">
+          <span id="scoreNum">0</span><small>/100</small>
         </div>
       </div>
-      <div style="font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:${sl.c}">${sl.l}</div>
+      <div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:${sl.c}">${sl.l}</div>
     </div>
-
     <div class="chart-box" style="align-items:flex-start">
-      <div class="chart-box-title" style="text-align:left;width:100%">Score Breakdown</div>
+      <div class="chart-box-t" style="text-align:left;width:100%">Score Breakdown</div>
       <div class="bar-chart" style="width:100%">
-        ${[
-          ['Speed',    d.speed_score    ||0,'#d4a84b'],
-          ['SEO',      d.seo_score      ||0,'#00aaff'],
-          ['Products', d.products_score ||0,'#aa55ff'],
-          ['Trust',    d.trust_score    ||0,'#00d97e'],
-          ['Ads',      d.ads_score      ||0,'#ff9500'],
-        ].map(([l,v,c])=>`
+        ${[['Speed',d.speed_score||0,'#d4a84b'],['SEO',d.seo_score||0,'#00aaff'],['Products',d.products_score||0,'#aa55ff'],['Trust',d.trust_score||0,'#00d97e'],['Ads',d.ads_score||0,'#ff9500']].map(([l,v,c])=>`
         <div class="brow">
           <span class="blabel">${l}</span>
           <div class="btrack"><div class="bfill" style="width:${v}%;background:${c}"></div></div>
@@ -1430,38 +972,30 @@ function renderResults(d,url){
         </div>`).join('')}
       </div>
     </div>
-
     <div class="chart-box">
-      <div class="chart-box-title">SEO Score</div>
-      <div style="position:relative;width:100px;height:100px">
-        <svg width="100" height="100" viewBox="0 0 100 100" style="transform:rotate(-90deg)">
+      <div class="chart-box-t">SEO Score</div>
+      <div class="score-ring">
+        <svg width="90" height="90" viewBox="0 0 100 100">
           <circle class="ring-track" cx="50" cy="50" r="45"/>
-          <circle class="ring-fill" cx="50" cy="50" r="45"
-            stroke="#00aaff"
-            style="stroke-dashoffset:${283-((d.seo_score||0)/100)*283}"/>
+          <circle class="ring-fill" cx="50" cy="50" r="45" stroke="#00aaff" style="stroke-dashoffset:${283-((d.seo_score||0)/100)*283}"/>
         </svg>
-        <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
-          <span style="font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:1px;color:#00aaff">${d.seo_score||0}</span>
-          <span style="font-size:10px;color:var(--muted)">/100</span>
-        </div>
+        <div class="ring-num" style="color:#00aaff"><span>${d.seo_score||0}</span><small>/100</small></div>
       </div>
-      <div style="font-size:11px;color:var(--muted);text-align:center">${d.google_tier||'Unknown'}</div>
+      <div style="font-size:10px;color:var(--muted);text-align:center">${d.google_tier||'Unknown'}</div>
     </div>
   </div>
 
-  <!-- Store info + overall score -->
-  <div class="result-top">
-    <div class="result-store">
+  <div class="res-header">
+    <div class="res-store">
       <h2>${d.store_name||'Your Store'}</h2>
       <p>${d.platform||'Store'} · <a href="${url}" target="_blank">${url.replace('https://','').replace('http://','').slice(0,50)}</a></p>
-      ${d.is_new_seller?'<p style="color:var(--green);font-size:12px;margin-top:6px;font-weight:600">🌱 New store detected</p>':''}
+      ${d.is_new_seller?'<p style="color:#00d97e;font-size:11px;margin-top:4px;font-weight:600">🌱 New store detected</p>':''}
     </div>
   </div>
 
-  ${criticals.length?`
-  <div class="crit-box">
-    <div class="crit-title">🚨 Critical Issues Costing You Sales</div>
-    ${criticals.map(c=>`<div class="crit-item"><span class="crit-arrow">↳</span>${c}</div>`).join('')}
+  ${crits.length?`<div class="crit-box">
+    <div class="crit-t">🚨 Critical Issues Costing You Sales</div>
+    ${crits.map(c=>`<div class="crit-item"><span class="crit-arr">↳</span>${c}</div>`).join('')}
   </div>`:''}
 
   <div class="acc-list">
@@ -1469,19 +1003,19 @@ function renderResults(d,url){
       ['Google PageSpeed',d.pagespeed_score,v=>v>=50,v=>v+'/100'+(d.speed_estimated?' (est.)':'')],
       ['Mobile Score',d.mobile_score,v=>v>=50,v=>v+'/100'],
       ['Load Speed',d.load_speed,null,v=>v&&v!=='0s'?v:'Not measured'],
-      ['SSL Certificate',d.has_ssl,null,v=>v?'Secure ✓':'Missing ✗'],
+      ['SSL',d.has_ssl,null,v=>v?'Secure ✓':'Missing ✗'],
       ['Platform',d.platform,null,v=>v||'Unknown'],
-      ['Redesign Needed',d.redesign_needed,null,v=>v?'Yes — recommended':'No issues',true],
+      ['Redesign Needed',d.redesign_needed,null,v=>v?'Yes — recommended':'No',true],
     ])}
     ${makeAcc('🔍','SEO Health',d.seo_score,[
       ['Page Title',d.has_meta_title,null,v=>v?(d.meta_title_value||'Present ✓'):'Missing ✗'],
       ['Title Quality',null,null,()=>d.title_quality||'Unknown'],
       ['Meta Description',d.has_meta_description,null,v=>v?d.desc_quality:'Missing ✗'],
-      ['Image Alt Text',d.has_alt_text,null,v=>v?(d.alt_text_pct+' covered ✓'):((d.alt_text_pct||'0%')+' covered ✗')],
+      ['Alt Text Coverage',d.has_alt_text,null,v=>v?(d.alt_text_pct+' ✓'):((d.alt_text_pct||'0%')+' ✗')],
       ['H1 Heading',d.has_h1,null,v=>v?'Present ✓':'Missing ✗'],
       ['Open Graph Tags',d.has_og_tags,null,v=>v?'Present ✓':'Missing ✗'],
       ['Sitemap',d.has_sitemap,null,v=>v?'Found ✓':'Not found'],
-      ['Blog / Content',d.has_blog,null,v=>v?'Yes ✓':'None — missing SEO content'],
+      ['Blog / Content',d.has_blog,null,v=>v?'Yes ✓':'None found'],
       ['Estimated Google Page',d.google_tier,null,v=>v||'Unknown'],
     ])}
     ${makeAcc('🛒','Products & Catalogue',d.products_score,[
@@ -1497,7 +1031,6 @@ function renderResults(d,url){
       ['Contact Page',d.has_contact,null,v=>v?'Present ✓':'Missing ✗'],
       ['About Page',d.has_about,null,v=>v?'Present ✓':'Missing ✗'],
       ['Social Media',d.has_social,null,v=>v?'Linked ✓':'Not linked'],
-      ['Email Visible',d.has_email,null,v=>v?'Yes ✓':'Not found'],
       ['SSL / Security',d.has_ssl,null,v=>v?'Secure ✓':'Unsecured ✗'],
     ])}
     ${makeAcc('📣','Ad Readiness',d.ads_score,[
@@ -1508,180 +1041,128 @@ function renderResults(d,url){
     ])}
   </div>
 
-  ${d.should_run_ads&&d.ad_reason?`
-  <div class="ad-box">
-    <h4>📣 Ad Strategy</h4>
-    <p>${d.ad_reason}</p>
-  </div>`:''}
+  ${d.should_run_ads&&d.ad_reason?`<div style="background:rgba(255,149,0,.05);border:1px solid rgba(255,149,0,.15);border-radius:12px;padding:18px;margin-top:12px"><div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#ff9500;margin-bottom:8px;display:flex;align-items:center;gap:6px">📣 Ad Strategy</div><p style="font-size:13px;color:var(--muted);line-height:1.7">${d.ad_reason}</p></div>`:''}
 
   <div class="verdict">
     <h3>Your Top ${fixes.length} Fixes Right Now</h3>
-    <div class="verdict-items">
-      ${fixes.map((f,i)=>`
-      <div class="v-item">
-        <div class="v-num">${i+1}</div>
-        <div>${f}</div>
-      </div>`).join('')}
+    <div class="v-items">
+      ${fixes.map((f,i)=>`<div class="v-item"><div class="v-num">${i+1}</div><div>${f}</div></div>`).join('')}
     </div>
-    <p style="font-size:13px;color:var(--muted)">Fix these in order. Each one directly impacts your conversion rate and Google visibility.</p>
-  </div>
-  `
+    <p style="font-size:12px;color:var(--muted)">Fix these in order — each one directly impacts your conversion rate and visibility.</p>
+  </div>`
 
-  const el=document.getElementById('results')
-  el.innerHTML=html
-  el.style.display='block'
+  const el = document.getElementById('results')
+  el.innerHTML = html
+  el.style.display = 'block'
 
-  // Hide progress bar and reset button
-  document.getElementById('progressWrap').style.display='none'
-  document.getElementById('scanBtn').disabled=false
-  document.getElementById('btnText').textContent='ANALYSE'
-  document.getElementById('btnIcon').innerHTML='→'
-
-  // Hide hero sections so results are at the very top
-  document.getElementById('heroSection').style.display='none'
-  document.getElementById('tickerSection').style.display='none'
-  document.getElementById('aboutSection').style.display='none'
-  document.getElementById('servicesSection').style.display='none'
+  // Hide hero
+  document.getElementById('heroSection').style.display   = 'none'
+  document.getElementById('servicesSection').style.display = 'none'
 
   // Animate score
-  let cur2=0
-  const t=setInterval(()=>{
-    cur2=Math.min(cur2+2,overall)
-    document.getElementById('scoreNum').textContent=cur2
-    if(cur2>=overall)clearInterval(t)
-  },18)
+  let c = 0
+  const t = setInterval(() => {
+    c = Math.min(c+2, overall)
+    document.getElementById('scoreNum').textContent = c
+    if (c >= overall) clearInterval(t)
+  }, 18)
 
-  // Show upsell
-  document.getElementById('upsell').style.display='block'
-  document.getElementById('scanAgain').style.display='block'
+  document.getElementById('upsell').style.display    = 'block'
+  document.getElementById('scanAgain').style.display = 'block'
+  window.scrollTo({top:0, behavior:'instant'})
 
-  // Scroll to very top
-  window.scrollTo({top:0,behavior:'instant'})
-
-  // Accordion listeners
-  document.querySelectorAll('.acc-head').forEach(h=>{
-    h.addEventListener('click',()=>{
-      const body=h.nextElementSibling
-      const chev=h.querySelector('.acc-chev')
-      body.classList.toggle('open')
-      chev.classList.toggle('open')
+  // Accordion
+  document.querySelectorAll('.acc-head').forEach(h => {
+    h.addEventListener('click', () => {
+      h.nextElementSibling.classList.toggle('open')
+      h.querySelector('.acc-chev').classList.toggle('open')
     })
   })
-  // Open first
-  const first=document.querySelector('.acc-body')
-  const firstC=document.querySelector('.acc-chev')
-  if(first){first.classList.add('open');firstC.classList.add('open')}
+  const fb = document.querySelector('.acc-body')
+  const fc = document.querySelector('.acc-chev')
+  if (fb) { fb.classList.add('open'); fc.classList.add('open') }
 }
 
-function makeAcc(icon,title,score,rows){
-  const sc=score||0
-  const col=scoreColor(sc)
-  return`
-  <div class="acc-item">
+function makeAcc(icon, title, score, rows) {
+  const sc  = score || 0
+  const col = scoreColor(sc)
+  return `<div class="acc-item">
     <div class="acc-head">
-      <div class="acc-head-l">
-        <span class="acc-ico">${icon}</span>
-        <span class="acc-name">${title}</span>
-      </div>
-      <div class="acc-head-r">
-        <span class="acc-score" style="color:${col}">${sc}/100</span>
-        <span class="acc-chev">▼</span>
-      </div>
+      <div class="acc-head-l"><span class="acc-ico">${icon}</span><span class="acc-name">${title}</span></div>
+      <div class="acc-head-r"><span class="acc-sc" style="color:${col}">${sc}/100</span><span class="acc-chev">▼</span></div>
     </div>
     <div class="acc-body">
       ${rows.map(([label,val,goodFn,fmt,invert])=>{
-        const display=fmt?fmt(val):(val===null||val===undefined?'N/A':String(val))
-        let cls='neutral'
-        if(val!==null&&val!==undefined){
-          if(typeof goodFn==='function')cls=goodFn(val)?(invert?'warn':'good'):(invert?'good':'bad')
-          else if(goodFn===null&&typeof val==='boolean')cls=val?'good':'bad'
+        const display = fmt ? fmt(val) : (val===null||val===undefined?'N/A':String(val))
+        let cls = 'neutral'
+        if (val!==null&&val!==undefined) {
+          if (typeof goodFn==='function') cls = goodFn(val)?(invert?'warn':'good'):(invert?'good':'bad')
+          else if (goodFn===null&&typeof val==='boolean') cls = val?'good':'bad'
         }
-        return`<div class="check-row">
-          <span class="check-lbl">${label}</span>
-          <span class="check-val ${cls}">${display??'N/A'}</span>
-        </div>`
+        return`<div class="check-row"><span class="check-lbl">${label}</span><span class="check-val ${cls}">${display??'N/A'}</span></div>`
       }).join('')}
     </div>
   </div>`
 }
-</script>
-<!-- ACTIVITY FEED -->
-<div class="activity-feed" id="activityFeed"></div>
 
-<script>
-// ── LIVE ACTIVITY FEED ──────────────────────────────
-
-// Push activity feed above footer when user scrolls near bottom
-function adjustFeedPosition() {
-  const feed   = document.getElementById('activityFeed')
-  const footer = document.querySelector('footer')
-  if (!feed || !footer) return
-
-  const footerTop    = footer.getBoundingClientRect().top
-  const windowHeight = window.innerHeight
-  const feedHeight   = feed.offsetHeight + 24
-
-  if (footerTop < windowHeight) {
-    // Footer is visible — push feed up above it
-    const overlap = windowHeight - footerTop
-    feed.style.bottom = (overlap + 16) + 'px'
-  } else {
-    feed.style.bottom = '24px'
-  }
+window.resetScan = function() {
+  document.getElementById('results').style.display   = 'none'
+  document.getElementById('results').innerHTML        = ''
+  document.getElementById('upsell').style.display    = 'none'
+  document.getElementById('scanAgain').style.display = 'none'
+  document.getElementById('heroSection').style.display     = ''
+  document.getElementById('servicesSection').style.display = ''
+  window.scrollTo({top:0, behavior:'smooth'})
 }
 
-window.addEventListener('scroll', adjustFeedPosition)
-window.addEventListener('resize', adjustFeedPosition)
-
-
-const ACTIVITIES = [
-  {name: 'Zara K.', action: 'just analysed their store', detail: 'Found 4 critical SEO issues', time: 'just now'},
-  {name: 'Marcus O.', action: 'discovered why they had no sales', detail: 'Missing trust signals and reviews', time: '2 min ago'},
-  {name: 'Priya S.', action: 'checked their store health', detail: 'Page speed was costing them 60% of visitors', time: '4 min ago'},
-  {name: 'Chidi A.', action: 'got their analysis', detail: 'SEO tweaks could double their visibility', time: '6 min ago'},
-  {name: 'Leila N.', action: 'ran a store analysis', detail: 'No return policy was blocking all conversions', time: '8 min ago'},
-  {name: 'Tomás B.', action: 'just checked their store', detail: 'Product descriptions needed improvement', time: '11 min ago'},
-  {name: 'Amara F.', action: 'discovered their issues', detail: 'Mobile experience was broken on 85% of visits', time: '14 min ago'},
-  {name: 'David W.', action: 'got their report', detail: 'Tweaking their SEO tags increased visibility', time: '17 min ago'},
-  {name: 'Suki T.', action: 'analysed their beauty store', detail: 'Missing social proof was hurting trust', time: '20 min ago'},
-  {name: 'Kofi M.', action: 'just ran an analysis', detail: 'Google could not index their pages properly', time: '23 min ago'},
+// ══════════════════════════════════════════════════════
+//  ACTIVITY FEED
+// ══════════════════════════════════════════════════════
+const ACTS = [
+  {name:'Priya S.',  init:'P', action:'checked their store health',   detail:'Page speed was slowing 80% of visitors'},
+  {name:'Marcus O.', init:'M', action:'just got their diagnosis',      detail:'Missing reviews were killing trust'},
+  {name:'Zara K.',   init:'Z', action:'analysed their beauty store',   detail:'Found 4 critical SEO issues'},
+  {name:'Chidi A.',  init:'C', action:'discovered why sales stopped',  detail:'SEO tweaks could double their visibility'},
+  {name:'Leila N.',  init:'L', action:'ran a full store analysis',     detail:'No return policy blocked all conversions'},
+  {name:'David W.',  init:'D', action:'got their report',              detail:'Fixing speed score increased traffic fast'},
+  {name:'Amara F.',  init:'A', action:'checked their fashion store',   detail:'Mobile experience was broken on phones'},
+  {name:'Kofi M.',   init:'K', action:'just ran an analysis',          detail:'Google could not index their pages'},
 ]
-
 let actIdx = 0
-const feed  = document.getElementById('activityFeed')
+const feed = document.getElementById('activityFeed')
+
+function adjustFeed() {
+  const footer = document.querySelector('.stats-bar')
+  if (!feed || !footer) return
+  const fTop = footer.getBoundingClientRect().top
+  const wH   = window.innerHeight
+  if (fTop < wH) {
+    feed.style.bottom = (wH - fTop + 16) + 'px'
+  } else {
+    feed.style.bottom = '80px'
+  }
+}
+window.addEventListener('scroll', adjustFeed)
+window.addEventListener('resize', adjustFeed)
 
 function showActivity() {
   if (!feed) return
-  const a    = ACTIVITIES[actIdx % ACTIVITIES.length]
-  actIdx++
-
-  const el   = document.createElement('div')
-  el.className = 'activity-item'
+  const a  = ACTS[actIdx % ACTS.length]; actIdx++
+  const el = document.createElement('div')
+  el.className = 'act-item'
   el.innerHTML = `
-    <strong>${a.name}</strong> ${a.action}<br/>
-    <span style="color:var(--muted);font-size:11px">${a.detail}</span>
-    <span class="a-time">● ${a.time}</span>
-  `
+    <div class="act-avatar">${a.init}</div>
+    <div class="act-text">
+      <span class="act-name">${a.name}</span> ${a.action}<br/>
+      <span class="act-detail">${a.detail}</span>
+      <span class="act-time">● just now</span>
+    </div>`
   feed.appendChild(el)
-
-  // Remove after 6 seconds
-  setTimeout(() => {
-    el.style.animation = 'slideOut .4s ease both'
-    setTimeout(() => el.remove(), 400)
-  }, 6000)
-
-  // Keep max 3 visible
-  while (feed.children.length > 3) {
-    feed.removeChild(feed.firstChild)
-  }
+  setTimeout(() => { el.style.animation='slideOut .4s ease both'; setTimeout(()=>el.remove(),400) }, 6000)
+  while (feed.children.length > 2) feed.removeChild(feed.firstChild)
 }
 
-// Show first after 3 seconds, then every 8 seconds
-setTimeout(() => {
-  showActivity()
-  setInterval(showActivity, 8000)
-}, 3000)
+setTimeout(() => { showActivity(); setInterval(showActivity, 9000) }, 4000)
 </script>
-
 </body>
 </html>
