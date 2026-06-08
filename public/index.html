@@ -109,7 +109,7 @@ nav{
 .glass-card{
   position:relative;
   border-radius:16px;
-  padding:28px 20px;
+  padding:0;
   display:flex;flex-direction:column;
   align-items:center;justify-content:center;
   gap:10px;
@@ -117,21 +117,20 @@ nav{
   cursor:pointer;
   overflow:hidden;
   min-height:180px;
-
-  /* Glass effect */
-  background:rgba(255,255,255,0.03);
-  border:1px solid rgba(255,255,255,0.08);
-  backdrop-filter:blur(12px);
-  -webkit-backdrop-filter:blur(12px);
-
-  /* Shattered glass look with box shadow */
-  box-shadow:
-    0 4px 24px rgba(0,0,0,0.4),
-    inset 0 1px 0 rgba(255,255,255,0.12),
-    inset 0 -1px 0 rgba(0,0,0,0.3);
-
+  background:transparent;
+  border:none;
+  box-shadow:none;
   transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease;
   transform-style:preserve-3d;
+}
+.card-content{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  gap:10px;
+  z-index:4;
+  pointer-events:none;
+  transition:opacity .3s;
 }
 
 /* Shattered crack lines via SVG filter */
@@ -528,40 +527,22 @@ nav{
   <!-- RIGHT — Glass Cards -->
   <div class="hero-right" id="servicesSection">
     <div class="glass-card" onclick="openScan()" data-tilt>
-      <canvas class="card-cracks"></canvas>
-      <div class="card-icon">🔍</div>
-      <div class="card-name">DIAGNOSE</div>
-      <div class="card-desc">47 checks on your live store</div>
+      <div class="card-content"><div class="card-icon">🔍</div><div class="card-name">DIAGNOSE</div><div class="card-desc">47 checks on your live store</div></div>
     </div>
     <div class="glass-card" onclick="window.location='/about.html'" data-tilt>
-      <canvas class="card-cracks"></canvas>
-      <div class="card-icon">📈</div>
-      <div class="card-name">SEO</div>
-      <div class="card-desc">Rank higher on Google</div>
+      <div class="card-content"><div class="card-icon">📈</div><div class="card-name">SEO</div><div class="card-desc">Rank higher on Google</div></div>
     </div>
     <div class="glass-card" onclick="window.location='/about.html'" data-tilt>
-      <canvas class="card-cracks"></canvas>
-      <div class="card-icon">🎯</div>
-      <div class="card-name">PRODUCTS</div>
-      <div class="card-desc">Weekly trending picks</div>
+      <div class="card-content"><div class="card-icon">🎯</div><div class="card-name">PRODUCTS</div><div class="card-desc">Weekly trending picks</div></div>
     </div>
     <div class="glass-card" onclick="window.location='/about.html'" data-tilt>
-      <canvas class="card-cracks"></canvas>
-      <div class="card-icon">📣</div>
-      <div class="card-name">ADS</div>
-      <div class="card-desc">When and what to promote</div>
+      <div class="card-content"><div class="card-icon">📣</div><div class="card-name">ADS</div><div class="card-desc">When and what to promote</div></div>
     </div>
     <div class="glass-card" onclick="window.location='/about.html'" data-tilt>
-      <canvas class="card-cracks"></canvas>
-      <div class="card-icon">🚀</div>
-      <div class="card-name">GROWTH</div>
-      <div class="card-desc">Systems that scale</div>
+      <div class="card-content"><div class="card-icon">🚀</div><div class="card-name">GROWTH</div><div class="card-desc">Systems that scale</div></div>
     </div>
     <div class="glass-card" onclick="window.location='/about.html'" data-tilt>
-      <canvas class="card-cracks"></canvas>
-      <div class="card-icon">📊</div>
-      <div class="card-name">ANALYTICS</div>
-      <div class="card-desc">Data that drives results</div>
+      <div class="card-content"><div class="card-icon">📊</div><div class="card-name">ANALYTICS</div><div class="card-desc">Data that drives results</div></div>
     </div>
   </div>
 
@@ -723,219 +704,307 @@ drawNetwork()
 window.addEventListener('resize', () => { resizeCanvas(); initNodes() })
 
 // ══════════════════════════════════════════════════════
-//  GLASS CRACK ENGINE — Realistic edge-to-edge cracks
+//  GLASS FRAGMENT ENGINE — Each piece is independent
 // ══════════════════════════════════════════════════════
 
-function generateCrackData(w, h) {
-  // Impact point - slightly off center for realism
-  const ix = w * (0.3 + Math.random() * 0.4)
-  const iy = h * (0.3 + Math.random() * 0.4)
-  const cracks = []
-  const mainCount = 7 + Math.floor(Math.random() * 3)
+function roundRectPath(ctx,x,y,w,h,r){
+  ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);
+  ctx.arcTo(x+w,y,x+w,y+r,r);ctx.lineTo(x+w,y+h-r);
+  ctx.arcTo(x+w,y+h,x+w-r,y+h,r);ctx.lineTo(x+r,y+h);
+  ctx.arcTo(x,y+h,x,y+h-r,r);ctx.lineTo(x,y+r);
+  ctx.arcTo(x,y,x+r,y,r);ctx.closePath()
+}
 
-  for (let i = 0; i < mainCount; i++) {
-    const angle   = (i / mainCount) * Math.PI * 2 + (Math.random()-0.5) * 0.5
-    const edgeDist = Math.max(w, h) * 1.5
-    const pts     = [{x: ix, y: iy}]
-    let lastX = ix, lastY = iy
+function buildGlassCard(wrap, W, H, onAction) {
+  // Layer 1: background glass
+  const bgCv = document.createElement('canvas')
+  bgCv.width=W; bgCv.height=H
+  bgCv.style.cssText='position:absolute;inset:0;border-radius:16px;transition:opacity .3s'
+  wrap.appendChild(bgCv)
+  const bgCtx = bgCv.getContext('2d')
 
-    // Walk toward edge with slight jitter
-    const steps = 10
-    for (let s = 1; s <= steps; s++) {
-      const t  = s / steps
-      const nx = ix + Math.cos(angle) * edgeDist * t + (Math.random()-0.5) * 14
-      const ny = iy + Math.sin(angle) * edgeDist * t + (Math.random()-0.5) * 14
-      const cx = Math.max(0, Math.min(w, nx))
-      const cy = Math.max(0, Math.min(h, ny))
-      pts.push({x: cx, y: cy})
-      lastX = cx; lastY = cy
-      // Stop if we hit an edge
-      if (nx <= 0 || nx >= w || ny <= 0 || ny >= h) break
-    }
-    cracks.push({pts, branch: false, glow: Math.random() > 0.6})
+  // Layer 2: cracks + fragments
+  const cv = document.createElement('canvas')
+  cv.width=W; cv.height=H
+  cv.style.cssText='position:absolute;inset:0;z-index:2'
+  wrap.appendChild(cv)
+  const ctx = cv.getContext('2d')
 
-    // Branch crack from 30-60% along main crack
-    if (Math.random() > 0.35 && pts.length > 3) {
-      const bIdx   = Math.floor(pts.length * (0.3 + Math.random() * 0.3))
-      const bp     = pts[bIdx]
-      const bAngle = angle + (Math.random() > 0.5 ? 0.6 : -0.6) + (Math.random()-0.5)*0.3
-      const bPts   = [{x: bp.x, y: bp.y}]
-      for (let s = 1; s <= 6; s++) {
-        const t  = s / 6
-        const nx = bp.x + Math.cos(bAngle) * edgeDist * 0.5 * t + (Math.random()-0.5) * 10
-        const ny = bp.y + Math.sin(bAngle) * edgeDist * 0.5 * t + (Math.random()-0.5) * 10
-        const cx = Math.max(0, Math.min(w, nx))
-        const cy = Math.max(0, Math.min(h, ny))
-        bPts.push({x: cx, y: cy})
-        if (nx <= 0 || nx >= w || ny <= 0 || ny >= h) break
-      }
-      cracks.push({pts: bPts, branch: true, glow: false})
-    }
+  function drawBg(){
+    bgCtx.clearRect(0,0,W,H)
+    roundRectPath(bgCtx,0,0,W,H,16)
+    bgCtx.fillStyle='rgba(255,255,255,0.04)'; bgCtx.fill()
+    bgCtx.strokeStyle='rgba(255,255,255,0.10)'; bgCtx.lineWidth=1; bgCtx.stroke()
+    const g=bgCtx.createLinearGradient(0,0,0,H*.5)
+    g.addColorStop(0,'rgba(255,255,255,0.07)'); g.addColorStop(1,'rgba(255,255,255,0)')
+    bgCtx.save(); roundRectPath(bgCtx,1,1,W-2,H/2,16)
+    bgCtx.fillStyle=g; bgCtx.fill(); bgCtx.restore()
   }
-  return {cracks, ix, iy}
-}
+  drawBg()
 
-// Store crack data per card for hover/click effects
-const cardCrackData = new WeakMap()
-
-function drawCrackCanvas(canvas, data, opts = {}) {
-  const {hover=false, shatter=0} = opts
-  const ctx = canvas.getContext('2d')
-  const w   = canvas.width
-  const h   = canvas.height
-  ctx.clearRect(0, 0, w, h)
-
-  const {cracks, ix, iy} = data
-
-  cracks.forEach(({pts, branch, glow}) => {
-    if (pts.length < 2) return
-
-    ctx.beginPath()
-    ctx.moveTo(pts[0].x, pts[0].y)
-    for (let i = 1; i < pts.length; i++) {
-      // On shatter, offset each segment
-      const ox = shatter > 0 ? (Math.random()-0.5) * shatter * 20 : 0
-      const oy = shatter > 0 ? (Math.random()-0.5) * shatter * 20 : 0
-      ctx.lineTo(pts[i].x + ox, pts[i].y + oy)
-    }
-
-    if (hover) {
-      // Glow effect on hover - cracks light up
-      ctx.shadowColor = 'rgba(212,168,75,0.8)'
-      ctx.shadowBlur  = branch ? 4 : 8
-      ctx.strokeStyle = branch
-        ? 'rgba(255,255,255,0.5)'
-        : 'rgba(212,168,75,0.9)'
-      ctx.lineWidth   = branch ? 0.8 : 1.5
-    } else {
-      ctx.shadowColor = 'transparent'
-      ctx.shadowBlur  = 0
-      ctx.strokeStyle = branch
-        ? 'rgba(255,255,255,0.25)'
-        : 'rgba(255,255,255,0.5)'
-      ctx.lineWidth   = branch ? 0.7 : 1.2
-    }
-    ctx.stroke()
-  })
-
-  // Impact point dot
-  ctx.shadowBlur  = hover ? 12 : 4
-  ctx.shadowColor = hover ? 'rgba(212,168,75,1)' : 'rgba(255,255,255,0.6)'
-  ctx.beginPath()
-  ctx.arc(ix, iy, hover ? 2.5 : 1.5, 0, Math.PI*2)
-  ctx.fillStyle = hover ? 'rgba(212,168,75,1)' : 'rgba(255,255,255,0.8)'
-  ctx.fill()
-  ctx.shadowBlur = 0
-}
-
-function initCard(card) {
-  const cv = card.querySelector('.card-cracks')
-  if (!cv) return
-
-  // Size canvas to card
-  const rect = card.getBoundingClientRect()
-  const w    = cv.width  = card.offsetWidth  || 180
-  const h    = cv.height = card.offsetHeight || 200
-
-  const data = generateCrackData(w, h)
-  cardCrackData.set(card, data)
-  drawCrackCanvas(cv, data, {hover: false})
-
-  // HOVER — cracks glow, card tilts
-  card.addEventListener('mousemove', e => {
-    const r  = card.getBoundingClientRect()
-    const dx = (e.clientX - r.left - r.width/2)  / (r.width/2)
-    const dy = (e.clientY - r.top  - r.height/2) / (r.height/2)
-    card.style.transform  = `perspective(600px) rotateX(${-dy*12}deg) rotateY(${dx*12}deg) scale(1.05)`
-    card.style.transition = 'transform .08s ease'
-    card.style.borderColor = 'rgba(212,168,75,0.4)'
-    card.style.boxShadow  = `
-      ${-dx*12}px ${-dy*12}px 40px rgba(0,0,0,0.5),
-      0 0 30px rgba(212,168,75,0.1),
-      inset 0 1px 0 rgba(255,255,255,0.2)
-    `
-    drawCrackCanvas(cv, data, {hover: true})
-  })
-
-  card.addEventListener('mouseleave', () => {
-    card.style.transform  = 'perspective(600px) rotateX(0) rotateY(0) scale(1)'
-    card.style.transition = 'transform .5s ease, border-color .3s, box-shadow .3s'
-    card.style.borderColor = ''
-    card.style.boxShadow  = ''
-    drawCrackCanvas(cv, data, {hover: false})
-  })
-
-  // CLICK — shatter animation then action
-  const originalOnclick = card.getAttribute('onclick')
-  card.removeAttribute('onclick')
-
-  card.addEventListener('click', e => {
-    if (card.dataset.shattering) return
-    card.dataset.shattering = '1'
-
-    // Shatter sequence
-    let frame = 0
-    const totalFrames = 12
-    const shatterAnim = setInterval(() => {
-      frame++
-      const progress = frame / totalFrames
-      drawCrackCanvas(cv, data, {hover: true, shatter: progress})
-      card.style.transform = `perspective(600px) scale(${1 - progress * 0.08})`
-      card.style.opacity   = String(1 - progress * 0.3)
-      card.style.filter    = `brightness(${1 + progress * 2}) blur(${progress * 2}px)`
-      if (frame >= totalFrames) {
-        clearInterval(shatterAnim)
-        // Flash white
-        card.style.filter  = 'brightness(4) blur(4px)'
-        card.style.opacity = '0'
-        setTimeout(() => {
-          card.dataset.shattering = ''
-          card.style.filter   = ''
-          card.style.opacity  = '1'
-          card.style.transform = ''
-          drawCrackCanvas(cv, data, {hover: false})
-          // Execute original action
-          if (originalOnclick) {
-            try { eval(originalOnclick) } catch(err) {}
-          }
-        }, 120)
+  // Generate crack lines
+  function genLines(ix,iy){
+    const lines=[]
+    const n=8+Math.floor(Math.random()*4)
+    for(let i=0;i<n;i++){
+      const angle=(i/n)*Math.PI*2+(Math.random()-.5)*.5
+      const pts=[{x:ix,y:iy}]
+      let cx=ix,cy=iy,a=angle
+      for(let s=0;s<25;s++){
+        a+=(Math.random()-.5)*.12
+        cx+=Math.cos(a)*(7+Math.random()*5)
+        cy+=Math.sin(a)*(7+Math.random()*5)
+        if(cx<0||cx>W||cy<0||cy>H){
+          pts.push({x:Math.max(0,Math.min(W,cx)),y:Math.max(0,Math.min(H,cy))})
+          break
+        }
+        pts.push({x:cx,y:cy})
       }
-    }, 25)
+      lines.push({pts,main:true})
+      if(Math.random()>.4&&pts.length>3){
+        const bi=2+Math.floor(Math.random()*(pts.length-2))
+        const bp=pts[bi]
+        const ba=a+(Math.random()>.5?.55:-.55)+(Math.random()-.5)*.2
+        const bPts=[{x:bp.x,y:bp.y}]
+        let bx=bp.x,by=bp.y,ba2=ba
+        for(let s=0;s<14;s++){
+          ba2+=(Math.random()-.5)*.15
+          bx+=Math.cos(ba2)*(6+Math.random()*4)
+          by+=Math.sin(ba2)*(6+Math.random()*4)
+          if(bx<0||bx>W||by<0||by>H){bPts.push({x:Math.max(0,Math.min(W,bx)),y:Math.max(0,Math.min(H,by))});break}
+          bPts.push({x:bx,y:by})
+        }
+        lines.push({pts:bPts,main:false})
+      }
+    }
+    return lines
+  }
+
+  // Build fragments from crack line intersections
+  function buildFrags(ix,iy,lines){
+    const allPts=[]
+    lines.forEach(({pts})=>pts.filter((_,i)=>i%2===0).forEach(p=>allPts.push({x:p.x,y:p.y})))
+    // Add boundary anchors
+    const bnd=[{x:0,y:0},{x:W/2,y:0},{x:W,y:0},{x:W,y:H/2},{x:W,y:H},{x:W/2,y:H},{x:0,y:H},{x:0,y:H/2}]
+    const pts=[...allPts,...bnd].filter(p=>p.x>=0&&p.x<=W&&p.y>=0&&p.y<=H)
+    const frags=[]
+    for(let i=0;i<pts.length;i++){
+      for(let j=i+1;j<pts.length;j++){
+        for(let k=j+1;k<pts.length;k++){
+          const a=pts[i],b=pts[j],c=pts[k]
+          const area=Math.abs((b.x-a.x)*(c.y-a.y)-(c.x-a.x)*(b.y-a.y))
+          if(area<200||area>5000)continue
+          const d1=Math.hypot(b.x-a.x,b.y-a.y)
+          const d2=Math.hypot(c.x-a.x,c.y-a.y)
+          const d3=Math.hypot(c.x-b.x,c.y-b.y)
+          if(d1>130||d2>130||d3>130)continue
+          const cx=(a.x+b.x+c.x)/3
+          const cy=(a.y+b.y+c.y)/3
+          frags.push({
+            pts:[{...a},{...b},{...c}],
+            cx,cy,ox:cx,oy:cy,
+            vx:0,vy:0,rot:0,vrot:0,alpha:1
+          })
+        }
+      }
+    }
+    return frags.slice(0,45)
+  }
+
+  const ix=W*(.38+Math.random()*.24), iy=H*(.38+Math.random()*.24)
+  const lines=genLines(ix,iy)
+  const frags=buildFrags(ix,iy,lines)
+
+  let mouseX=-1,mouseY=-1,shattered=false,animating=false
+
+  function drawCracks(hover){
+    ctx.clearRect(0,0,W,H)
+    lines.forEach(({pts,main})=>{
+      if(pts.length<2)return
+      ctx.beginPath(); ctx.moveTo(pts[0].x,pts[0].y)
+      pts.slice(1).forEach(p=>ctx.lineTo(p.x,p.y))
+      const dist=mouseX>=0?Math.hypot(pts[0].x-mouseX,pts[0].y-mouseY):999
+      const prox=Math.max(0,1-dist/110)
+      if(hover&&prox>.05){
+        ctx.strokeStyle=`rgba(212,168,75,${.45+prox*.55})`
+        ctx.lineWidth=main?2.2+prox*2:1.2+prox
+        ctx.shadowColor=`rgba(212,168,75,${prox*.7})`
+        ctx.shadowBlur=prox*20
+      } else {
+        ctx.strokeStyle=main?'rgba(255,255,255,0.6)':'rgba(255,255,255,0.3)'
+        ctx.lineWidth=main?1.8:1.0
+        ctx.shadowBlur=0
+      }
+      ctx.stroke(); ctx.shadowBlur=0
+    })
+    // Impact point
+    const d=mouseX>=0?Math.hypot(ix-mouseX,iy-mouseY):999
+    const p=Math.max(0,1-d/80)
+    ctx.beginPath(); ctx.arc(ix,iy,1.8+p*2.5,0,Math.PI*2)
+    ctx.fillStyle=p>.1?`rgba(212,168,75,${.5+p*.5})`:'rgba(255,255,255,0.5)'
+    if(p>.1){ctx.shadowColor='rgba(212,168,75,1)';ctx.shadowBlur=p*16}
+    ctx.fill(); ctx.shadowBlur=0
+  }
+
+  function drawFragments(){
+    ctx.clearRect(0,0,W,H)
+    frags.forEach(f=>{
+      ctx.save()
+      ctx.globalAlpha=Math.max(0,f.alpha)
+      ctx.translate(f.cx,f.cy)
+      ctx.rotate(f.rot)
+      ctx.beginPath()
+      const rel=f.pts.map(p=>({x:p.x-f.ox,y:p.y-f.oy}))
+      ctx.moveTo(rel[0].x,rel[0].y)
+      rel.slice(1).forEach(p=>ctx.lineTo(p.x,p.y))
+      ctx.closePath()
+      ctx.fillStyle='rgba(200,220,255,0.07)'; ctx.fill()
+      ctx.strokeStyle='rgba(255,255,255,0.75)'; ctx.lineWidth=1.3
+      ctx.shadowColor='rgba(255,255,255,0.3)'; ctx.shadowBlur=3
+      ctx.stroke(); ctx.shadowBlur=0
+      ctx.restore()
+    })
+  }
+
+  drawCracks(false)
+
+  // Mouse move
+  wrap.addEventListener('mousemove',e=>{
+    if(shattered||animating)return
+    const r=cv.getBoundingClientRect()
+    mouseX=(e.clientX-r.left)*(W/r.width)
+    mouseY=(e.clientY-r.top)*(H/r.height)
+    const dx=(mouseX/W-.5)*2, dy=(mouseY/H-.5)*2
+    wrap.style.transform=`perspective(700px) rotateX(${-dy*13}deg) rotateY(${dx*13}deg) scale(1.06)`
+    wrap.style.transition='transform .08s ease'
+    wrap.style.borderColor='rgba(212,168,75,0.25)'
+    drawCracks(true)
   })
 
-  // TOUCH
-  card.addEventListener('touchstart', () => {
-    drawCrackCanvas(cv, data, {hover: true})
-    card.style.transform = 'scale(0.97)'
-  }, {passive:true})
+  wrap.addEventListener('mouseleave',()=>{
+    if(shattered||animating)return
+    mouseX=-1; mouseY=-1
+    wrap.style.transform='perspective(700px) rotateX(0) rotateY(0) scale(1)'
+    wrap.style.transition='transform .5s ease'
+    wrap.style.borderColor=''
+    drawCracks(false)
+  })
 
-  card.addEventListener('touchend', () => {
-    drawCrackCanvas(cv, data, {hover: false})
-    card.style.transform = ''
-  }, {passive:true})
+  // Click — shatter
+  wrap.addEventListener('click',e=>{
+    if(animating)return
+    if(shattered){
+      // Reset
+      shattered=false; animating=false
+      frags.forEach(f=>{f.cx=f.ox;f.cy=f.oy;f.rot=0;f.vx=0;f.vy=0;f.vrot=0;f.alpha=1})
+      bgCv.style.opacity='1'
+      const content=wrap.querySelector('.card-content')
+      if(content)content.style.opacity='1'
+      drawCracks(false)
+      return
+    }
+    animating=true
+    e.stopPropagation()
+    const content=wrap.querySelector('.card-content')
+    if(content)content.style.opacity='0'
+
+    // Flash
+    let fl=0
+    const flashId=setInterval(()=>{
+      fl+=.2; ctx.clearRect(0,0,W,H)
+      roundRectPath(ctx,0,0,W,H,16)
+      ctx.fillStyle=`rgba(255,255,255,${Math.min(1,fl*.5)})`; ctx.fill()
+      if(fl>=1){
+        clearInterval(flashId)
+        bgCv.style.opacity='0'; shattered=true
+        frags.forEach(f=>{
+          const dx=f.ox-ix, dy=f.oy-iy
+          const dist=Math.hypot(dx,dy)||1
+          const speed=5+Math.random()*10+(160-Math.min(160,dist))*.05
+          const angle=Math.atan2(dy,dx)+(Math.random()-.5)*.9
+          f.vx=Math.cos(angle)*speed; f.vy=Math.sin(angle)*speed-3
+          f.vrot=(Math.random()-.5)*.18
+        })
+        let tick=0
+        const loop=()=>{
+          tick++; let alive=false
+          frags.forEach(f=>{
+            f.cx+=f.vx; f.cy+=f.vy
+            f.vy+=.2; f.vx*=.97
+            f.rot+=f.vrot; f.alpha-=.007
+            if(f.alpha>0)alive=true
+          })
+          drawFragments()
+          if(alive&&tick<400)requestAnimationFrame(loop)
+          else{
+            animating=false
+            if(onAction)setTimeout(onAction,100)
+          }
+        }
+        requestAnimationFrame(loop)
+      }
+    },16)
+  })
+
+  // Touch
+  wrap.addEventListener('touchstart',e=>{
+    if(shattered||animating)return
+    const t=e.touches[0]
+    const r=cv.getBoundingClientRect()
+    mouseX=(t.clientX-r.left)*(W/r.width)
+    mouseY=(t.clientY-r.top)*(H/r.height)
+    wrap.style.transform='scale(0.97)'; wrap.style.transition='transform .15s'
+    drawCracks(true)
+  },{passive:true})
+  wrap.addEventListener('touchend',()=>{
+    if(shattered||animating)return
+    mouseX=-1; mouseY=-1
+    wrap.style.transform=''; wrap.style.transition='transform .3s'
+    drawCracks(false)
+  },{passive:true})
 }
 
-// Init all cards after layout
-setTimeout(() => {
-  document.querySelectorAll('.glass-card').forEach(initCard)
-}, 200)
+// ── Init all cards ──
+setTimeout(()=>{
+  document.querySelectorAll('.glass-card').forEach(card=>{
+    const W=card.offsetWidth||190
+    const H=card.offsetHeight||200
+    // Move existing content to overlay
+    const content=card.querySelector('.card-content')
+    if(!content){
+      const div=document.createElement('div')
+      div.className='card-content'
+      div.style.cssText='position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;z-index:4;pointer-events:none;transition:opacity .3s'
+      while(card.firstChild){
+        const child=card.firstChild
+        if(child.classList&&(child.classList.contains('card-cracks')||child.classList.contains('card-icon')||child.classList.contains('card-name')||child.classList.contains('card-desc'))){
+          div.appendChild(child)
+        } else { break }
+      }
+      card.appendChild(div)
+    } else {
+      content.style.cssText='position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;z-index:4;pointer-events:none;transition:opacity .3s'
+    }
+    // Remove old crack canvas
+    card.querySelectorAll('.card-cracks').forEach(c=>c.remove())
+    // Get action from onclick
+    const action=card.getAttribute('onclick')||''
+    card.removeAttribute('onclick')
+    card.style.position='relative'
+    card.style.overflow='hidden'
+    card.style.background='transparent'
+    card.style.border='none'
+    card.style.padding='0'
+    buildGlassCard(card, W, H, action ? ()=>{try{eval(action)}catch(e){}} : null)
+  })
+}, 300)
 
-// Also init nav CTA and buttons with glass effect
-document.querySelectorAll('.nav-cta, .hero-btn').forEach(btn => {
-  btn.addEventListener('mouseenter', () => {
-    btn.style.boxShadow = '0 0 20px rgba(212,168,75,0.2)'
-  })
-  btn.addEventListener('mouseleave', () => {
-    btn.style.boxShadow = ''
-  })
-  btn.addEventListener('click', () => {
-    btn.style.transform = 'scale(0.95)'
-    btn.style.filter    = 'brightness(1.5)'
-    setTimeout(() => {
-      btn.style.transform = ''
-      btn.style.filter    = ''
-    }, 200)
-  })
+// Nav and hero button interactions
+document.querySelectorAll('.nav-cta,.hero-btn').forEach(btn=>{
+  btn.addEventListener('mouseenter',()=>{btn.style.boxShadow='0 0 24px rgba(212,168,75,0.25)'})
+  btn.addEventListener('mouseleave',()=>{btn.style.boxShadow=''})
+  btn.addEventListener('mousedown',()=>{btn.style.transform='scale(0.96)';btn.style.filter='brightness(1.4)'})
+  btn.addEventListener('mouseup',()=>{btn.style.transform='';btn.style.filter=''})
 })
 
 // ══════════════════════════════════════════════════════
