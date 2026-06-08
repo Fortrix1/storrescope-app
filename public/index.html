@@ -723,113 +723,219 @@ drawNetwork()
 window.addEventListener('resize', () => { resizeCanvas(); initNodes() })
 
 // ══════════════════════════════════════════════════════
-//  GLASS CARD CRACKS
+//  GLASS CRACK ENGINE — Realistic edge-to-edge cracks
 // ══════════════════════════════════════════════════════
-function drawCracks(canvas) {
-  const ctx = canvas.getContext('2d')
-  const w   = canvas.width  = canvas.parentElement.offsetWidth  || 180
-  const h   = canvas.height = canvas.parentElement.offsetHeight || 200
 
-  ctx.clearRect(0, 0, w, h)
-  ctx.strokeStyle = 'rgba(255,255,255,0.6)'
-  ctx.lineWidth   = 0.5
+function generateCrackData(w, h) {
+  // Impact point - slightly off center for realism
+  const ix = w * (0.3 + Math.random() * 0.4)
+  const iy = h * (0.3 + Math.random() * 0.4)
+  const cracks = []
+  const mainCount = 7 + Math.floor(Math.random() * 3)
 
-  // Generate random crack lines from a center point
-  const cx = w * (0.3 + Math.random() * 0.4)
-  const cy = h * (0.3 + Math.random() * 0.4)
-  const lines = 6 + Math.floor(Math.random() * 4)
+  for (let i = 0; i < mainCount; i++) {
+    const angle   = (i / mainCount) * Math.PI * 2 + (Math.random()-0.5) * 0.5
+    const edgeDist = Math.max(w, h) * 1.5
+    const pts     = [{x: ix, y: iy}]
+    let lastX = ix, lastY = iy
 
-  for (let i = 0; i < lines; i++) {
-    const angle  = (i / lines) * Math.PI * 2 + Math.random() * 0.5
-    const length = 30 + Math.random() * 60
-    const ex     = cx + Math.cos(angle) * length
-    const ey     = cy + Math.sin(angle) * length
+    // Walk toward edge with slight jitter
+    const steps = 10
+    for (let s = 1; s <= steps; s++) {
+      const t  = s / steps
+      const nx = ix + Math.cos(angle) * edgeDist * t + (Math.random()-0.5) * 14
+      const ny = iy + Math.sin(angle) * edgeDist * t + (Math.random()-0.5) * 14
+      const cx = Math.max(0, Math.min(w, nx))
+      const cy = Math.max(0, Math.min(h, ny))
+      pts.push({x: cx, y: cy})
+      lastX = cx; lastY = cy
+      // Stop if we hit an edge
+      if (nx <= 0 || nx >= w || ny <= 0 || ny >= h) break
+    }
+    cracks.push({pts, branch: false, glow: Math.random() > 0.6})
 
-    ctx.beginPath()
-    ctx.moveTo(cx, cy)
-
-    // Add sub-cracks
-    const mx = (cx + ex) / 2 + (Math.random()-0.5) * 20
-    const my = (cy + ey) / 2 + (Math.random()-0.5) * 20
-    ctx.quadraticCurveTo(mx, my, ex, ey)
-    ctx.stroke()
-
-    // Branch cracks
-    if (Math.random() > 0.5) {
-      const bx = mx + Math.cos(angle + 1.2) * (length * 0.3)
-      const by = my + Math.sin(angle + 1.2) * (length * 0.3)
-      ctx.beginPath()
-      ctx.moveTo(mx, my)
-      ctx.lineTo(bx, by)
-      ctx.stroke()
+    // Branch crack from 30-60% along main crack
+    if (Math.random() > 0.35 && pts.length > 3) {
+      const bIdx   = Math.floor(pts.length * (0.3 + Math.random() * 0.3))
+      const bp     = pts[bIdx]
+      const bAngle = angle + (Math.random() > 0.5 ? 0.6 : -0.6) + (Math.random()-0.5)*0.3
+      const bPts   = [{x: bp.x, y: bp.y}]
+      for (let s = 1; s <= 6; s++) {
+        const t  = s / 6
+        const nx = bp.x + Math.cos(bAngle) * edgeDist * 0.5 * t + (Math.random()-0.5) * 10
+        const ny = bp.y + Math.sin(bAngle) * edgeDist * 0.5 * t + (Math.random()-0.5) * 10
+        const cx = Math.max(0, Math.min(w, nx))
+        const cy = Math.max(0, Math.min(h, ny))
+        bPts.push({x: cx, y: cy})
+        if (nx <= 0 || nx >= w || ny <= 0 || ny >= h) break
+      }
+      cracks.push({pts: bPts, branch: true, glow: false})
     }
   }
+  return {cracks, ix, iy}
 }
 
-document.querySelectorAll('.card-cracks').forEach(c => {
-  setTimeout(() => drawCracks(c), 100)
-})
+// Store crack data per card for hover/click effects
+const cardCrackData = new WeakMap()
 
-// ══════════════════════════════════════════════════════
-//  GLASS CARD 3D TILT + RIPPLE
-// ══════════════════════════════════════════════════════
-document.querySelectorAll('.glass-card').forEach(card => {
+function drawCrackCanvas(canvas, data, opts = {}) {
+  const {hover=false, shatter=0} = opts
+  const ctx = canvas.getContext('2d')
+  const w   = canvas.width
+  const h   = canvas.height
+  ctx.clearRect(0, 0, w, h)
+
+  const {cracks, ix, iy} = data
+
+  cracks.forEach(({pts, branch, glow}) => {
+    if (pts.length < 2) return
+
+    ctx.beginPath()
+    ctx.moveTo(pts[0].x, pts[0].y)
+    for (let i = 1; i < pts.length; i++) {
+      // On shatter, offset each segment
+      const ox = shatter > 0 ? (Math.random()-0.5) * shatter * 20 : 0
+      const oy = shatter > 0 ? (Math.random()-0.5) * shatter * 20 : 0
+      ctx.lineTo(pts[i].x + ox, pts[i].y + oy)
+    }
+
+    if (hover) {
+      // Glow effect on hover - cracks light up
+      ctx.shadowColor = 'rgba(212,168,75,0.8)'
+      ctx.shadowBlur  = branch ? 4 : 8
+      ctx.strokeStyle = branch
+        ? 'rgba(255,255,255,0.5)'
+        : 'rgba(212,168,75,0.9)'
+      ctx.lineWidth   = branch ? 0.8 : 1.5
+    } else {
+      ctx.shadowColor = 'transparent'
+      ctx.shadowBlur  = 0
+      ctx.strokeStyle = branch
+        ? 'rgba(255,255,255,0.25)'
+        : 'rgba(255,255,255,0.5)'
+      ctx.lineWidth   = branch ? 0.7 : 1.2
+    }
+    ctx.stroke()
+  })
+
+  // Impact point dot
+  ctx.shadowBlur  = hover ? 12 : 4
+  ctx.shadowColor = hover ? 'rgba(212,168,75,1)' : 'rgba(255,255,255,0.6)'
+  ctx.beginPath()
+  ctx.arc(ix, iy, hover ? 2.5 : 1.5, 0, Math.PI*2)
+  ctx.fillStyle = hover ? 'rgba(212,168,75,1)' : 'rgba(255,255,255,0.8)'
+  ctx.fill()
+  ctx.shadowBlur = 0
+}
+
+function initCard(card) {
+  const cv = card.querySelector('.card-cracks')
+  if (!cv) return
+
+  // Size canvas to card
+  const rect = card.getBoundingClientRect()
+  const w    = cv.width  = card.offsetWidth  || 180
+  const h    = cv.height = card.offsetHeight || 200
+
+  const data = generateCrackData(w, h)
+  cardCrackData.set(card, data)
+  drawCrackCanvas(cv, data, {hover: false})
+
+  // HOVER — cracks glow, card tilts
   card.addEventListener('mousemove', e => {
-    const rect = card.getBoundingClientRect()
-    const cx   = rect.left + rect.width  / 2
-    const cy   = rect.top  + rect.height / 2
-    const dx   = (e.clientX - cx) / (rect.width  / 2)
-    const dy   = (e.clientY - cy) / (rect.height / 2)
-    card.style.transform  = `perspective(500px) rotateX(${-dy*10}deg) rotateY(${dx*10}deg) scale(1.04)`
-    card.style.transition = 'transform .1s ease'
-    card.style.borderColor = `rgba(212,168,75,${0.1 + Math.abs(dx+dy)*0.15})`
+    const r  = card.getBoundingClientRect()
+    const dx = (e.clientX - r.left - r.width/2)  / (r.width/2)
+    const dy = (e.clientY - r.top  - r.height/2) / (r.height/2)
+    card.style.transform  = `perspective(600px) rotateX(${-dy*12}deg) rotateY(${dx*12}deg) scale(1.05)`
+    card.style.transition = 'transform .08s ease'
+    card.style.borderColor = 'rgba(212,168,75,0.4)'
+    card.style.boxShadow  = `
+      ${-dx*12}px ${-dy*12}px 40px rgba(0,0,0,0.5),
+      0 0 30px rgba(212,168,75,0.1),
+      inset 0 1px 0 rgba(255,255,255,0.2)
+    `
+    drawCrackCanvas(cv, data, {hover: true})
   })
 
   card.addEventListener('mouseleave', () => {
-    card.style.transform   = 'perspective(500px) rotateX(0) rotateY(0) scale(1)'
-    card.style.transition  = 'transform .5s ease, border-color .3s'
+    card.style.transform  = 'perspective(600px) rotateX(0) rotateY(0) scale(1)'
+    card.style.transition = 'transform .5s ease, border-color .3s, box-shadow .3s'
     card.style.borderColor = ''
+    card.style.boxShadow  = ''
+    drawCrackCanvas(cv, data, {hover: false})
   })
+
+  // CLICK — shatter animation then action
+  const originalOnclick = card.getAttribute('onclick')
+  card.removeAttribute('onclick')
 
   card.addEventListener('click', e => {
-    const rect   = card.getBoundingClientRect()
-    const ripple = document.createElement('div')
-    ripple.className   = 'ripple'
-    const size         = Math.max(rect.width, rect.height)
-    ripple.style.width = ripple.style.height = size + 'px'
-    ripple.style.left  = (e.clientX - rect.left - size/2) + 'px'
-    ripple.style.top   = (e.clientY - rect.top  - size/2) + 'px'
-    card.appendChild(ripple)
-    setTimeout(() => ripple.remove(), 800)
+    if (card.dataset.shattering) return
+    card.dataset.shattering = '1'
 
-    card.style.transform  = 'perspective(500px) scale(0.95)'
-    card.style.transition = 'transform .1s ease'
-    setTimeout(() => {
-      card.style.transform  = 'perspective(500px) scale(1.04)'
-      card.style.transition = 'transform .4s cubic-bezier(.34,1.56,.64,1)'
-    }, 100)
+    // Shatter sequence
+    let frame = 0
+    const totalFrames = 12
+    const shatterAnim = setInterval(() => {
+      frame++
+      const progress = frame / totalFrames
+      drawCrackCanvas(cv, data, {hover: true, shatter: progress})
+      card.style.transform = `perspective(600px) scale(${1 - progress * 0.08})`
+      card.style.opacity   = String(1 - progress * 0.3)
+      card.style.filter    = `brightness(${1 + progress * 2}) blur(${progress * 2}px)`
+      if (frame >= totalFrames) {
+        clearInterval(shatterAnim)
+        // Flash white
+        card.style.filter  = 'brightness(4) blur(4px)'
+        card.style.opacity = '0'
+        setTimeout(() => {
+          card.dataset.shattering = ''
+          card.style.filter   = ''
+          card.style.opacity  = '1'
+          card.style.transform = ''
+          drawCrackCanvas(cv, data, {hover: false})
+          // Execute original action
+          if (originalOnclick) {
+            try { eval(originalOnclick) } catch(err) {}
+          }
+        }, 120)
+      }
+    }, 25)
   })
 
-  // Touch
-  card.addEventListener('touchstart', e => {
-    card.style.transform  = 'scale(0.96)'
-    card.style.transition = 'transform .15s ease'
-    const t      = e.touches[0]
-    const rect   = card.getBoundingClientRect()
-    const ripple = document.createElement('div')
-    ripple.className   = 'ripple'
-    const size         = Math.max(rect.width, rect.height)
-    ripple.style.width = ripple.style.height = size + 'px'
-    ripple.style.left  = (t.clientX - rect.left - size/2) + 'px'
-    ripple.style.top   = (t.clientY - rect.top  - size/2) + 'px'
-    card.appendChild(ripple)
-    setTimeout(() => ripple.remove(), 800)
+  // TOUCH
+  card.addEventListener('touchstart', () => {
+    drawCrackCanvas(cv, data, {hover: true})
+    card.style.transform = 'scale(0.97)'
   }, {passive:true})
 
   card.addEventListener('touchend', () => {
-    card.style.transform  = 'scale(1)'
-    card.style.transition = 'transform .4s cubic-bezier(.34,1.56,.64,1)'
+    drawCrackCanvas(cv, data, {hover: false})
+    card.style.transform = ''
   }, {passive:true})
+}
+
+// Init all cards after layout
+setTimeout(() => {
+  document.querySelectorAll('.glass-card').forEach(initCard)
+}, 200)
+
+// Also init nav CTA and buttons with glass effect
+document.querySelectorAll('.nav-cta, .hero-btn').forEach(btn => {
+  btn.addEventListener('mouseenter', () => {
+    btn.style.boxShadow = '0 0 20px rgba(212,168,75,0.2)'
+  })
+  btn.addEventListener('mouseleave', () => {
+    btn.style.boxShadow = ''
+  })
+  btn.addEventListener('click', () => {
+    btn.style.transform = 'scale(0.95)'
+    btn.style.filter    = 'brightness(1.5)'
+    setTimeout(() => {
+      btn.style.transform = ''
+      btn.style.filter    = ''
+    }, 200)
+  })
 })
 
 // ══════════════════════════════════════════════════════
