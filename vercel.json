@@ -2,12 +2,16 @@
   "version": 2,
   "builds": [
     { "src": "public/**", "use": "@vercel/static" },
-    { "src": "api/analyse.js", "use": "@vercel/node" }
+    { "src": "api/analyse.js", "use": "@vercel/node" },
+    { "src": "api/bot.js",     "use": "@vercel/node" },
+    { "src": "api/works.js",   "use": "@vercel/node" }
   ],
   "routes": [
     { "src": "/api/analyse", "dest": "/api/analyse.js" },
-    { "src": "/about", "dest": "/public/about.html" },
-    { "src": "/about.html", "dest": "/public/about.html" },
-    { "src": "/", "dest": "/public/index.html" }
+    { "src": "/api/bot",     "dest": "/api/bot.js"     },
+    { "src": "/api/works",   "dest": "/api/works.js"   },
+    { "src": "/about",       "dest": "/public/about.html" },
+    { "src": "/about.html",  "dest": "/public/about.html" },
+    { "src": "/",            "dest": "/public/index.html" }
   ]
 }

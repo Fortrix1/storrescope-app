@@ -218,6 +218,60 @@ const obs = new IntersectionObserver(e=>{
   e.forEach(el=>{ if(el.isIntersecting) el.target.classList.add('on') })
 },{threshold:.1})
 document.querySelectorAll('.fade').forEach(el=>obs.observe(el))
+
+// ── Load dynamic works from Telegram bot ──
+async function loadWorks() {
+  try {
+    const r = await fetch('/api/works')
+    const d = await r.json()
+    const works = d.works || []
+    if (!works.length) return
+
+    const grid = document.querySelector('.work-grid')
+    if (!grid) return
+
+    // Keep the "Your Store Here" placeholder
+    const placeholder = grid.querySelector('.soon-card')?.parentElement
+      || grid.lastElementChild
+
+    // Insert bot works before placeholder
+    works.forEach(w => {
+      const emoji = getEmoji(w.tag)
+      const card  = document.createElement('div')
+      card.className = 'work-card fade'
+      card.innerHTML = `
+        <div class="work-card-top" style="${w.imgUrl ? `background:url('${w.imgUrl}') center/cover` : ''}">
+          ${!w.imgUrl ? `<span style="font-size:52px">${emoji}</span>` : ''}
+        </div>
+        <div class="work-card-body">
+          <span class="work-tag">${w.tag}</span>
+          <div class="work-title">${w.title}</div>
+          <div class="work-desc">Added via Karios Agency portfolio system.</div>
+          ${w.result1 || w.result2 ? `
+          <div class="work-nums">
+            ${w.result1 ? `<div class="work-num"><div class="work-num-val">${w.result1.split(' ')[0]}</div><div class="work-num-lbl">${w.result1.split(' ').slice(1).join(' ')}</div></div>` : ''}
+            ${w.result2 ? `<div class="work-num"><div class="work-num-val">${w.result2.split(' ')[0]}</div><div class="work-num-lbl">${w.result2.split(' ').slice(1).join(' ')}</div></div>` : ''}
+          </div>` : ''}
+        </div>`
+      grid.insertBefore(card, placeholder)
+      setTimeout(() => obs.observe(card), 100)
+    })
+  } catch(e) {}
+}
+
+function getEmoji(tag) {
+  const t = (tag||'').toLowerCase()
+  if (t.includes('fashion')||t.includes('cloth')) return '🛍️'
+  if (t.includes('beauty')||t.includes('skin'))   return '💄'
+  if (t.includes('seo'))                           return '📈'
+  if (t.includes('ad'))                            return '📣'
+  if (t.includes('product'))                       return '🎯'
+  if (t.includes('food')||t.includes('restaurant'))return '🍽️'
+  if (t.includes('photo'))                         return '📸'
+  return '🚀'
+}
+
+loadWorks()
 </script>
 </body>
 </html>
