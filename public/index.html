@@ -704,308 +704,260 @@ drawNetwork()
 window.addEventListener('resize', () => { resizeCanvas(); initNodes() })
 
 // ══════════════════════════════════════════════════════
-//  GLASS FRAGMENT ENGINE — Each piece is independent
+//  TEMPERED GLASS ENGINE — Etched text, Voronoi shards
+//  Each shard carries its text fragment, physics on hover
 // ══════════════════════════════════════════════════════
 
-function roundRectPath(ctx,x,y,w,h,r){
-  ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);
-  ctx.arcTo(x+w,y,x+w,y+r,r);ctx.lineTo(x+w,y+h-r);
-  ctx.arcTo(x+w,y+h,x+w-r,y+h,r);ctx.lineTo(x+r,y+h);
-  ctx.arcTo(x,y+h,x,y+h-r,r);ctx.lineTo(x,y+r);
-  ctx.arcTo(x,y,x+r,y,r);ctx.closePath()
+function roundRectPath(c,x,y,w,h,r){
+  c.beginPath();c.moveTo(x+r,y);c.lineTo(x+w-r,y);c.arcTo(x+w,y,x+w,y+r,r)
+  c.lineTo(x+w,y+h-r);c.arcTo(x+w,y+h,x+w-r,y+h,r);c.lineTo(x+r,y+h)
+  c.arcTo(x,y+h,x,y+h-r,r);c.lineTo(x,y+r);c.arcTo(x,y,x+r,y,r);c.closePath()
 }
 
-function buildGlassCard(wrap, W, H, onAction) {
-  // Layer 1: background glass
-  const bgCv = document.createElement('canvas')
-  bgCv.width=W; bgCv.height=H
-  bgCv.style.cssText='position:absolute;inset:0;border-radius:16px;transition:opacity .3s'
-  wrap.appendChild(bgCv)
-  const bgCtx = bgCv.getContext('2d')
+function convexHull(pts){
+  if(pts.length<3)return pts
+  const s=[...pts].sort((a,b)=>a.x-b.x||a.y-b.y)
+  const cross=(O,A,B)=>(A.x-O.x)*(B.y-O.y)-(A.y-O.y)*(B.x-O.x)
+  const lower=[];for(const p of s){while(lower.length>=2&&cross(lower[lower.length-2],lower[lower.length-1],p)<=0)lower.pop();lower.push(p)}
+  const upper=[];for(let i=s.length-1;i>=0;i--){const p=s[i];while(upper.length>=2&&cross(upper[upper.length-2],upper[upper.length-1],p)<=0)upper.pop();upper.push(p)}
+  upper.pop();lower.pop();return[...lower,...upper]
+}
 
-  // Layer 2: cracks + fragments
-  const cv = document.createElement('canvas')
-  cv.width=W; cv.height=H
-  cv.style.cssText='position:absolute;inset:0;z-index:2'
-  wrap.appendChild(cv)
+function buildGlassCard(wrap, W, H, label1, label2, onAction) {
+  // Remove old children except card-content
+  const existing = wrap.querySelector('.card-content')
+
+  // Main canvas
+  const cv  = document.createElement('canvas')
+  cv.width  = W; cv.height = H
+  cv.style.cssText = 'position:absolute;inset:0;z-index:2;cursor:pointer;border-radius:16px'
+  wrap.insertBefore(cv, wrap.firstChild)
   const ctx = cv.getContext('2d')
 
-  function drawBg(){
-    bgCtx.clearRect(0,0,W,H)
-    roundRectPath(bgCtx,0,0,W,H,16)
-    bgCtx.fillStyle='rgba(255,255,255,0.04)'; bgCtx.fill()
-    bgCtx.strokeStyle='rgba(255,255,255,0.10)'; bgCtx.lineWidth=1; bgCtx.stroke()
-    const g=bgCtx.createLinearGradient(0,0,0,H*.5)
-    g.addColorStop(0,'rgba(255,255,255,0.07)'); g.addColorStop(1,'rgba(255,255,255,0)')
-    bgCtx.save(); roundRectPath(bgCtx,1,1,W-2,H/2,16)
-    bgCtx.fillStyle=g; bgCtx.fill(); bgCtx.restore()
-  }
-  drawBg()
+  // Text canvas — render etched text
+  const tCv  = document.createElement('canvas')
+  tCv.width  = W; tCv.height = H
+  const tCtx = tCv.getContext('2d')
+  tCtx.clearRect(0,0,W,H)
+  // Icon
+  tCtx.font='28px serif'; tCtx.textAlign='center'; tCtx.textBaseline='middle'
+  tCtx.shadowColor='rgba(255,255,255,0.9)'; tCtx.shadowBlur=4
+  tCtx.fillStyle='rgba(255,255,255,0.95)'
+  tCtx.fillText(label1, W/2, H/2-20)
+  // Title
+  tCtx.font='700 14px Cabinet Grotesk,system-ui'; tCtx.letterSpacing='3px'
+  tCtx.shadowBlur=3; tCtx.fillStyle='rgba(255,255,255,0.92)'
+  tCtx.fillText(label2, W/2, H/2+12)
+  tCtx.shadowBlur=0
 
-  // Generate crack lines
-  function genLines(ix,iy){
-    const lines=[]
-    const n=8+Math.floor(Math.random()*4)
-    for(let i=0;i<n;i++){
-      const angle=(i/n)*Math.PI*2+(Math.random()-.5)*.5
-      const pts=[{x:ix,y:iy}]
-      let cx=ix,cy=iy,a=angle
-      for(let s=0;s<25;s++){
-        a+=(Math.random()-.5)*.12
-        cx+=Math.cos(a)*(7+Math.random()*5)
-        cy+=Math.sin(a)*(7+Math.random()*5)
-        if(cx<0||cx>W||cy<0||cy>H){
-          pts.push({x:Math.max(0,Math.min(W,cx)),y:Math.max(0,Math.min(H,cy))})
-          break
-        }
-        pts.push({x:cx,y:cy})
-      }
-      lines.push({pts,main:true})
-      if(Math.random()>.4&&pts.length>3){
-        const bi=2+Math.floor(Math.random()*(pts.length-2))
-        const bp=pts[bi]
-        const ba=a+(Math.random()>.5?.55:-.55)+(Math.random()-.5)*.2
-        const bPts=[{x:bp.x,y:bp.y}]
-        let bx=bp.x,by=bp.y,ba2=ba
-        for(let s=0;s<14;s++){
-          ba2+=(Math.random()-.5)*.15
-          bx+=Math.cos(ba2)*(6+Math.random()*4)
-          by+=Math.sin(ba2)*(6+Math.random()*4)
-          if(bx<0||bx>W||by<0||by>H){bPts.push({x:Math.max(0,Math.min(W,bx)),y:Math.max(0,Math.min(H,by))});break}
-          bPts.push({x:bx,y:by})
-        }
-        lines.push({pts:bPts,main:false})
+  // Impact point
+  const ix=W*(.44+Math.random()*.12), iy=H*(.44+Math.random()*.12)
+
+  // Seeds
+  const seeds=[]
+  for(let r=0;r<3;r++){const n=5+r*3,rad=12+r*16;for(let i=0;i<n;i++){const a=(i/n)*Math.PI*2+Math.random()*.4;seeds.push({x:ix+Math.cos(a)*rad+(Math.random()-.5)*5,y:iy+Math.sin(a)*rad+(Math.random()-.5)*5})}}
+  for(let i=0;i<22;i++)seeds.push({x:6+Math.random()*(W-12),y:6+Math.random()*(H-12)})
+  for(let x=0;x<=W;x+=W/5){seeds.push({x,y:0});seeds.push({x,y:H})}
+  for(let y=0;y<=H;y+=H/4){seeds.push({x:0,y});seeds.push({x:W,y})}
+
+  // Voronoi
+  const G=3,gW=Math.ceil(W/G),gH=Math.ceil(H/G)
+  const cellMap=new Int32Array(gW*gH)
+  for(let gy=0;gy<gH;gy++)for(let gx=0;gx<gW;gx++){
+    const px=gx*G+G/2,py=gy*G+G/2;let minD=Infinity,minI=0
+    seeds.forEach((s,i)=>{const d=(px-s.x)**2+(py-s.y)**2;if(d<minD){minD=d;minI=i}})
+    cellMap[gy*gW+gx]=minI
+  }
+
+  // Build shards
+  const shards=seeds.map((_,si)=>{
+    const bPts=[]
+    for(let gy=0;gy<gH;gy++)for(let gx=0;gx<gW;gx++){
+      if(cellMap[gy*gW+gx]===si){
+        const nb=[gx>0?cellMap[gy*gW+gx-1]:-1,gx<gW-1?cellMap[gy*gW+gx+1]:-1,gy>0?cellMap[(gy-1)*gW+gx]:-1,gy<gH-1?cellMap[(gy+1)*gW+gx]:-1]
+        if(nb.some(n=>n!==si))bPts.push({x:gx*G+G/2,y:gy*G+G/2})
       }
     }
-    return lines
-  }
+    const hull=convexHull(bPts)
+    if(hull.length<3)return null
+    const cx=hull.reduce((s,p)=>s+p.x,0)/hull.length
+    const cy=hull.reduce((s,p)=>s+p.y,0)/hull.length
 
-  // Build fragments from crack line intersections
-  function buildFrags(ix,iy,lines){
-    const allPts=[]
-    lines.forEach(({pts})=>pts.filter((_,i)=>i%2===0).forEach(p=>allPts.push({x:p.x,y:p.y})))
-    // Add boundary anchors
-    const bnd=[{x:0,y:0},{x:W/2,y:0},{x:W,y:0},{x:W,y:H/2},{x:W,y:H},{x:W/2,y:H},{x:0,y:H},{x:0,y:H/2}]
-    const pts=[...allPts,...bnd].filter(p=>p.x>=0&&p.x<=W&&p.y>=0&&p.y<=H)
-    const frags=[]
-    for(let i=0;i<pts.length;i++){
-      for(let j=i+1;j<pts.length;j++){
-        for(let k=j+1;k<pts.length;k++){
-          const a=pts[i],b=pts[j],c=pts[k]
-          const area=Math.abs((b.x-a.x)*(c.y-a.y)-(c.x-a.x)*(b.y-a.y))
-          if(area<200||area>5000)continue
-          const d1=Math.hypot(b.x-a.x,b.y-a.y)
-          const d2=Math.hypot(c.x-a.x,c.y-a.y)
-          const d3=Math.hypot(c.x-b.x,c.y-b.y)
-          if(d1>130||d2>130||d3>130)continue
-          const cx=(a.x+b.x+c.x)/3
-          const cy=(a.y+b.y+c.y)/3
-          frags.push({
-            pts:[{...a},{...b},{...c}],
-            cx,cy,ox:cx,oy:cy,
-            vx:0,vy:0,rot:0,vrot:0,alpha:1
-          })
-        }
-      }
-    }
-    return frags.slice(0,45)
-  }
+    // Pre-render shard canvas with etched text
+    const pad=3
+    const xs=hull.map(p=>p.x),ys=hull.map(p=>p.y)
+    const minX=Math.max(0,Math.floor(Math.min(...xs))-pad)
+    const minY=Math.max(0,Math.floor(Math.min(...ys))-pad)
+    const maxX=Math.min(W,Math.ceil(Math.max(...xs))+pad)
+    const maxY=Math.min(H,Math.ceil(Math.max(...ys))+pad)
+    const bw=maxX-minX,bh=maxY-minY
+    if(bw<2||bh<2)return null
 
-  const ix=W*(.38+Math.random()*.24), iy=H*(.38+Math.random()*.24)
-  const lines=genLines(ix,iy)
-  const frags=buildFrags(ix,iy,lines)
+    const sc=document.createElement('canvas')
+    sc.width=bw;sc.height=bh
+    const sCtx=sc.getContext('2d')
+    sCtx.save()
+    sCtx.beginPath()
+    hull.forEach((p,i)=>i===0?sCtx.moveTo(p.x-minX,p.y-minY):sCtx.lineTo(p.x-minX,p.y-minY))
+    sCtx.closePath();sCtx.clip()
+    // Glass fill
+    const g=sCtx.createLinearGradient(0,0,bw,bh)
+    const b=.04+Math.random()*.07
+    g.addColorStop(0,`rgba(210,230,255,${b+.04})`)
+    g.addColorStop(.5,`rgba(232,244,255,${b})`)
+    g.addColorStop(1,`rgba(195,218,255,${b+.02})`)
+    sCtx.fillStyle=g;sCtx.fillRect(0,0,bw,bh)
+    // Etched text blit
+    sCtx.globalCompositeOperation='source-atop'
+    sCtx.drawImage(tCv,-minX,-minY)
+    sCtx.globalCompositeOperation='source-over'
+    sCtx.restore()
+    // Crack edges
+    sCtx.beginPath()
+    hull.forEach((p,i)=>i===0?sCtx.moveTo(p.x-minX,p.y-minY):sCtx.lineTo(p.x-minX,p.y-minY))
+    sCtx.closePath()
+    sCtx.strokeStyle='rgba(255,255,255,0.55)';sCtx.lineWidth=1.1;sCtx.stroke()
 
-  let mouseX=-1,mouseY=-1,shattered=false,animating=false
+    return{hull,cx,cy,ox:cx,oy:cy,dx:0,dy:0,vx:0,vy:0,rot:0,vrot:0,alpha:1,
+           bx:minX,by:minY,bw,bh,sc,distFromImpact:Math.hypot(cx-ix,cy-iy)}
+  }).filter(Boolean)
 
-  function drawCracks(hover){
-    ctx.clearRect(0,0,W,H)
-    lines.forEach(({pts,main})=>{
-      if(pts.length<2)return
-      ctx.beginPath(); ctx.moveTo(pts[0].x,pts[0].y)
-      pts.slice(1).forEach(p=>ctx.lineTo(p.x,p.y))
-      const dist=mouseX>=0?Math.hypot(pts[0].x-mouseX,pts[0].y-mouseY):999
-      const prox=Math.max(0,1-dist/110)
-      if(hover&&prox>.05){
-        ctx.strokeStyle=`rgba(212,168,75,${.45+prox*.55})`
-        ctx.lineWidth=main?2.2+prox*2:1.2+prox
-        ctx.shadowColor=`rgba(212,168,75,${prox*.7})`
-        ctx.shadowBlur=prox*20
-      } else {
-        ctx.strokeStyle=main?'rgba(255,255,255,0.6)':'rgba(255,255,255,0.3)'
-        ctx.lineWidth=main?1.8:1.0
-        ctx.shadowBlur=0
-      }
-      ctx.stroke(); ctx.shadowBlur=0
-    })
-    // Impact point
-    const d=mouseX>=0?Math.hypot(ix-mouseX,iy-mouseY):999
-    const p=Math.max(0,1-d/80)
-    ctx.beginPath(); ctx.arc(ix,iy,1.8+p*2.5,0,Math.PI*2)
-    ctx.fillStyle=p>.1?`rgba(212,168,75,${.5+p*.5})`:'rgba(255,255,255,0.5)'
-    if(p>.1){ctx.shadowColor='rgba(212,168,75,1)';ctx.shadowBlur=p*16}
-    ctx.fill(); ctx.shadowBlur=0
-  }
-
-  function drawFragments(){
-    ctx.clearRect(0,0,W,H)
-    frags.forEach(f=>{
-      ctx.save()
-      ctx.globalAlpha=Math.max(0,f.alpha)
-      ctx.translate(f.cx,f.cy)
-      ctx.rotate(f.rot)
+  function drawShard(s,glow=0){
+    if(!s.sc||s.alpha<=0)return
+    ctx.save();ctx.globalAlpha=Math.max(0,s.alpha)
+    const cx=s.ox+s.dx,cy=s.oy+s.dy
+    ctx.translate(cx,cy);ctx.rotate(s.rot)
+    if(glow>.05){
       ctx.beginPath()
-      const rel=f.pts.map(p=>({x:p.x-f.ox,y:p.y-f.oy}))
-      ctx.moveTo(rel[0].x,rel[0].y)
-      rel.slice(1).forEach(p=>ctx.lineTo(p.x,p.y))
+      s.hull.forEach((p,i)=>i===0?ctx.moveTo(p.x-s.ox,p.y-s.oy):ctx.lineTo(p.x-s.ox,p.y-s.oy))
       ctx.closePath()
-      ctx.fillStyle='rgba(200,220,255,0.07)'; ctx.fill()
-      ctx.strokeStyle='rgba(255,255,255,0.75)'; ctx.lineWidth=1.3
-      ctx.shadowColor='rgba(255,255,255,0.3)'; ctx.shadowBlur=3
-      ctx.stroke(); ctx.shadowBlur=0
-      ctx.restore()
+      ctx.strokeStyle=`rgba(212,168,75,${glow*.65})`
+      ctx.lineWidth=2;ctx.shadowColor=`rgba(212,168,75,${glow*.5})`;ctx.shadowBlur=glow*14
+      ctx.stroke();ctx.shadowBlur=0
+    }
+    ctx.drawImage(s.sc,s.bx-s.ox,s.by-s.oy)
+    ctx.restore()
+  }
+
+  function drawFrame(mxA=-1,myA=-1){
+    ctx.clearRect(0,0,W,H)
+    ctx.save();roundRectPath(ctx,0,0,W,H,16);ctx.fillStyle='rgba(8,7,18,1)';ctx.fill();ctx.restore()
+    shards.forEach(s=>{
+      const d=mxA>=0?Math.hypot(s.ox+s.dx-mxA,s.oy+s.dy-myA):999
+      drawShard(s,Math.max(0,1-d/72))
     })
   }
 
-  drawCracks(false)
+  let mx=-1,my=-1,exploded=false,rafId=null
 
-  // Mouse move
-  wrap.addEventListener('mousemove',e=>{
-    if(shattered||animating)return
+  function physicsLoop(){
+    if(exploded)return
+    shards.forEach(s=>{
+      if(mx>=0){
+        const d=Math.hypot(s.ox+s.dx-mx,s.oy+s.dy-my)
+        if(d<68&&d>1){const f=Math.pow(1-d/68,1.8)*7;const a=Math.atan2(s.oy+s.dy-my,s.ox+s.dx-mx);s.vx+=Math.cos(a)*f;s.vy+=Math.sin(a)*f}
+      }
+      s.vx+=(0-s.dx)*.2;s.vy+=(0-s.dy)*.2;s.vx*=.7;s.vy*=.7;s.dx+=s.vx;s.dy+=s.vy
+    })
+    drawFrame(mx,my)
+    rafId=requestAnimationFrame(physicsLoop)
+  }
+
+  function shatterGlass(){
+    exploded=true;cancelAnimationFrame(rafId)
+    if(existing)existing.style.opacity='0'
+    shards.forEach(s=>{
+      const dx=s.ox-ix,dy=s.oy-iy,dist=Math.hypot(dx,dy)||1
+      const spd=3+Math.random()*10+Math.max(0,145-dist)*.05
+      const a=Math.atan2(dy,dx)+(Math.random()-.5)*.8
+      s.vx=Math.cos(a)*spd;s.vy=Math.sin(a)*spd-2
+      s.vrot=(Math.random()-.5)*.16;s.rot=0
+    })
+    let tick=0
+    function loop(){
+      tick++;ctx.clearRect(0,0,W,H)
+      ctx.save();roundRectPath(ctx,0,0,W,H,16);ctx.fillStyle='rgba(8,7,18,1)';ctx.fill();ctx.restore()
+      let alive=false
+      shards.forEach(s=>{
+        s.dx+=s.vx;s.dy+=s.vy;s.vy+=.26;s.vx*=.985
+        s.rot+=s.vrot;s.vrot*=.99;s.alpha-=.009
+        if(s.alpha>0){alive=true;drawShard(s,0)}
+      })
+      if(alive&&tick<400)requestAnimationFrame(loop)
+      else{
+        if(onAction)setTimeout(onAction,80)
+        // Auto-reform after action
+        setTimeout(()=>{
+          exploded=false
+          shards.forEach(s=>{s.dx=0;s.dy=0;s.vx=0;s.vy=0;s.rot=0;s.vrot=0;s.alpha=1})
+          if(existing)existing.style.opacity='1'
+          mx=-1;my=-1;cancelAnimationFrame(rafId);physicsLoop()
+        },1200)
+      }
+    }
+    requestAnimationFrame(loop)
+  }
+
+  cv.addEventListener('mousemove',e=>{
+    if(exploded)return
     const r=cv.getBoundingClientRect()
-    mouseX=(e.clientX-r.left)*(W/r.width)
-    mouseY=(e.clientY-r.top)*(H/r.height)
-    const dx=(mouseX/W-.5)*2, dy=(mouseY/H-.5)*2
-    wrap.style.transform=`perspective(700px) rotateX(${-dy*13}deg) rotateY(${dx*13}deg) scale(1.06)`
+    mx=(e.clientX-r.left)*(W/r.width);my=(e.clientY-r.top)*(H/r.height)
+    // 3D tilt on wrap
+    const dx=(mx/W-.5)*2,dy=(my/H-.5)*2
+    wrap.style.transform=`perspective(700px) rotateX(${-dy*10}deg) rotateY(${dx*10}deg) scale(1.05)`
     wrap.style.transition='transform .08s ease'
-    wrap.style.borderColor='rgba(212,168,75,0.25)'
-    drawCracks(true)
   })
-
-  wrap.addEventListener('mouseleave',()=>{
-    if(shattered||animating)return
-    mouseX=-1; mouseY=-1
+  cv.addEventListener('mouseleave',()=>{
+    mx=-1;my=-1
     wrap.style.transform='perspective(700px) rotateX(0) rotateY(0) scale(1)'
     wrap.style.transition='transform .5s ease'
-    wrap.style.borderColor=''
-    drawCracks(false)
   })
-
-  // Click — shatter
-  wrap.addEventListener('click',e=>{
-    if(animating)return
-    if(shattered){
-      // Reset
-      shattered=false; animating=false
-      frags.forEach(f=>{f.cx=f.ox;f.cy=f.oy;f.rot=0;f.vx=0;f.vy=0;f.vrot=0;f.alpha=1})
-      bgCv.style.opacity='1'
-      const content=wrap.querySelector('.card-content')
-      if(content)content.style.opacity='1'
-      drawCracks(false)
-      return
-    }
-    animating=true
-    e.stopPropagation()
-    const content=wrap.querySelector('.card-content')
-    if(content)content.style.opacity='0'
-
-    // Flash
-    let fl=0
-    const flashId=setInterval(()=>{
-      fl+=.2; ctx.clearRect(0,0,W,H)
-      roundRectPath(ctx,0,0,W,H,16)
-      ctx.fillStyle=`rgba(255,255,255,${Math.min(1,fl*.5)})`; ctx.fill()
-      if(fl>=1){
-        clearInterval(flashId)
-        bgCv.style.opacity='0'; shattered=true
-        frags.forEach(f=>{
-          const dx=f.ox-ix, dy=f.oy-iy
-          const dist=Math.hypot(dx,dy)||1
-          const speed=5+Math.random()*10+(160-Math.min(160,dist))*.05
-          const angle=Math.atan2(dy,dx)+(Math.random()-.5)*.9
-          f.vx=Math.cos(angle)*speed; f.vy=Math.sin(angle)*speed-3
-          f.vrot=(Math.random()-.5)*.18
-        })
-        let tick=0
-        const loop=()=>{
-          tick++; let alive=false
-          frags.forEach(f=>{
-            f.cx+=f.vx; f.cy+=f.vy
-            f.vy+=.2; f.vx*=.97
-            f.rot+=f.vrot; f.alpha-=.007
-            if(f.alpha>0)alive=true
-          })
-          drawFragments()
-          if(alive&&tick<400)requestAnimationFrame(loop)
-          else{
-            animating=false
-            if(onAction)setTimeout(onAction,100)
-          }
-        }
-        requestAnimationFrame(loop)
-      }
-    },16)
+  cv.addEventListener('click',e=>{
+    if(!exploded)shatterGlass()
   })
+  cv.addEventListener('touchmove',e=>{
+    e.preventDefault();if(exploded)return
+    const r=cv.getBoundingClientRect(),t=e.touches[0]
+    mx=(t.clientX-r.left)*(W/r.width);my=(t.clientY-r.top)*(H/r.height)
+  },{passive:false})
+  cv.addEventListener('touchend',()=>{mx=-1;my=-1})
 
-  // Touch
-  wrap.addEventListener('touchstart',e=>{
-    if(shattered||animating)return
-    const t=e.touches[0]
-    const r=cv.getBoundingClientRect()
-    mouseX=(t.clientX-r.left)*(W/r.width)
-    mouseY=(t.clientY-r.top)*(H/r.height)
-    wrap.style.transform='scale(0.97)'; wrap.style.transition='transform .15s'
-    drawCracks(true)
-  },{passive:true})
-  wrap.addEventListener('touchend',()=>{
-    if(shattered||animating)return
-    mouseX=-1; mouseY=-1
-    wrap.style.transform=''; wrap.style.transition='transform .3s'
-    drawCracks(false)
-  },{passive:true})
+  physicsLoop()
 }
 
-// ── Init all cards ──
+// ── Init all glass cards ──
 setTimeout(()=>{
-  document.querySelectorAll('.glass-card').forEach(card=>{
-    const W=card.offsetWidth||190
-    const H=card.offsetHeight||200
-    // Move existing content to overlay
-    const content=card.querySelector('.card-content')
-    if(!content){
-      const div=document.createElement('div')
-      div.className='card-content'
-      div.style.cssText='position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;z-index:4;pointer-events:none;transition:opacity .3s'
-      while(card.firstChild){
-        const child=card.firstChild
-        if(child.classList&&(child.classList.contains('card-cracks')||child.classList.contains('card-icon')||child.classList.contains('card-name')||child.classList.contains('card-desc'))){
-          div.appendChild(child)
-        } else { break }
-      }
-      card.appendChild(div)
-    } else {
-      content.style.cssText='position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;z-index:4;pointer-events:none;transition:opacity .3s'
-    }
-    // Remove old crack canvas
-    card.querySelectorAll('.card-cracks').forEach(c=>c.remove())
-    // Get action from onclick
-    const action=card.getAttribute('onclick')||''
-    card.removeAttribute('onclick')
-    card.style.position='relative'
-    card.style.overflow='hidden'
-    card.style.background='transparent'
-    card.style.border='none'
-    card.style.padding='0'
-    buildGlassCard(card, W, H, action ? ()=>{try{eval(action)}catch(e){}} : null)
-  })
-}, 300)
+  const cardDefs = [
+    {icon:'🔍', label:'DIAGNOSE',  action:"openScan()"},
+    {icon:'📈', label:'SEO',       action:"window.location='/about.html'"},
+    {icon:'🎯', label:'PRODUCTS',  action:"window.location='/about.html'"},
+    {icon:'📣', label:'ADS',       action:"window.location='/about.html'"},
+    {icon:'🚀', label:'GROWTH',    action:"window.location='/about.html'"},
+    {icon:'📊', label:'ANALYTICS', action:"window.location='/about.html'"},
+  ]
 
-// Nav and hero button interactions
-document.querySelectorAll('.nav-cta,.hero-btn').forEach(btn=>{
-  btn.addEventListener('mouseenter',()=>{btn.style.boxShadow='0 0 24px rgba(212,168,75,0.25)'})
-  btn.addEventListener('mouseleave',()=>{btn.style.boxShadow=''})
-  btn.addEventListener('mousedown',()=>{btn.style.transform='scale(0.96)';btn.style.filter='brightness(1.4)'})
-  btn.addEventListener('mouseup',()=>{btn.style.transform='';btn.style.filter=''})
-})
+  document.querySelectorAll('.glass-card').forEach((card,i)=>{
+    const def = cardDefs[i] || cardDefs[0]
+    const W   = card.offsetWidth  || 190
+    const H   = card.offsetHeight || 195
+    // Clear canvases
+    card.querySelectorAll('canvas').forEach(c=>c.remove())
+    card.style.cssText += ';overflow:hidden;position:relative;border:none;background:transparent;padding:0'
+    const content = card.querySelector('.card-content')
+    if(content) content.style.zIndex='5'
+    buildGlassCard(card, W, H, def.icon, def.label, ()=>{
+      try{eval(def.action)}catch(e){}
+    })
+  })
+
+  // Nav + hero btn interactions
+  document.querySelectorAll('.nav-cta,.hero-btn').forEach(btn=>{
+    btn.addEventListener('mouseenter',()=>{btn.style.boxShadow='0 0 24px rgba(212,168,75,0.25)'})
+    btn.addEventListener('mouseleave',()=>{btn.style.boxShadow=''})
+    btn.addEventListener('mousedown',()=>{btn.style.transform='scale(0.96)';btn.style.filter='brightness(1.5)'})
+    btn.addEventListener('mouseup',()=>{btn.style.transform='';btn.style.filter=''})
+  })
+},400)
 
 // ══════════════════════════════════════════════════════
 //  SCAN OVERLAY
