@@ -704,8 +704,8 @@ drawNetwork()
 window.addEventListener('resize', () => { resizeCanvas(); initNodes() })
 
 // ══════════════════════════════════════════════════════
-//  TEMPERED GLASS ENGINE — Etched text, Voronoi shards
-//  Each shard carries its text fragment, physics on hover
+//  GLASS HOVER INTERACTION — shards push away from cursor
+//  No shatter, just smooth magnetic push interaction
 // ══════════════════════════════════════════════════════
 
 function roundRectPath(c,x,y,w,h,r){
@@ -723,44 +723,39 @@ function convexHull(pts){
   upper.pop();lower.pop();return[...lower,...upper]
 }
 
-function buildGlassCard(wrap, W, H, label1, label2, onAction) {
-  // Remove old children except card-content
-  const existing = wrap.querySelector('.card-content')
-
-  // Main canvas
+function buildGlassCard(wrap, W, H, icon, label, onAction) {
   const cv  = document.createElement('canvas')
   cv.width  = W; cv.height = H
   cv.style.cssText = 'position:absolute;inset:0;z-index:2;cursor:pointer;border-radius:16px'
   wrap.insertBefore(cv, wrap.firstChild)
   const ctx = cv.getContext('2d')
 
-  // Text canvas — render etched text
-  const tCv  = document.createElement('canvas')
-  tCv.width  = W; tCv.height = H
-  const tCtx = tCv.getContext('2d')
+  // Render etched text to offscreen canvas
+  const tCv = document.createElement('canvas')
+  tCv.width=W; tCv.height=H
+  const tCtx=tCv.getContext('2d')
   tCtx.clearRect(0,0,W,H)
-  // Icon
   tCtx.font='28px serif'; tCtx.textAlign='center'; tCtx.textBaseline='middle'
   tCtx.shadowColor='rgba(255,255,255,0.9)'; tCtx.shadowBlur=4
   tCtx.fillStyle='rgba(255,255,255,0.95)'
-  tCtx.fillText(label1, W/2, H/2-20)
-  // Title
-  tCtx.font='700 14px Cabinet Grotesk,system-ui'; tCtx.letterSpacing='3px'
-  tCtx.shadowBlur=3; tCtx.fillStyle='rgba(255,255,255,0.92)'
-  tCtx.fillText(label2, W/2, H/2+12)
+  tCtx.fillText(icon, W/2, H/2-18)
+  tCtx.font='700 13px Cabinet Grotesk,system-ui'
+  tCtx.letterSpacing='3px'; tCtx.shadowBlur=3
+  tCtx.fillStyle='rgba(255,255,255,0.9)'
+  tCtx.fillText(label, W/2, H/2+14)
   tCtx.shadowBlur=0
 
-  // Impact point
+  // Impact point for crack pattern
   const ix=W*(.44+Math.random()*.12), iy=H*(.44+Math.random()*.12)
 
-  // Seeds
+  // Generate Voronoi seeds
   const seeds=[]
   for(let r=0;r<3;r++){const n=5+r*3,rad=12+r*16;for(let i=0;i<n;i++){const a=(i/n)*Math.PI*2+Math.random()*.4;seeds.push({x:ix+Math.cos(a)*rad+(Math.random()-.5)*5,y:iy+Math.sin(a)*rad+(Math.random()-.5)*5})}}
   for(let i=0;i<22;i++)seeds.push({x:6+Math.random()*(W-12),y:6+Math.random()*(H-12)})
   for(let x=0;x<=W;x+=W/5){seeds.push({x,y:0});seeds.push({x,y:H})}
   for(let y=0;y<=H;y+=H/4){seeds.push({x:0,y});seeds.push({x:W,y})}
 
-  // Voronoi
+  // Voronoi cell map
   const G=3,gW=Math.ceil(W/G),gH=Math.ceil(H/G)
   const cellMap=new Int32Array(gW*gH)
   for(let gy=0;gy<gH;gy++)for(let gx=0;gx<gW;gx++){
@@ -769,7 +764,7 @@ function buildGlassCard(wrap, W, H, label1, label2, onAction) {
     cellMap[gy*gW+gx]=minI
   }
 
-  // Build shards
+  // Build shards with pre-rendered canvases
   const shards=seeds.map((_,si)=>{
     const bPts=[]
     for(let gy=0;gy<gH;gy++)for(let gx=0;gx<gW;gx++){
@@ -782,8 +777,6 @@ function buildGlassCard(wrap, W, H, label1, label2, onAction) {
     if(hull.length<3)return null
     const cx=hull.reduce((s,p)=>s+p.x,0)/hull.length
     const cy=hull.reduce((s,p)=>s+p.y,0)/hull.length
-
-    // Pre-render shard canvas with etched text
     const pad=3
     const xs=hull.map(p=>p.x),ys=hull.map(p=>p.y)
     const minX=Math.max(0,Math.floor(Math.min(...xs))-pad)
@@ -792,7 +785,6 @@ function buildGlassCard(wrap, W, H, label1, label2, onAction) {
     const maxY=Math.min(H,Math.ceil(Math.max(...ys))+pad)
     const bw=maxX-minX,bh=maxY-minY
     if(bw<2||bh<2)return null
-
     const sc=document.createElement('canvas')
     sc.width=bw;sc.height=bh
     const sCtx=sc.getContext('2d')
@@ -800,109 +792,77 @@ function buildGlassCard(wrap, W, H, label1, label2, onAction) {
     sCtx.beginPath()
     hull.forEach((p,i)=>i===0?sCtx.moveTo(p.x-minX,p.y-minY):sCtx.lineTo(p.x-minX,p.y-minY))
     sCtx.closePath();sCtx.clip()
-    // Glass fill
     const g=sCtx.createLinearGradient(0,0,bw,bh)
     const b=.04+Math.random()*.07
     g.addColorStop(0,`rgba(210,230,255,${b+.04})`)
     g.addColorStop(.5,`rgba(232,244,255,${b})`)
     g.addColorStop(1,`rgba(195,218,255,${b+.02})`)
     sCtx.fillStyle=g;sCtx.fillRect(0,0,bw,bh)
-    // Etched text blit
     sCtx.globalCompositeOperation='source-atop'
     sCtx.drawImage(tCv,-minX,-minY)
     sCtx.globalCompositeOperation='source-over'
     sCtx.restore()
-    // Crack edges
     sCtx.beginPath()
     hull.forEach((p,i)=>i===0?sCtx.moveTo(p.x-minX,p.y-minY):sCtx.lineTo(p.x-minX,p.y-minY))
     sCtx.closePath()
-    sCtx.strokeStyle='rgba(255,255,255,0.55)';sCtx.lineWidth=1.1;sCtx.stroke()
-
-    return{hull,cx,cy,ox:cx,oy:cy,dx:0,dy:0,vx:0,vy:0,rot:0,vrot:0,alpha:1,
-           bx:minX,by:minY,bw,bh,sc,distFromImpact:Math.hypot(cx-ix,cy-iy)}
+    sCtx.strokeStyle='rgba(255,255,255,0.5)';sCtx.lineWidth=1.0;sCtx.stroke()
+    return{hull,cx,cy,ox:cx,oy:cy,dx:0,dy:0,vx:0,vy:0,sc,bx:minX,by:minY}
   }).filter(Boolean)
 
-  function drawShard(s,glow=0){
-    if(!s.sc||s.alpha<=0)return
-    ctx.save();ctx.globalAlpha=Math.max(0,s.alpha)
-    const cx=s.ox+s.dx,cy=s.oy+s.dy
-    ctx.translate(cx,cy);ctx.rotate(s.rot)
-    if(glow>.05){
-      ctx.beginPath()
-      s.hull.forEach((p,i)=>i===0?ctx.moveTo(p.x-s.ox,p.y-s.oy):ctx.lineTo(p.x-s.ox,p.y-s.oy))
-      ctx.closePath()
-      ctx.strokeStyle=`rgba(212,168,75,${glow*.65})`
-      ctx.lineWidth=2;ctx.shadowColor=`rgba(212,168,75,${glow*.5})`;ctx.shadowBlur=glow*14
-      ctx.stroke();ctx.shadowBlur=0
-    }
-    ctx.drawImage(s.sc,s.bx-s.ox,s.by-s.oy)
-    ctx.restore()
-  }
-
-  function drawFrame(mxA=-1,myA=-1){
+  function drawFrame(mx,my){
     ctx.clearRect(0,0,W,H)
-    ctx.save();roundRectPath(ctx,0,0,W,H,16);ctx.fillStyle='rgba(8,7,18,1)';ctx.fill();ctx.restore()
+    ctx.save();roundRectPath(ctx,0,0,W,H,16)
+    ctx.fillStyle='rgba(8,7,18,1)';ctx.fill();ctx.restore()
     shards.forEach(s=>{
-      const d=mxA>=0?Math.hypot(s.ox+s.dx-mxA,s.oy+s.dy-myA):999
-      drawShard(s,Math.max(0,1-d/72))
+      if(!s.sc)return
+      ctx.save()
+      const cx=s.ox+s.dx,cy=s.oy+s.dy
+      ctx.translate(cx,cy)
+      // Glow near cursor
+      if(mx>=0){
+        const d=Math.hypot(cx-mx,cy-my)
+        const glow=Math.max(0,1-d/75)
+        if(glow>.05){
+          ctx.beginPath()
+          s.hull.forEach((p,i)=>i===0?ctx.moveTo(p.x-s.ox,p.y-s.oy):ctx.lineTo(p.x-s.ox,p.y-s.oy))
+          ctx.closePath()
+          ctx.strokeStyle=`rgba(212,168,75,${glow*.6})`
+          ctx.lineWidth=1.8
+          ctx.shadowColor=`rgba(212,168,75,${glow*.4})`
+          ctx.shadowBlur=glow*14
+          ctx.stroke();ctx.shadowBlur=0
+        }
+      }
+      ctx.drawImage(s.sc,s.bx-s.ox,s.by-s.oy)
+      ctx.restore()
     })
   }
 
-  let mx=-1,my=-1,exploded=false,rafId=null
+  let mx=-1,my=-1,rafId=null
 
-  function physicsLoop(){
-    if(exploded)return
+  function loop(){
     shards.forEach(s=>{
       if(mx>=0){
         const d=Math.hypot(s.ox+s.dx-mx,s.oy+s.dy-my)
-        if(d<68&&d>1){const f=Math.pow(1-d/68,1.8)*7;const a=Math.atan2(s.oy+s.dy-my,s.ox+s.dx-mx);s.vx+=Math.cos(a)*f;s.vy+=Math.sin(a)*f}
+        if(d<72&&d>1){
+          const f=Math.pow(1-d/72,1.8)*6.5
+          const a=Math.atan2(s.oy+s.dy-my,s.ox+s.dx-mx)
+          s.vx+=Math.cos(a)*f;s.vy+=Math.sin(a)*f
+        }
       }
-      s.vx+=(0-s.dx)*.2;s.vy+=(0-s.dy)*.2;s.vx*=.7;s.vy*=.7;s.dx+=s.vx;s.dy+=s.vy
+      // Spring back home
+      s.vx+=(0-s.dx)*.2;s.vy+=(0-s.dy)*.2
+      s.vx*=.72;s.vy*=.72
+      s.dx+=s.vx;s.dy+=s.vy
     })
     drawFrame(mx,my)
-    rafId=requestAnimationFrame(physicsLoop)
-  }
-
-  function shatterGlass(){
-    exploded=true;cancelAnimationFrame(rafId)
-    if(existing)existing.style.opacity='0'
-    shards.forEach(s=>{
-      const dx=s.ox-ix,dy=s.oy-iy,dist=Math.hypot(dx,dy)||1
-      const spd=3+Math.random()*10+Math.max(0,145-dist)*.05
-      const a=Math.atan2(dy,dx)+(Math.random()-.5)*.8
-      s.vx=Math.cos(a)*spd;s.vy=Math.sin(a)*spd-2
-      s.vrot=(Math.random()-.5)*.16;s.rot=0
-    })
-    let tick=0
-    function loop(){
-      tick++;ctx.clearRect(0,0,W,H)
-      ctx.save();roundRectPath(ctx,0,0,W,H,16);ctx.fillStyle='rgba(8,7,18,1)';ctx.fill();ctx.restore()
-      let alive=false
-      shards.forEach(s=>{
-        s.dx+=s.vx;s.dy+=s.vy;s.vy+=.26;s.vx*=.985
-        s.rot+=s.vrot;s.vrot*=.99;s.alpha-=.009
-        if(s.alpha>0){alive=true;drawShard(s,0)}
-      })
-      if(alive&&tick<400)requestAnimationFrame(loop)
-      else{
-        if(onAction)setTimeout(onAction,80)
-        // Auto-reform after action
-        setTimeout(()=>{
-          exploded=false
-          shards.forEach(s=>{s.dx=0;s.dy=0;s.vx=0;s.vy=0;s.rot=0;s.vrot=0;s.alpha=1})
-          if(existing)existing.style.opacity='1'
-          mx=-1;my=-1;cancelAnimationFrame(rafId);physicsLoop()
-        },1200)
-      }
-    }
-    requestAnimationFrame(loop)
+    rafId=requestAnimationFrame(loop)
   }
 
   cv.addEventListener('mousemove',e=>{
-    if(exploded)return
     const r=cv.getBoundingClientRect()
-    mx=(e.clientX-r.left)*(W/r.width);my=(e.clientY-r.top)*(H/r.height)
-    // 3D tilt on wrap
+    mx=(e.clientX-r.left)*(W/r.width)
+    my=(e.clientY-r.top)*(H/r.height)
     const dx=(mx/W-.5)*2,dy=(my/H-.5)*2
     wrap.style.transform=`perspective(700px) rotateX(${-dy*10}deg) rotateY(${dx*10}deg) scale(1.05)`
     wrap.style.transition='transform .08s ease'
@@ -912,45 +872,38 @@ function buildGlassCard(wrap, W, H, label1, label2, onAction) {
     wrap.style.transform='perspective(700px) rotateX(0) rotateY(0) scale(1)'
     wrap.style.transition='transform .5s ease'
   })
-  cv.addEventListener('click',e=>{
-    if(!exploded)shatterGlass()
+  cv.addEventListener('click',()=>{
+    if(onAction)onAction()
   })
   cv.addEventListener('touchmove',e=>{
-    e.preventDefault();if(exploded)return
+    e.preventDefault()
     const r=cv.getBoundingClientRect(),t=e.touches[0]
     mx=(t.clientX-r.left)*(W/r.width);my=(t.clientY-r.top)*(H/r.height)
   },{passive:false})
   cv.addEventListener('touchend',()=>{mx=-1;my=-1})
 
-  physicsLoop()
+  loop()
 }
 
-// ── Init all glass cards ──
+// Init all cards
 setTimeout(()=>{
-  const cardDefs = [
-    {icon:'🔍', label:'DIAGNOSE',  action:"openScan()"},
-    {icon:'📈', label:'SEO',       action:"window.location='/about.html'"},
-    {icon:'🎯', label:'PRODUCTS',  action:"window.location='/about.html'"},
-    {icon:'📣', label:'ADS',       action:"window.location='/about.html'"},
-    {icon:'🚀', label:'GROWTH',    action:"window.location='/about.html'"},
-    {icon:'📊', label:'ANALYTICS', action:"window.location='/about.html'"},
+  const cardDefs=[
+    {icon:'🔍',label:'DIAGNOSE', action:"openScan()"},
+    {icon:'📈',label:'SEO',      action:"window.location='/about.html'"},
+    {icon:'🎯',label:'PRODUCTS', action:"window.location='/about.html'"},
+    {icon:'📣',label:'ADS',      action:"window.location='/about.html'"},
+    {icon:'🚀',label:'GROWTH',   action:"window.location='/about.html'"},
+    {icon:'📊',label:'ANALYTICS',action:"window.location='/about.html'"},
   ]
-
   document.querySelectorAll('.glass-card').forEach((card,i)=>{
-    const def = cardDefs[i] || cardDefs[0]
-    const W   = card.offsetWidth  || 190
-    const H   = card.offsetHeight || 195
-    // Clear canvases
+    const def=cardDefs[i]||cardDefs[0]
+    const W=card.offsetWidth||190, H=card.offsetHeight||195
     card.querySelectorAll('canvas').forEach(c=>c.remove())
-    card.style.cssText += ';overflow:hidden;position:relative;border:none;background:transparent;padding:0'
-    const content = card.querySelector('.card-content')
-    if(content) content.style.zIndex='5'
-    buildGlassCard(card, W, H, def.icon, def.label, ()=>{
-      try{eval(def.action)}catch(e){}
-    })
+    card.style.cssText+='overflow:hidden;position:relative;border:none;background:transparent;padding:0'
+    const content=card.querySelector('.card-content')
+    if(content)content.style.zIndex='5'
+    buildGlassCard(card,W,H,def.icon,def.label,()=>{try{eval(def.action)}catch(e){}})
   })
-
-  // Nav + hero btn interactions
   document.querySelectorAll('.nav-cta,.hero-btn').forEach(btn=>{
     btn.addEventListener('mouseenter',()=>{btn.style.boxShadow='0 0 24px rgba(212,168,75,0.25)'})
     btn.addEventListener('mouseleave',()=>{btn.style.boxShadow=''})
