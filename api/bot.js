@@ -68,6 +68,36 @@ module.exports = async (req, res) => {
     } catch { return '' }
   }
 
+  async function uploadToCloudinary(telegramUrl) {
+    try {
+      const CLOUD_NAME   = process.env.CLOUDINARY_NAME   || 'dorw8vhwq'
+      const CLOUD_KEY    = process.env.CLOUDINARY_KEY    || '499294615748537'
+      const CLOUD_SECRET = process.env.CLOUDINARY_SECRET || 'z17JJ6bKde2TJqGd0fIdokftHi8'
+
+      // Generate signature
+      const timestamp = Math.floor(Date.now()/1000)
+      const crypto    = require('crypto')
+      const sigStr    = `timestamp=${timestamp}${CLOUD_SECRET}`
+      const signature = crypto.createHash('sha1').update(sigStr).digest('hex')
+
+      const form = new URLSearchParams()
+      form.append('file',      telegramUrl)
+      form.append('api_key',   CLOUD_KEY)
+      form.append('timestamp', timestamp)
+      form.append('signature', signature)
+
+      const r = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`, {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body:    form.toString()
+      })
+      const d = await r.json()
+      return d.secure_url || ''
+    } catch(e) {
+      return ''
+    }
+  }
+
   // ── Handle callback (delete buttons) ──
   if (callback) {
     const chatId = callback.message.chat.id
@@ -156,8 +186,11 @@ module.exports = async (req, res) => {
     const tag     = parts[1] || 'Project'
     const result1 = parts[2] || ''
     const result2 = parts[3] || ''
-    const fileId  = photo[photo.length-1].file_id
-    const imgUrl  = await getPhotoUrl(fileId)
+    const fileId     = photo[photo.length-1].file_id
+    const telegramUrl = await getPhotoUrl(fileId)
+    // Upload to Cloudinary for permanent storage
+    await send(chatId, '⏳ Uploading image...')
+    const imgUrl = await uploadToCloudinary(telegramUrl) || telegramUrl
     const works   = await getWorks()
     works.unshift({ id: Date.now(), title, tag, result1, result2, imgUrl, addedAt: new Date().toISOString() })
     const saved   = await saveWorks(works)

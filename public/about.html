@@ -267,7 +267,7 @@ async function loadWorks() {
       }
 
       // Build card top — use emoji if image URL is a telegram URL (expires)
-      const topStyle = w.imgUrl && !w.imgUrl.includes('api.telegram.org')
+      const hasImg = w.imgUrl && w.imgUrl.length > 0
         ? `style="background:url('${w.imgUrl}') center/cover no-repeat"`
         : ''
       const topContent = (!topStyle) ? `<span style="font-size:52px">${emoji}</span>` : ''
