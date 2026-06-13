@@ -476,14 +476,28 @@ nav{
   .hero{grid-template-columns:1fr;padding:100px 5% 160px}
   .hero-right{grid-template-columns:1fr 1fr}
   .nav-links{display:none}
+  .nav-links.open{
+    display:flex;flex-direction:column;
+    position:fixed;top:64px;left:0;right:0;
+    background:rgba(5,4,10,0.97);
+    padding:20px 5%;gap:20px;
+    border-bottom:1px solid rgba(255,255,255,0.06);
+    z-index:99;
+  }
+  .nav-links.open a{font-size:15px;color:var(--text)}
+  .hamburger{display:flex}
   .stats-bar{padding:12px 4%}
-  .stat-item{padding:0 16px}
+  .stat-item{padding:0 10px}
+  .stat-item:nth-child(3){display:none}
   .charts-row{grid-template-columns:1fr}
+  .upsell-inner{flex-direction:column}
 }
 @media(max-width:480px){
   .hero-right{grid-template-columns:1fr 1fr}
   .glass-card{min-height:140px;padding:20px 12px}
-  .card-name{font-size:13px}
+  .card-name{font-size:12px}
+  .card-icon{font-size:22px}
+  .hero-h1{font-size:clamp(42px,12vw,70px)}
 }
 </style>
 </head>
@@ -502,6 +516,11 @@ nav{
     <li><a href="/about.html">Our Work</a></li>
   </ul>
   <a href="https://wa.me/18734712764" class="nav-cta" target="_blank">Work With Us</a>
+  <button class="hamburger" id="hamburger" onclick="toggleNav()" style="display:none;background:none;border:1px solid rgba(255,255,255,0.15);border-radius:6px;padding:8px 10px;cursor:pointer;flex-direction:column;gap:4px">
+    <span style="display:block;width:18px;height:1.5px;background:var(--white)"></span>
+    <span style="display:block;width:18px;height:1.5px;background:var(--white)"></span>
+    <span style="display:block;width:18px;height:1.5px;background:var(--white)"></span>
+  </button>
 </nav>
 
 <!-- HERO -->
@@ -704,213 +723,68 @@ drawNetwork()
 window.addEventListener('resize', () => { resizeCanvas(); initNodes() })
 
 // ══════════════════════════════════════════════════════
-//  GLASS HOVER INTERACTION — shards push away from cursor
-//  No shatter, just smooth magnetic push interaction
+//  CARD INTERACTIONS — simple tilt + ripple + glow
 // ══════════════════════════════════════════════════════
 
-function roundRectPath(c,x,y,w,h,r){
-  c.beginPath();c.moveTo(x+r,y);c.lineTo(x+w-r,y);c.arcTo(x+w,y,x+w,y+r,r)
-  c.lineTo(x+w,y+h-r);c.arcTo(x+w,y+h,x+w-r,y+h,r);c.lineTo(x+r,y+h)
-  c.arcTo(x,y+h,x,y+h-r,r);c.lineTo(x,y+r);c.arcTo(x,y,x+r,y,r);c.closePath()
-}
-
-function convexHull(pts){
-  if(pts.length<3)return pts
-  const s=[...pts].sort((a,b)=>a.x-b.x||a.y-b.y)
-  const cross=(O,A,B)=>(A.x-O.x)*(B.y-O.y)-(A.y-O.y)*(B.x-O.x)
-  const lower=[];for(const p of s){while(lower.length>=2&&cross(lower[lower.length-2],lower[lower.length-1],p)<=0)lower.pop();lower.push(p)}
-  const upper=[];for(let i=s.length-1;i>=0;i--){const p=s[i];while(upper.length>=2&&cross(upper[upper.length-2],upper[upper.length-1],p)<=0)upper.pop();upper.push(p)}
-  upper.pop();lower.pop();return[...lower,...upper]
-}
-
-function buildGlassCard(wrap, W, H, icon, label, onAction) {
-  const cv  = document.createElement('canvas')
-  cv.width  = W; cv.height = H
-  cv.style.cssText = 'position:absolute;inset:0;z-index:2;cursor:pointer;border-radius:16px'
-  wrap.insertBefore(cv, wrap.firstChild)
-  const ctx = cv.getContext('2d')
-
-  // Render etched text to offscreen canvas
-  const tCv = document.createElement('canvas')
-  tCv.width=W; tCv.height=H
-  const tCtx=tCv.getContext('2d')
-  tCtx.clearRect(0,0,W,H)
-  tCtx.font='28px serif'; tCtx.textAlign='center'; tCtx.textBaseline='middle'
-  tCtx.shadowColor='rgba(255,255,255,0.9)'; tCtx.shadowBlur=4
-  tCtx.fillStyle='rgba(255,255,255,0.95)'
-  tCtx.fillText(icon, W/2, H/2-18)
-  tCtx.font='700 13px Cabinet Grotesk,system-ui'
-  tCtx.letterSpacing='3px'; tCtx.shadowBlur=3
-  tCtx.fillStyle='rgba(255,255,255,0.9)'
-  tCtx.fillText(label, W/2, H/2+14)
-  tCtx.shadowBlur=0
-
-  // Impact point for crack pattern
-  const ix=W*(.44+Math.random()*.12), iy=H*(.44+Math.random()*.12)
-
-  // Generate Voronoi seeds
-  const seeds=[]
-  for(let r=0;r<3;r++){const n=5+r*3,rad=12+r*16;for(let i=0;i<n;i++){const a=(i/n)*Math.PI*2+Math.random()*.4;seeds.push({x:ix+Math.cos(a)*rad+(Math.random()-.5)*5,y:iy+Math.sin(a)*rad+(Math.random()-.5)*5})}}
-  for(let i=0;i<22;i++)seeds.push({x:6+Math.random()*(W-12),y:6+Math.random()*(H-12)})
-  for(let x=0;x<=W;x+=W/5){seeds.push({x,y:0});seeds.push({x,y:H})}
-  for(let y=0;y<=H;y+=H/4){seeds.push({x:0,y});seeds.push({x:W,y})}
-
-  // Voronoi cell map
-  const G=3,gW=Math.ceil(W/G),gH=Math.ceil(H/G)
-  const cellMap=new Int32Array(gW*gH)
-  for(let gy=0;gy<gH;gy++)for(let gx=0;gx<gW;gx++){
-    const px=gx*G+G/2,py=gy*G+G/2;let minD=Infinity,minI=0
-    seeds.forEach((s,i)=>{const d=(px-s.x)**2+(py-s.y)**2;if(d<minD){minD=d;minI=i}})
-    cellMap[gy*gW+gx]=minI
-  }
-
-  // Build shards with pre-rendered canvases
-  const shards=seeds.map((_,si)=>{
-    const bPts=[]
-    for(let gy=0;gy<gH;gy++)for(let gx=0;gx<gW;gx++){
-      if(cellMap[gy*gW+gx]===si){
-        const nb=[gx>0?cellMap[gy*gW+gx-1]:-1,gx<gW-1?cellMap[gy*gW+gx+1]:-1,gy>0?cellMap[(gy-1)*gW+gx]:-1,gy<gH-1?cellMap[(gy+1)*gW+gx]:-1]
-        if(nb.some(n=>n!==si))bPts.push({x:gx*G+G/2,y:gy*G+G/2})
-      }
-    }
-    const hull=convexHull(bPts)
-    if(hull.length<3)return null
-    const cx=hull.reduce((s,p)=>s+p.x,0)/hull.length
-    const cy=hull.reduce((s,p)=>s+p.y,0)/hull.length
-    const pad=3
-    const xs=hull.map(p=>p.x),ys=hull.map(p=>p.y)
-    const minX=Math.max(0,Math.floor(Math.min(...xs))-pad)
-    const minY=Math.max(0,Math.floor(Math.min(...ys))-pad)
-    const maxX=Math.min(W,Math.ceil(Math.max(...xs))+pad)
-    const maxY=Math.min(H,Math.ceil(Math.max(...ys))+pad)
-    const bw=maxX-minX,bh=maxY-minY
-    if(bw<2||bh<2)return null
-    const sc=document.createElement('canvas')
-    sc.width=bw;sc.height=bh
-    const sCtx=sc.getContext('2d')
-    sCtx.save()
-    sCtx.beginPath()
-    hull.forEach((p,i)=>i===0?sCtx.moveTo(p.x-minX,p.y-minY):sCtx.lineTo(p.x-minX,p.y-minY))
-    sCtx.closePath();sCtx.clip()
-    const g=sCtx.createLinearGradient(0,0,bw,bh)
-    const b=.04+Math.random()*.07
-    g.addColorStop(0,`rgba(210,230,255,${b+.04})`)
-    g.addColorStop(.5,`rgba(232,244,255,${b})`)
-    g.addColorStop(1,`rgba(195,218,255,${b+.02})`)
-    sCtx.fillStyle=g;sCtx.fillRect(0,0,bw,bh)
-    sCtx.globalCompositeOperation='source-atop'
-    sCtx.drawImage(tCv,-minX,-minY)
-    sCtx.globalCompositeOperation='source-over'
-    sCtx.restore()
-    sCtx.beginPath()
-    hull.forEach((p,i)=>i===0?sCtx.moveTo(p.x-minX,p.y-minY):sCtx.lineTo(p.x-minX,p.y-minY))
-    sCtx.closePath()
-    sCtx.strokeStyle='rgba(255,255,255,0.5)';sCtx.lineWidth=1.0;sCtx.stroke()
-    return{hull,cx,cy,ox:cx,oy:cy,dx:0,dy:0,vx:0,vy:0,sc,bx:minX,by:minY}
-  }).filter(Boolean)
-
-  function drawFrame(mx,my){
-    ctx.clearRect(0,0,W,H)
-    ctx.save();roundRectPath(ctx,0,0,W,H,16)
-    ctx.fillStyle='rgba(8,7,18,1)';ctx.fill();ctx.restore()
-    shards.forEach(s=>{
-      if(!s.sc)return
-      ctx.save()
-      const cx=s.ox+s.dx,cy=s.oy+s.dy
-      ctx.translate(cx,cy)
-      // Glow near cursor
-      if(mx>=0){
-        const d=Math.hypot(cx-mx,cy-my)
-        const glow=Math.max(0,1-d/75)
-        if(glow>.05){
-          ctx.beginPath()
-          s.hull.forEach((p,i)=>i===0?ctx.moveTo(p.x-s.ox,p.y-s.oy):ctx.lineTo(p.x-s.ox,p.y-s.oy))
-          ctx.closePath()
-          ctx.strokeStyle=`rgba(212,168,75,${glow*.6})`
-          ctx.lineWidth=1.8
-          ctx.shadowColor=`rgba(212,168,75,${glow*.4})`
-          ctx.shadowBlur=glow*14
-          ctx.stroke();ctx.shadowBlur=0
-        }
-      }
-      ctx.drawImage(s.sc,s.bx-s.ox,s.by-s.oy)
-      ctx.restore()
-    })
-  }
-
-  let mx=-1,my=-1,rafId=null
-
-  function loop(){
-    shards.forEach(s=>{
-      if(mx>=0){
-        const d=Math.hypot(s.ox+s.dx-mx,s.oy+s.dy-my)
-        if(d<72&&d>1){
-          const f=Math.pow(1-d/72,1.8)*6.5
-          const a=Math.atan2(s.oy+s.dy-my,s.ox+s.dx-mx)
-          s.vx+=Math.cos(a)*f;s.vy+=Math.sin(a)*f
-        }
-      }
-      // Spring back home
-      s.vx+=(0-s.dx)*.2;s.vy+=(0-s.dy)*.2
-      s.vx*=.72;s.vy*=.72
-      s.dx+=s.vx;s.dy+=s.vy
-    })
-    drawFrame(mx,my)
-    rafId=requestAnimationFrame(loop)
-  }
-
-  cv.addEventListener('mousemove',e=>{
-    const r=cv.getBoundingClientRect()
-    mx=(e.clientX-r.left)*(W/r.width)
-    my=(e.clientY-r.top)*(H/r.height)
-    const dx=(mx/W-.5)*2,dy=(my/H-.5)*2
-    wrap.style.transform=`perspective(700px) rotateX(${-dy*10}deg) rotateY(${dx*10}deg) scale(1.05)`
-    wrap.style.transition='transform .08s ease'
+document.querySelectorAll('.glass-card').forEach(card => {
+  // 3D tilt on hover
+  card.addEventListener('mousemove', e => {
+    const rect = card.getBoundingClientRect()
+    const dx   = (e.clientX - rect.left - rect.width/2)  / (rect.width/2)
+    const dy   = (e.clientY - rect.top  - rect.height/2) / (rect.height/2)
+    card.style.transform  = `perspective(600px) rotateX(${-dy*10}deg) rotateY(${dx*10}deg) scale(1.05)`
+    card.style.transition = 'transform .08s ease'
+    card.style.borderColor = `rgba(212,168,75,${0.15 + Math.abs(dx+dy)*0.15})`
+    card.style.boxShadow  = `0 8px 40px rgba(0,0,0,0.5), 0 0 30px rgba(212,168,75,0.08), inset 0 1px 0 rgba(255,255,255,0.15)`
   })
-  cv.addEventListener('mouseleave',()=>{
-    mx=-1;my=-1
-    wrap.style.transform='perspective(700px) rotateX(0) rotateY(0) scale(1)'
-    wrap.style.transition='transform .5s ease'
-  })
-  cv.addEventListener('click',()=>{
-    if(onAction)onAction()
-  })
-  cv.addEventListener('touchmove',e=>{
-    e.preventDefault()
-    const r=cv.getBoundingClientRect(),t=e.touches[0]
-    mx=(t.clientX-r.left)*(W/r.width);my=(t.clientY-r.top)*(H/r.height)
-  },{passive:false})
-  cv.addEventListener('touchend',()=>{mx=-1;my=-1})
 
-  loop()
-}
+  card.addEventListener('mouseleave', () => {
+    card.style.transform   = 'perspective(600px) rotateX(0) rotateY(0) scale(1)'
+    card.style.transition  = 'transform .5s ease, border-color .3s, box-shadow .3s'
+    card.style.borderColor = ''
+    card.style.boxShadow   = ''
+  })
 
-// Init all cards
-setTimeout(()=>{
-  const cardDefs=[
-    {icon:'🔍',label:'DIAGNOSE', action:"openScan()"},
-    {icon:'📈',label:'SEO',      action:"window.location='/about.html'"},
-    {icon:'🎯',label:'PRODUCTS', action:"window.location='/about.html'"},
-    {icon:'📣',label:'ADS',      action:"window.location='/about.html'"},
-    {icon:'🚀',label:'GROWTH',   action:"window.location='/about.html'"},
-    {icon:'📊',label:'ANALYTICS',action:"window.location='/about.html'"},
-  ]
-  document.querySelectorAll('.glass-card').forEach((card,i)=>{
-    const def=cardDefs[i]||cardDefs[0]
-    const W=card.offsetWidth||190, H=card.offsetHeight||195
-    card.querySelectorAll('canvas').forEach(c=>c.remove())
-    card.style.cssText+='overflow:hidden;position:relative;border:none;background:transparent;padding:0'
-    const content=card.querySelector('.card-content')
-    if(content)content.style.zIndex='5'
-    buildGlassCard(card,W,H,def.icon,def.label,()=>{try{eval(def.action)}catch(e){}})
+  // Ripple on click
+  card.addEventListener('click', e => {
+    const rect   = card.getBoundingClientRect()
+    const ripple = document.createElement('div')
+    ripple.className = 'ripple'
+    const size   = Math.max(rect.width, rect.height)
+    ripple.style.width  = size + 'px'
+    ripple.style.height = size + 'px'
+    ripple.style.left   = (e.clientX - rect.left - size/2) + 'px'
+    ripple.style.top    = (e.clientY - rect.top  - size/2) + 'px'
+    card.appendChild(ripple)
+    setTimeout(() => ripple.remove(), 800)
+    card.style.transform  = 'perspective(600px) scale(0.96)'
+    card.style.transition = 'transform .1s ease'
+    setTimeout(() => {
+      card.style.transform  = 'perspective(600px) scale(1.04)'
+      card.style.transition = 'transform .4s cubic-bezier(.34,1.56,.64,1)'
+    }, 100)
   })
-  document.querySelectorAll('.nav-cta,.hero-btn').forEach(btn=>{
-    btn.addEventListener('mouseenter',()=>{btn.style.boxShadow='0 0 24px rgba(212,168,75,0.25)'})
-    btn.addEventListener('mouseleave',()=>{btn.style.boxShadow=''})
-    btn.addEventListener('mousedown',()=>{btn.style.transform='scale(0.96)';btn.style.filter='brightness(1.5)'})
-    btn.addEventListener('mouseup',()=>{btn.style.transform='';btn.style.filter=''})
-  })
-},400)
+
+  // Touch support
+  card.addEventListener('touchstart', e => {
+    card.style.transform  = 'scale(0.97)'
+    card.style.transition = 'transform .15s ease'
+    card.style.borderColor = 'rgba(212,168,75,0.3)'
+  }, {passive:true})
+  card.addEventListener('touchend', () => {
+    card.style.transform   = 'scale(1)'
+    card.style.transition  = 'transform .3s cubic-bezier(.34,1.56,.64,1)'
+    card.style.borderColor = ''
+  }, {passive:true})
+})
+
+// Nav + hero button interactions
+document.querySelectorAll('.nav-cta,.hero-btn').forEach(btn => {
+  btn.addEventListener('mouseenter', () => { btn.style.boxShadow = '0 0 24px rgba(212,168,75,0.25)' })
+  btn.addEventListener('mouseleave', () => { btn.style.boxShadow = '' })
+  btn.addEventListener('mousedown',  () => { btn.style.transform = 'scale(0.96)'; btn.style.filter = 'brightness(1.4)' })
+  btn.addEventListener('mouseup',    () => { btn.style.transform = ''; btn.style.filter = '' })
+})
 
 // ══════════════════════════════════════════════════════
 //  SCAN OVERLAY
@@ -1198,6 +1072,23 @@ window.resetScan = function() {
 // ══════════════════════════════════════════════════════
 //  ACTIVITY FEED
 // ══════════════════════════════════════════════════════
+// ── MOBILE NAV ──────────────────────────────────────
+window.toggleNav = function() {
+  const links = document.querySelector('.nav-links')
+  if (links) links.classList.toggle('open')
+}
+function checkMobile() {
+  const ham = document.getElementById('hamburger')
+  if (!ham) return
+  ham.style.display = window.innerWidth <= 900 ? 'flex' : 'none'
+  if (window.innerWidth > 900) {
+    const links = document.querySelector('.nav-links')
+    if (links) links.classList.remove('open')
+  }
+}
+checkMobile()
+window.addEventListener('resize', checkMobile)
+
 const ACTS = [
   {name:'Priya S.',  init:'P', action:'checked their store health',   detail:'Page speed was slowing 80% of visitors'},
   {name:'Marcus O.', init:'M', action:'just got their diagnosis',      detail:'Missing reviews were killing trust'},
