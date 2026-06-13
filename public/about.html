@@ -266,11 +266,9 @@ async function loadWorks() {
         resultsHtml += '</div>'
       }
 
-      // Build card top — use emoji if image URL is a telegram URL (expires)
-      const hasImg = w.imgUrl && w.imgUrl.length > 0
-        ? `style="background:url('${w.imgUrl}') center/cover no-repeat"`
-        : ''
-      const topContent = (!topStyle) ? `<span style="font-size:52px">${emoji}</span>` : ''
+      // Show image if available, emoji fallback
+      const topStyle   = w.imgUrl ? `style="background:url('${w.imgUrl}') center/cover no-repeat"` : ''
+      const topContent = w.imgUrl ? '' : `<span style="font-size:52px">${emoji}</span>`
 
       card.innerHTML = `
         <div class="work-card-top" ${topStyle}>${topContent}</div>
