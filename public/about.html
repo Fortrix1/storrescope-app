@@ -6,7 +6,7 @@
 <title>Our Work — Karios Agency</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>"/>
 <meta property="og:title" content="Our Work — Karios Agency"/>
-<meta property="og:description" content="Portfolio and services from Karios Agency — ecommerce growth specialists."/>
+<meta property="og:description" content="Portfolio and services from Karios Agency."/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cabinet+Grotesk:wght@400;500;700;800;900&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet"/>
 <style>
@@ -19,36 +19,47 @@
 }
 html{scroll-behavior:smooth}
 body{font-family:'Cabinet Grotesk',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden}
+
 nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 6%;height:68px;background:rgba(5,4,10,0.85);backdrop-filter:blur(24px);border-bottom:1px solid var(--border)}
-.logo{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:2px;color:var(--white);text-decoration:none;display:flex;align-items:center;gap:3px}
-.logo-dot{width:7px;height:7px;background:var(--gold);border-radius:50%;animation:pulse 2s infinite}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;color:var(--white);text-decoration:none;display:flex;align-items:center;gap:3px}
+.logo-dot{width:6px;height:6px;background:var(--gold);border-radius:50%;animation:pulse 2s infinite}
 .nav-links{display:flex;align-items:center;gap:28px;list-style:none}
-.nav-links a{font-size:13px;font-weight:500;color:var(--muted);text-decoration:none;transition:color .2s}
+.nav-links a{font-size:12px;font-weight:600;color:var(--muted);text-decoration:none;letter-spacing:.08em;text-transform:uppercase;transition:color .2s}
 .nav-links a:hover,.nav-links a.active{color:var(--white)}
-.nav-cta{background:var(--gold);color:#000;font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;padding:10px 20px;border-radius:6px;text-decoration:none;transition:background .2s}
-.nav-cta:hover{background:var(--gold2)}
-.hero{padding:140px 6% 60px;max-width:1100px;margin:0 auto}
-.back{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);text-decoration:none;margin-bottom:36px;transition:color .2s}
+.nav-cta{background:transparent;border:1px solid var(--gold);color:var(--gold);font-weight:700;font-size:12px;letter-spacing:.06em;text-transform:uppercase;padding:9px 18px;border-radius:6px;text-decoration:none;transition:background .2s,color .2s}
+.nav-cta:hover{background:var(--gold);color:#000}
+.hamburger{display:none;background:none;border:1px solid rgba(255,255,255,0.15);border-radius:6px;padding:8px 10px;cursor:pointer;flex-direction:column;gap:4px}
+.hamburger span{display:block;width:18px;height:1.5px;background:var(--white)}
+
+/* HERO */
+.hero{padding:130px 6% 60px;max-width:1100px;margin:0 auto}
+.back{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);text-decoration:none;margin-bottom:32px;letter-spacing:.06em;text-transform:uppercase;transition:color .2s}
 .back:hover{color:var(--gold)}
 .eyebrow{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:14px}
-.page-h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(56px,8vw,96px);letter-spacing:1px;color:var(--white);line-height:.92;margin-bottom:18px}
-.page-h1 em{font-family:'Instrument Serif',serif;font-style:italic;color:rgba(240,236,228,0.35);letter-spacing:0}
+.page-h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(52px,8vw,88px);letter-spacing:1px;color:var(--white);line-height:.92;margin-bottom:16px}
+.page-h1 em{font-family:'Instrument Serif',serif;font-style:italic;color:rgba(240,236,228,0.3);letter-spacing:0}
 .page-sub{font-size:16px;color:var(--muted);max-width:480px;line-height:1.8}
-.section{padding:0 6% 70px;max-width:1100px;margin:0 auto}
+
+/* SECTIONS */
+.section{padding:0 6% 64px;max-width:1100px;margin:0 auto}
 .sec-label{font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
-.sec-h{font-family:'Bebas Neue',sans-serif;font-size:clamp(36px,4vw,56px);letter-spacing:1px;color:var(--white);margin-bottom:32px}
-.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:start}
+.sec-h{font-family:'Bebas Neue',sans-serif;font-size:clamp(32px,4vw,52px);letter-spacing:1px;color:var(--white);margin-bottom:28px}
+
+/* ABOUT */
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:52px;align-items:start}
 .about-text p{font-size:15px;color:var(--muted);line-height:1.8;margin-bottom:14px}
 .about-text p strong{color:var(--text)}
-.skills{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+.skills{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
 .skill{background:var(--gold-dim);border:1px solid rgba(212,168,75,0.15);border-radius:6px;padding:5px 12px;font-size:12px;font-weight:600;color:var(--gold)}
 .stats{display:flex;flex-direction:column;gap:12px}
-.stat-box{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px 24px;display:flex;align-items:center;gap:16px;transition:border-color .2s,transform .2s}
+.stat-box{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 22px;display:flex;align-items:center;gap:14px;transition:border-color .2s,transform .2s}
 .stat-box:hover{border-color:rgba(212,168,75,0.2);transform:translateX(4px)}
-.stat-box-ico{font-size:22px}
-.stat-box-num{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:1px;color:var(--white)}
-.stat-box-num span{color:var(--gold)}
-.stat-box-lbl{font-size:12px;color:var(--muted);margin-top:2px}
+.stat-ico{font-size:20px}
+.stat-num{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:1px;color:var(--white)}
+.stat-num span{color:var(--gold)}
+.stat-lbl{font-size:12px;color:var(--muted);margin-top:2px}
+
+/* WORK CARDS */
 .work-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
 .work-card{background:var(--card);border:1px solid var(--border);border-radius:18px;overflow:hidden;transition:border-color .2s,transform .2s}
 .work-card:hover{border-color:rgba(212,168,75,0.25);transform:translateY(-4px)}
@@ -56,13 +67,22 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
 .work-card-body{padding:20px 22px}
 .work-tag{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);background:var(--gold-dim);border:1px solid rgba(212,168,75,0.12);border-radius:4px;padding:3px 8px;margin-bottom:10px}
 .work-title{font-weight:800;font-size:17px;color:var(--white);margin-bottom:8px}
-.work-desc{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:16px}
+.work-desc{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:14px}
 .work-nums{display:flex;gap:20px}
-.work-num{text-align:center}
 .work-num-val{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:1px;color:var(--gold)}
 .work-num-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
 .soon-card{background:var(--card);border:1px dashed var(--border2);border-radius:18px;padding:40px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;min-height:280px}
-.soon-card p{font-size:13px;color:var(--muted);line-height:1.6;margin-top:10px;max-width:240px}
+.soon-card p{font-size:13px;color:var(--muted);line-height:1.6;margin-top:8px;max-width:220px}
+
+/* TESTIMONIALS */
+.testi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px}
+.testi-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px;display:flex;flex-direction:column;gap:12px}
+.testi-avatar{width:42px;height:42px;border-radius:50%;background:rgba(212,168,75,0.1);border:1px solid rgba(212,168,75,0.2);display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:800;color:var(--gold);flex-shrink:0}
+.testi-name{font-weight:700;font-size:14px;color:var(--white)}
+.testi-biz{font-size:12px;color:var(--muted)}
+.testi-quote{font-size:13px;color:var(--text);line-height:1.7;font-style:italic}
+
+/* SERVICES TABLE */
 .services-table{border:1px solid var(--border);border-radius:18px;overflow:hidden}
 .svc-row{display:flex;align-items:center;justify-content:space-between;padding:18px 26px;background:var(--card);border-bottom:1px solid var(--border);transition:background .2s;gap:16px;flex-wrap:wrap}
 .svc-row:last-child{border-bottom:none}
@@ -72,38 +92,59 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
 .svc-name{font-weight:700;font-size:14px;color:var(--white)}
 .svc-desc{font-size:12px;color:var(--muted);margin-top:2px}
 .svc-price{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1px;color:var(--gold);flex-shrink:0}
-.cta-box{background:var(--card);border:1px solid var(--border2);border-radius:22px;padding:52px 44px;text-align:center;position:relative;overflow:hidden}
+
+/* CTA */
+.cta-box{background:var(--card);border:1px solid var(--border2);border-radius:20px;padding:48px 40px;text-align:center;position:relative;overflow:hidden}
 .cta-box::before{content:'';position:absolute;top:-80px;left:50%;transform:translateX(-50%);width:400px;height:250px;background:radial-gradient(circle,rgba(212,168,75,.06),transparent 70%);pointer-events:none}
-.cta-box h2{font-family:'Bebas Neue',sans-serif;font-size:clamp(40px,5vw,64px);letter-spacing:1px;color:var(--white);margin-bottom:14px;line-height:.92}
-.cta-box p{font-size:15px;color:var(--muted);max-width:400px;margin:0 auto 28px;line-height:1.8}
+.cta-box h2{font-family:'Bebas Neue',sans-serif;font-size:clamp(36px,5vw,56px);letter-spacing:1px;color:var(--white);margin-bottom:12px;line-height:.92}
+.cta-box p{font-size:15px;color:var(--muted);max-width:380px;margin:0 auto 24px;line-height:1.8}
 .btn-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
-.btn-gold{display:inline-flex;align-items:center;gap:8px;background:var(--gold);color:#000;font-weight:800;font-size:14px;padding:13px 26px;border-radius:10px;text-decoration:none;transition:background .2s,transform .1s}
+.btn-gold{display:inline-flex;align-items:center;gap:8px;background:var(--gold);color:#000;font-weight:800;font-size:13px;padding:13px 24px;border-radius:10px;text-decoration:none;transition:background .2s,transform .1s}
 .btn-gold:hover{background:var(--gold2);transform:translateY(-1px)}
-.btn-ghost{display:inline-flex;align-items:center;gap:8px;background:transparent;color:var(--muted);font-size:13px;padding:13px 22px;border-radius:10px;border:1px solid var(--border2);text-decoration:none;transition:color .2s,border-color .2s}
+.btn-ghost{display:inline-flex;align-items:center;gap:8px;background:transparent;color:var(--muted);font-size:13px;padding:13px 20px;border-radius:10px;border:1px solid var(--border2);text-decoration:none;transition:color .2s,border-color .2s}
 .btn-ghost:hover{color:var(--text);border-color:var(--muted)}
-footer{border-top:1px solid var(--border);padding:28px 6%;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+
+/* FOOTER */
+footer{border-top:1px solid var(--border);padding:28px 6%;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px}
 .footer-logo{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;color:var(--white)}
-.footer-copy{font-size:12px;color:var(--muted)}
+.footer-links{display:flex;gap:20px;flex-wrap:wrap}
+.footer-links a{font-size:12px;color:var(--muted);text-decoration:none;letter-spacing:.06em;text-transform:uppercase;transition:color .2s}
+.footer-links a:hover{color:var(--white)}
+.footer-copy{font-size:11px;color:var(--muted)}
+
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.75)}}
 @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 .fade{opacity:0;transform:translateY(24px);transition:opacity .7s ease,transform .7s ease}
 .fade.on{opacity:1;transform:translateY(0)}
-@media(max-width:768px){.about-grid{grid-template-columns:1fr}.nav-links{display:none}.cta-box{padding:32px 20px}}
+
+@media(max-width:900px){
+  .about-grid{grid-template-columns:1fr}
+  .cta-box{padding:32px 20px}
+  .nav-links{display:none}
+  .nav-links.open{display:flex;flex-direction:column;position:fixed;top:68px;left:0;right:0;background:rgba(5,4,10,0.97);padding:20px 6%;gap:20px;border-bottom:1px solid var(--border);z-index:99}
+  .nav-links.open a{font-size:15px}
+  .hamburger{display:flex}
+}
 </style>
 </head>
 <body>
 
 <nav>
   <a href="/" class="logo">KARIOS<div class="logo-dot"></div></a>
-  <ul class="nav-links">
+  <ul class="nav-links" id="navLinks">
     <li><a href="#who-we-are">About</a></li>
-    <li><a href="#services-section">Services</a></li>
     <li><a href="#portfolio-section">Case Studies</a></li>
-    <li><a href="/" style="color:var(--gold)">Free Analysis</a></li>
+    <li><a href="#services-section">Services</a></li>
+    <li><a href="#testimonials-section">Testimonials</a></li>
+    <li><a href="/" style="color:var(--gold)">Free Analysis ↗</a></li>
   </ul>
   <a href="https://wa.me/18734712764" class="nav-cta" target="_blank">Work With Us</a>
+  <button class="hamburger" onclick="document.getElementById('navLinks').classList.toggle('open')">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
 
+<!-- HERO -->
 <div class="hero fade">
   <a href="/" class="back">← Back to Home</a>
   <div class="eyebrow">Karios Agency</div>
@@ -111,13 +152,14 @@ footer{border-top:1px solid var(--border);padding:28px 6%;display:flex;align-ite
   <p class="page-sub">Real work. Real results. Built for store owners who want to stop guessing and start growing.</p>
 </div>
 
-<div class="section fade">
+<!-- WHO WE ARE -->
+<div class="section fade" id="who-we-are">
   <div class="sec-label">Who We Are</div>
   <div class="about-grid">
     <div class="about-text">
       <p>My name is <strong>Karios</strong> — I've spent years studying what makes ecommerce stores succeed and fail. Not from a classroom, but from actually digging into hundreds of real stores and finding the patterns that separate the ones that sell from the ones that don't.</p>
       <p>I built Karios Agency because I kept seeing the same thing — <strong>store owners with great products but invisible stores</strong>. Bad SEO, slow pages, no trust signals, no strategy. Problems that are completely fixable with the right knowledge.</p>
-      <p>Every service I offer comes from real experience — not templates, not guesswork. When I tell you what's wrong with your store, it's because I've seen that exact problem kill conversions hundreds of times.</p>
+      <p>When I tell you what's wrong with your store it's because I've seen that exact problem kill conversions hundreds of times.</p>
       <div class="skills">
         <span class="skill">SEO</span>
         <span class="skill">Store Analysis</span>
@@ -130,19 +172,20 @@ footer{border-top:1px solid var(--border);padding:28px 6%;display:flex;align-ite
       </div>
     </div>
     <div class="stats">
-      <div class="stat-box"><div class="stat-box-ico">🏪</div><div><div class="stat-box-num">100<span>+</span></div><div class="stat-box-lbl">Stores analysed and audited</div></div></div>
-      <div class="stat-box"><div class="stat-box-ico">🔍</div><div><div class="stat-box-num">47<span>+</span></div><div class="stat-box-lbl">Data points checked per store</div></div></div>
-      <div class="stat-box"><div class="stat-box-ico">🌍</div><div><div class="stat-box-num">10<span>+</span></div><div class="stat-box-lbl">Countries served</div></div></div>
-      <div class="stat-box"><div class="stat-box-ico">⚡</div><div><div class="stat-box-num">&lt;<span>10s</span></div><div class="stat-box-lbl">Full store diagnosis time</div></div></div>
+      <div class="stat-box"><div class="stat-ico">🏪</div><div><div class="stat-num">100<span>+</span></div><div class="stat-lbl">Stores analysed and audited</div></div></div>
+      <div class="stat-box"><div class="stat-ico">🔍</div><div><div class="stat-num">47<span>+</span></div><div class="stat-lbl">Data points checked per store</div></div></div>
+      <div class="stat-box"><div class="stat-ico">🌍</div><div><div class="stat-num">10<span>+</span></div><div class="stat-lbl">Countries served</div></div></div>
+      <div class="stat-box"><div class="stat-ico">⚡</div><div><div class="stat-num">&lt;<span>10s</span></div><div class="stat-lbl">Full store diagnosis time</div></div></div>
     </div>
   </div>
 </div>
 
-<div class="section fade">
-  <div class="sec-label">Portfolio</div>
+<!-- PORTFOLIO -->
+<div class="section fade" id="portfolio-section">
+  <div class="sec-label">Case Studies</div>
   <div class="sec-h">Work We've Done</div>
-  <div class="work-grid">
-    <div class="work-card">
+  <div class="work-grid" id="workGrid">
+    <div class="work-card fade">
       <div class="work-card-top">🛍️</div>
       <div class="work-card-body">
         <span class="work-tag">Store Analysis + SEO</span>
@@ -154,7 +197,7 @@ footer{border-top:1px solid var(--border);padding:28px 6%;display:flex;align-ite
         </div>
       </div>
     </div>
-    <div class="work-card">
+    <div class="work-card fade">
       <div class="work-card-top">💄</div>
       <div class="work-card-body">
         <span class="work-tag">Product Research</span>
@@ -166,7 +209,7 @@ footer{border-top:1px solid var(--border);padding:28px 6%;display:flex;align-ite
         </div>
       </div>
     </div>
-    <div class="work-card">
+    <div class="work-card fade">
       <div class="work-card-top">👟</div>
       <div class="work-card-body">
         <span class="work-tag">SEO + Store Fix</span>
@@ -178,33 +221,36 @@ footer{border-top:1px solid var(--border);padding:28px 6%;display:flex;align-ite
         </div>
       </div>
     </div>
-    <div class="soon-card">
+    <div class="soon-card fade">
       <div style="font-size:40px">📸</div>
       <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;color:var(--white);margin-top:10px">Your Store Here</div>
       <p>These spots are filling up. Get analysed today and become our next success story.</p>
-      <a href="/" style="margin-top:18px;display:inline-flex;align-items:center;gap:6px;background:var(--gold);color:#000;font-weight:800;font-size:13px;padding:11px 22px;border-radius:8px;text-decoration:none">Analyse My Store →</a>
+      <a href="/" style="margin-top:16px;display:inline-flex;align-items:center;gap:6px;background:var(--gold);color:#000;font-weight:800;font-size:13px;padding:11px 20px;border-radius:8px;text-decoration:none">Analyse My Store →</a>
     </div>
   </div>
 </div>
 
-<div class="section fade">
+<!-- TESTIMONIALS -->
+<div class="section fade" id="testimonials-section" style="display:none">
+  <div class="sec-label">What Clients Say</div>
+  <div class="sec-h">Testimonials</div>
+  <div class="testi-grid" id="testiGrid"></div>
+</div>
+
+<!-- SERVICES -->
+<div class="section fade" id="services-section">
   <div class="sec-label">What We Offer</div>
   <div class="sec-h">Services & Pricing</div>
   <div class="services-table">
     <div class="svc-row"><div class="svc-left"><span class="svc-ico">🔍</span><div><div class="svc-name">Free Store Analysis</div><div class="svc-desc">47-point diagnosis — speed, SEO, trust, products, ads</div></div></div><div class="svc-price">FREE</div></div>
     <div class="svc-row"><div class="svc-left"><span class="svc-ico">📈</span><div><div class="svc-name">Full SEO Package</div><div class="svc-desc">Meta tags, sitemap, headings, alt text, content strategy</div></div></div><div class="svc-price">GET A QUOTE</div></div>
-    <div class="svc-row"><div class="svc-left"><span class="svc-ico">🎯</span><div><div class="svc-name">Weekly Product Research</div><div class="svc-desc">5 trending products weekly matched to your niche with supplier links</div></div></div><div class="svc-price">$20/WK</div></div>
-    <div class="svc-row"><div class="svc-left"><span class="svc-ico">📣</span><div><div class="svc-name">Ad Strategy & Setup</div><div class="svc-desc">Which product, which platform, what budget — data-driven</div></div></div><div class="svc-price">GET A QUOTE</div></div>
-    <div class="svc-row"><div class="svc-left"><span class="svc-ico">🚀</span><div><div class="svc-name">Full Store Growth Package</div><div class="svc-desc">SEO + products + ads + social — everything handled monthly</div></div></div><div class="svc-price">GET A QUOTE</div></div>
+    <div class="svc-row"><div class="svc-left"><span class="svc-ico">🎯</span><div><div class="svc-name">Weekly Product Research</div><div class="svc-desc">5 trending products weekly matched to your niche</div></div></div><div class="svc-price">$20/WK</div></div>
+    <div class="svc-row"><div class="svc-left"><span class="svc-ico">📣</span><div><div class="svc-name">Ad Strategy & Setup</div><div class="svc-desc">Which product, which platform, what budget</div></div></div><div class="svc-price">GET A QUOTE</div></div>
+    <div class="svc-row"><div class="svc-left"><span class="svc-ico">🚀</span><div><div class="svc-name">Full Store Growth Package</div><div class="svc-desc">SEO + products + ads + social — everything monthly</div></div></div><div class="svc-price">GET A QUOTE</div></div>
   </div>
 </div>
 
-<div class="section fade" id="testimonials-section" style="display:none">
-  <div class="sec-label">What Clients Say</div>
-  <div class="sec-h">Testimonials</div>
-  <div id="testimonials-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px"></div>
-</div>
-
+<!-- CTA -->
 <div class="section fade">
   <div class="cta-box">
     <h2>READY TO START<br/>SELLING?</h2>
@@ -219,104 +265,56 @@ footer{border-top:1px solid var(--border);padding:28px 6%;display:flex;align-ite
 
 <footer>
   <div class="footer-logo">KARIOS</div>
-  <div class="footer-copy">© 2026 Karios Agency — We turn struggling stores into stores that sell</div>
+  <div class="footer-links">
+    <a href="#who-we-are">About</a>
+    <a href="#portfolio-section">Case Studies</a>
+    <a href="#services-section">Services</a>
+    <a href="/">Free Analysis</a>
+    <a href="https://wa.me/18734712764" target="_blank">WhatsApp</a>
+    <a href="https://t.me/kariosagency" target="_blank">Telegram</a>
+  </div>
+  <div class="footer-copy">© 2026 Karios Agency</div>
 </footer>
 
 <script>
-const obs = new IntersectionObserver(e=>{
-  e.forEach(el=>{ if(el.isIntersecting) el.target.classList.add('on') })
-},{threshold:.1})
-document.querySelectorAll('.fade').forEach(el=>obs.observe(el))
+// Scroll reveal
+const obs = new IntersectionObserver(e => {
+  e.forEach(el => { if (el.isIntersecting) el.target.classList.add('on') })
+}, {threshold:.1})
+document.querySelectorAll('.fade').forEach(el => obs.observe(el))
 
-// ── Load dynamic works from Telegram bot ──
-function getEmoji(tag) {
-  const t = (tag||'').toLowerCase()
-  if (t.includes('fashion')||t.includes('cloth')) return '🛍️'
-  if (t.includes('beauty')||t.includes('skin'))   return '💄'
-  if (t.includes('seo'))                           return '📈'
-  if (t.includes('ad'))                            return '📣'
-  if (t.includes('product'))                       return '🎯'
-  if (t.includes('food')||t.includes('restaurant'))return '🍽️'
-  if (t.includes('photo'))                         return '📸'
-  return '🚀'
-}
-
-async function loadTestimonials() {
+// Load dynamic works + testimonials from bot
+async function loadDynamic() {
   try {
     const r = await fetch('/api/works')
     if (!r.ok) return
     const d = await r.json()
-    const testimonials = d.testimonials || []
-    if (!testimonials.length) return
 
-    const section = document.getElementById('testimonials-section')
-    const grid    = document.getElementById('testimonials-grid')
-    if (!section || !grid) return
-
-    section.style.display = 'block'
-
-    testimonials.forEach(t => {
-      const card = document.createElement('div')
-      card.className = 'fade'
-      card.style.cssText = 'background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:14px'
-      card.innerHTML = `
-        <div style="display:flex;align-items:center;gap:12px">
-          ${t.imgUrl
-            ? `<img src="${t.imgUrl}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:1px solid rgba(212,168,75,0.3)" onerror="this.style.display='none'">`
-            : `<div style="width:44px;height:44px;border-radius:50%;background:rgba(212,168,75,0.08);border:1px solid rgba(212,168,75,0.2);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:var(--gold)">${t.name.charAt(0)}</div>`
-          }
-          <div>
-            <div style="font-weight:700;font-size:14px;color:var(--white)">${t.name}</div>
-            <div style="font-size:12px;color:var(--muted)">${t.business}</div>
-          </div>
-        </div>
-        ${t.quote ? `<div style="font-size:14px;color:var(--text);line-height:1.7;font-style:italic">"${t.quote}"</div>` : ''}
-        <div style="display:flex;gap:2px;font-size:14px">${'⭐'.repeat(5)}</div>`
-      grid.appendChild(card)
-      setTimeout(() => { card.classList.add('on'); obs.observe(card) }, 100)
-    })
-  } catch(e) {}
-}
-
-async function loadWorks()
-loadTestimonials() {
-  try {
-    const r = await fetch('/api/works')
-    if (!r.ok) return
-    const d = await r.json()
-    const works = d.works || []
-    if (!works.length) return
-
-    const grid = document.querySelector('.work-grid')
-    if (!grid) return
-
-    // Find the soon-card placeholder
-    const soonCard = grid.querySelector('.soon-card')
+    // ── Works ──
+    const works   = d.works || []
+    const workGrid = document.getElementById('workGrid')
+    const soonCard = workGrid?.querySelector('.soon-card')
 
     works.forEach(w => {
       const emoji = getEmoji(w.tag)
       const card  = document.createElement('div')
       card.className = 'work-card fade'
-
-      // Build results HTML
+      const hasImg = w.imgUrl && w.imgUrl.includes('cloudinary.com')
+      const topStyle = hasImg ? `style="background:url('${w.imgUrl}') center/cover no-repeat"` : ''
+      const topContent = hasImg ? '' : `<span style="font-size:52px">${emoji}</span>`
       let resultsHtml = ''
       if (w.result1 || w.result2) {
         resultsHtml = '<div class="work-nums">'
         if (w.result1) {
-          const parts = w.result1.split(' ')
-          resultsHtml += `<div class="work-num"><div class="work-num-val">${parts[0]}</div><div class="work-num-lbl">${parts.slice(1).join(' ')}</div></div>`
+          const p = w.result1.split(' ')
+          resultsHtml += `<div class="work-num"><div class="work-num-val">${p[0]}</div><div class="work-num-lbl">${p.slice(1).join(' ')}</div></div>`
         }
         if (w.result2) {
-          const parts = w.result2.split(' ')
-          resultsHtml += `<div class="work-num"><div class="work-num-val">${parts[0]}</div><div class="work-num-lbl">${parts.slice(1).join(' ')}</div></div>`
+          const p = w.result2.split(' ')
+          resultsHtml += `<div class="work-num"><div class="work-num-val">${p[0]}</div><div class="work-num-lbl">${p.slice(1).join(' ')}</div></div>`
         }
         resultsHtml += '</div>'
       }
-
-      // Show image if available, emoji fallback
-      const topStyle   = w.imgUrl ? `style="background:url('${w.imgUrl}') center/cover no-repeat"` : ''
-      const topContent = w.imgUrl ? '' : `<span style="font-size:52px">${emoji}</span>`
-
       card.innerHTML = `
         <div class="work-card-top" ${topStyle}>${topContent}</div>
         <div class="work-card-body">
@@ -325,26 +323,49 @@ loadTestimonials() {
           <div class="work-desc">Completed by Karios Agency.</div>
           ${resultsHtml}
         </div>`
-
-      // Insert before soon card or append
-      if (soonCard) {
-        grid.insertBefore(card, soonCard)
-      } else {
-        grid.appendChild(card)
-      }
-
-      // Trigger fade animation
-      setTimeout(() => {
-        card.classList.add('on')
-        obs.observe(card)
-      }, 100)
+      if (soonCard) workGrid.insertBefore(card, soonCard)
+      else workGrid?.appendChild(card)
+      setTimeout(() => { card.classList.add('on'); obs.observe(card) }, 100)
     })
-  } catch(e) {
-    console.log('loadWorks error:', e)
-  }
+
+    // ── Testimonials ──
+    const testimonials = d.testimonials || []
+    if (testimonials.length) {
+      const section = document.getElementById('testimonials-section')
+      const grid    = document.getElementById('testiGrid')
+      if (section) section.style.display = 'block'
+      testimonials.forEach(t => {
+        const card = document.createElement('div')
+        card.className = 'testi-card fade'
+        const avatarHtml = t.imgUrl && t.imgUrl.includes('cloudinary.com')
+          ? `<img src="${t.imgUrl}" style="width:42px;height:42px;border-radius:50%;object-fit:cover;border:1px solid rgba(212,168,75,0.3)" onerror="this.style.display='none'">`
+          : `<div class="testi-avatar">${t.name.charAt(0).toUpperCase()}</div>`
+        card.innerHTML = `
+          <div style="display:flex;align-items:center;gap:12px">
+            ${avatarHtml}
+            <div><div class="testi-name">${t.name}</div><div class="testi-biz">${t.business}</div></div>
+          </div>
+          ${t.quote ? `<div class="testi-quote">"${t.quote}"</div>` : ''}
+          <div style="font-size:13px">⭐⭐⭐⭐⭐</div>`
+        grid?.appendChild(card)
+        setTimeout(() => { card.classList.add('on'); obs.observe(card) }, 100)
+      })
+    }
+  } catch(e) { console.log('loadDynamic error:', e) }
 }
 
-loadWorks()
+function getEmoji(tag) {
+  const t = (tag||'').toLowerCase()
+  if (t.includes('fashion')||t.includes('cloth')) return '🛍️'
+  if (t.includes('beauty')||t.includes('skin'))   return '💄'
+  if (t.includes('seo'))                           return '📈'
+  if (t.includes('ad'))                            return '📣'
+  if (t.includes('product'))                       return '🎯'
+  if (t.includes('food')||t.includes('restaurant'))return '🍽️'
+  return '🚀'
+}
+
+loadDynamic()
 </script>
 </body>
 </html>
