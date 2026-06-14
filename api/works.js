@@ -1,26 +1,22 @@
-// api/works.js
-// Returns portfolio works stored via Telegram bot
-// Called by about.html to load dynamic portfolio
+// api/works.js - Returns portfolio works AND testimonials
 
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*')
   res.setHeader('Cache-Control', 'no-store')
 
-  const JSONBIN_URL = process.env.JSONBIN_URL || ''
-  const JSONBIN_KEY = process.env.JSONBIN_KEY || ''
+  const BIN_URL = process.env.JSONBIN_URL || ''
+  const BIN_KEY = process.env.JSONBIN_KEY || ''
 
-  if (!JSONBIN_URL) {
-    // Return default works if not configured
-    return res.status(200).json({ works: [] })
-  }
+  if (!BIN_URL) return res.status(200).json({ works: [], testimonials: [] })
 
   try {
-    const r = await fetch(JSONBIN_URL + '/latest', {
-      headers: { 'X-Master-Key': JSONBIN_KEY }
-    })
+    const r = await fetch(BIN_URL + '/latest', { headers: { 'X-Master-Key': BIN_KEY } })
     const d = await r.json()
-    res.status(200).json({ works: d.record?.works || [] })
+    res.status(200).json({
+      works:        d.record?.works        || [],
+      testimonials: d.record?.testimonials || [],
+    })
   } catch(e) {
-    res.status(200).json({ works: [] })
+    res.status(200).json({ works: [], testimonials: [] })
   }
 }

@@ -4,6 +4,11 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Karios Agency — We Don't Guess. We Diagnose.</title>
+<meta name="theme-color" content="#05040a"/>
+<meta property="og:title" content="Karios Agency — We Don't Guess. We Diagnose."/>
+<meta property="og:description" content="Free store analysis in 10 seconds. We turn struggling stores into stores that sell."/>
+<meta property="og:type" content="website"/>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>"/>
 <meta name="description" content="Karios Agency turns struggling stores into stores that sell. Free store analysis in under 10 seconds."/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cabinet+Grotesk:wght@300;400;500;700;800;900&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet"/>
@@ -604,6 +609,29 @@ nav{
 <!-- RESULTS -->
 <div id="results"></div>
 
+<!-- TESTIMONIALS SECTION -->
+<div id="testimonialsSection" style="display:none;max-width:960px;margin:0 auto;padding:0 5% 60px">
+  <div style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:12px">What Clients Say</div>
+  <div style="font-family:'Bebas Neue',sans-serif;font-size:clamp(32px,4vw,48px);letter-spacing:1px;color:var(--white);margin-bottom:32px">Client Testimonials</div>
+  <div id="testimonialsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px"></div>
+</div>
+
+<!-- CONTACT SECTION -->
+<div id="contactSection" style="max-width:960px;margin:0 auto;padding:0 5% 60px">
+  <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:40px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap">
+    <div>
+      <div style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:10px">Get In Touch</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:clamp(28px,4vw,40px);letter-spacing:1px;color:var(--white);margin-bottom:8px">Let's work together</div>
+      <div style="font-size:14px;color:var(--muted);max-width:360px;line-height:1.7">Have a store that needs fixing? Want to grow? Reach out — we respond fast.</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:10px;flex-shrink:0">
+      <a href="https://wa.me/18734712764" target="_blank" style="display:inline-flex;align-items:center;gap:8px;background:var(--gold);color:#000;font-weight:800;font-size:13px;padding:12px 22px;border-radius:10px;text-decoration:none">💬 WhatsApp</a>
+      <a href="https://t.me/kariosagency" target="_blank" style="display:inline-flex;align-items:center;gap:8px;background:transparent;color:var(--muted);font-size:13px;padding:12px 20px;border-radius:10px;border:1px solid rgba(255,255,255,0.1);text-decoration:none">✈ Telegram</a>
+      <a href="mailto:fortrixtrn@gmail.com" style="display:inline-flex;align-items:center;gap:8px;background:transparent;color:var(--muted);font-size:13px;padding:12px 20px;border-radius:10px;border:1px solid rgba(255,255,255,0.1);text-decoration:none">✉ Email</a>
+    </div>
+  </div>
+</div>
+
 <!-- UPSELL -->
 <div class="upsell-bar" id="upsell">
   <div class="upsell-inner">
@@ -622,6 +650,19 @@ nav{
 <div class="scan-again" id="scanAgain">
   <button class="btn-ghost" onclick="resetScan()">← Analyse another store</button>
 </div>
+
+<!-- FOOTER -->
+<footer style="border-top:1px solid rgba(255,255,255,0.06);padding:24px 5%;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:72px">
+  <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;color:#f0ece4">KARIOS</div>
+  <div style="display:flex;gap:20px;flex-wrap:wrap">
+    <a href="/#about" style="font-size:12px;color:var(--muted);text-decoration:none">About</a>
+    <a href="/#services" style="font-size:12px;color:var(--muted);text-decoration:none">Services</a>
+    <a href="/about.html" style="font-size:12px;color:var(--muted);text-decoration:none">Our Work</a>
+    <a href="https://wa.me/18734712764" target="_blank" style="font-size:12px;color:var(--muted);text-decoration:none">WhatsApp</a>
+    <a href="https://t.me/kariosagency" target="_blank" style="font-size:12px;color:var(--muted);text-decoration:none">Telegram</a>
+  </div>
+  <div style="font-size:11px;color:var(--muted)">© 2026 Karios Agency</div>
+</footer>
 
 <!-- STATS BAR -->
 <div class="stats-bar" id="statsBar">
@@ -1072,6 +1113,43 @@ window.resetScan = function() {
 // ══════════════════════════════════════════════════════
 //  ACTIVITY FEED
 // ══════════════════════════════════════════════════════
+// ── LOAD TESTIMONIALS ───────────────────────────────
+async function loadTestimonials() {
+  try {
+    const r = await fetch('/api/works')
+    if (!r.ok) return
+    const d = await r.json()
+    const testimonials = d.testimonials || []
+    if (!testimonials.length) return
+
+    const section = document.getElementById('testimonialsSection')
+    const grid    = document.getElementById('testimonialsGrid')
+    if (!section || !grid) return
+
+    section.style.display = 'block'
+
+    testimonials.forEach(t => {
+      const card = document.createElement('div')
+      card.style.cssText = 'background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:14px'
+      card.innerHTML = `
+        <div style="display:flex;align-items:center;gap:12px">
+          ${t.imgUrl
+            ? `<img src="${t.imgUrl}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:1px solid rgba(212,168,75,0.3)" onerror="this.style.display='none'">`
+            : `<div style="width:44px;height:44px;border-radius:50%;background:rgba(212,168,75,0.1);border:1px solid rgba(212,168,75,0.2);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:var(--gold)">${t.name.charAt(0)}</div>`
+          }
+          <div>
+            <div style="font-weight:700;font-size:14px;color:#f0ece4">${t.name}</div>
+            <div style="font-size:12px;color:var(--muted)">${t.business}</div>
+          </div>
+        </div>
+        ${t.quote ? `<div style="font-size:14px;color:#c8c0b0;line-height:1.7;font-style:italic">"${t.quote}"</div>` : ''}
+        <div style="display:flex;gap:2px">${'⭐'.repeat(5)}</div>`
+      grid.appendChild(card)
+    })
+  } catch(e) {}
+}
+loadTestimonials()
+
 // ── MOBILE NAV ──────────────────────────────────────
 window.toggleNav = function() {
   const links = document.querySelector('.nav-links')

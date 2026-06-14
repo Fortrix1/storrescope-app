@@ -4,6 +4,9 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Our Work — Karios Agency</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>"/>
+<meta property="og:title" content="Our Work — Karios Agency"/>
+<meta property="og:description" content="Portfolio and services from Karios Agency — ecommerce growth specialists."/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cabinet+Grotesk:wght@400;500;700;800;900&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet"/>
 <style>
@@ -196,6 +199,12 @@ footer{border-top:1px solid var(--border);padding:28px 6%;display:flex;align-ite
   </div>
 </div>
 
+<div class="section fade" id="testimonials-section" style="display:none">
+  <div class="sec-label">What Clients Say</div>
+  <div class="sec-h">Testimonials</div>
+  <div id="testimonials-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px"></div>
+</div>
+
 <div class="section fade">
   <div class="cta-box">
     <h2>READY TO START<br/>SELLING?</h2>
@@ -232,7 +241,45 @@ function getEmoji(tag) {
   return '🚀'
 }
 
-async function loadWorks() {
+async function loadTestimonials() {
+  try {
+    const r = await fetch('/api/works')
+    if (!r.ok) return
+    const d = await r.json()
+    const testimonials = d.testimonials || []
+    if (!testimonials.length) return
+
+    const section = document.getElementById('testimonials-section')
+    const grid    = document.getElementById('testimonials-grid')
+    if (!section || !grid) return
+
+    section.style.display = 'block'
+
+    testimonials.forEach(t => {
+      const card = document.createElement('div')
+      card.className = 'fade'
+      card.style.cssText = 'background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:14px'
+      card.innerHTML = `
+        <div style="display:flex;align-items:center;gap:12px">
+          ${t.imgUrl
+            ? `<img src="${t.imgUrl}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;border:1px solid rgba(212,168,75,0.3)" onerror="this.style.display='none'">`
+            : `<div style="width:44px;height:44px;border-radius:50%;background:rgba(212,168,75,0.08);border:1px solid rgba(212,168,75,0.2);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:var(--gold)">${t.name.charAt(0)}</div>`
+          }
+          <div>
+            <div style="font-weight:700;font-size:14px;color:var(--white)">${t.name}</div>
+            <div style="font-size:12px;color:var(--muted)">${t.business}</div>
+          </div>
+        </div>
+        ${t.quote ? `<div style="font-size:14px;color:var(--text);line-height:1.7;font-style:italic">"${t.quote}"</div>` : ''}
+        <div style="display:flex;gap:2px;font-size:14px">${'⭐'.repeat(5)}</div>`
+      grid.appendChild(card)
+      setTimeout(() => { card.classList.add('on'); obs.observe(card) }, 100)
+    })
+  } catch(e) {}
+}
+
+async function loadWorks()
+loadTestimonials() {
   try {
     const r = await fetch('/api/works')
     if (!r.ok) return
