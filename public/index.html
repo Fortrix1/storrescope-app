@@ -207,7 +207,7 @@ nav{
 
 /* ── STATS BAR ── */
 .stats-bar{
-  position:fixed;bottom:0;left:0;right:0;z-index:99;
+  position:fixed;bottom:0;left:0;right:0;z-index:100;
   background:rgba(5,4,10,0.85);
   backdrop-filter:blur(20px);
   border-top:1px solid rgba(255,255,255,0.06);
@@ -652,14 +652,16 @@ nav{
 </div>
 
 <!-- FOOTER -->
-<footer style="border-top:1px solid rgba(255,255,255,0.06);padding:24px 5%;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:72px">
-  <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:2px;color:#f0ece4">KARIOS</div>
-  <div style="display:flex;gap:20px;flex-wrap:wrap">
-    <a href="/#about" style="font-size:12px;color:var(--muted);text-decoration:none">About</a>
-    <a href="/#services" style="font-size:12px;color:var(--muted);text-decoration:none">Services</a>
-    <a href="/about.html" style="font-size:12px;color:var(--muted);text-decoration:none">Our Work</a>
-    <a href="https://wa.me/18734712764" target="_blank" style="font-size:12px;color:var(--muted);text-decoration:none">WhatsApp</a>
-    <a href="https://t.me/kariosagency" target="_blank" style="font-size:12px;color:var(--muted);text-decoration:none">Telegram</a>
+<footer id="mainFooter" style="border-top:1px solid rgba(255,255,255,0.06);padding:28px 5% 90px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;position:relative;z-index:1">
+  <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:#f0ece4">KARIOS</div>
+  <div style="display:flex;gap:24px;flex-wrap:wrap;align-items:center">
+    <a href="/#about" style="font-size:12px;color:rgba(255,255,255,0.4);text-decoration:none;letter-spacing:.06em;text-transform:uppercase;transition:color .2s" onmouseover="this.style.color='#f0ece4'" onmouseout="this.style.color='rgba(255,255,255,0.4)'">About</a>
+    <a href="/#services" style="font-size:12px;color:rgba(255,255,255,0.4);text-decoration:none;letter-spacing:.06em;text-transform:uppercase;transition:color .2s" onmouseover="this.style.color='#f0ece4'" onmouseout="this.style.color='rgba(255,255,255,0.4)'">Services</a>
+    <a href="/about.html" style="font-size:12px;color:rgba(255,255,255,0.4);text-decoration:none;letter-spacing:.06em;text-transform:uppercase;transition:color .2s" onmouseover="this.style.color='#f0ece4'" onmouseout="this.style.color='rgba(255,255,255,0.4)'">Our Work</a>
+    <a href="/about.html" style="font-size:12px;color:rgba(255,255,255,0.4);text-decoration:none;letter-spacing:.06em;text-transform:uppercase;transition:color .2s" onmouseover="this.style.color='#f0ece4'" onmouseout="this.style.color='rgba(255,255,255,0.4)'">Case Studies</a>
+    <a href="https://wa.me/18734712764" target="_blank" style="font-size:12px;color:var(--gold);text-decoration:none;letter-spacing:.06em;text-transform:uppercase">WhatsApp</a>
+    <a href="https://t.me/kariosagency" target="_blank" style="font-size:12px;color:rgba(255,255,255,0.4);text-decoration:none;letter-spacing:.06em;text-transform:uppercase;transition:color .2s" onmouseover="this.style.color='#f0ece4'" onmouseout="this.style.color='rgba(255,255,255,0.4)'">Telegram</a>
+    <a href="mailto:fortrixtrn@gmail.com" style="font-size:12px;color:rgba(255,255,255,0.4);text-decoration:none;letter-spacing:.06em;text-transform:uppercase;transition:color .2s" onmouseover="this.style.color='#f0ece4'" onmouseout="this.style.color='rgba(255,255,255,0.4)'">Email</a>
   </div>
   <div style="font-size:11px;color:var(--muted)">© 2026 Karios Agency</div>
 </footer>
@@ -1181,15 +1183,21 @@ let actIdx = 0
 const feed = document.getElementById('activityFeed')
 
 function adjustFeed() {
-  const footer = document.querySelector('.stats-bar')
-  if (!feed || !footer) return
-  const fTop = footer.getBoundingClientRect().top
-  const wH   = window.innerHeight
-  if (fTop < wH) {
-    feed.style.bottom = (wH - fTop + 16) + 'px'
-  } else {
-    feed.style.bottom = '80px'
+  if (!feed) return
+  // Stay above stats bar always
+  const statsBar = document.querySelector('.stats-bar')
+  const statsH   = statsBar ? statsBar.offsetHeight : 72
+  // Also check if footer is visible
+  const footer   = document.getElementById('mainFooter')
+  if (footer) {
+    const fTop = footer.getBoundingClientRect().top
+    const wH   = window.innerHeight
+    if (fTop < wH) {
+      feed.style.bottom = (wH - fTop + statsH + 8) + 'px'
+      return
+    }
   }
+  feed.style.bottom = (statsH + 16) + 'px'
 }
 window.addEventListener('scroll', adjustFeed)
 window.addEventListener('resize', adjustFeed)
