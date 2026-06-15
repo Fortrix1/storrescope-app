@@ -610,10 +610,28 @@ nav{
 <div id="results"></div>
 
 <!-- TESTIMONIALS SECTION -->
-<div id="testimonialsSection" style="display:none;max-width:960px;margin:0 auto;padding:0 5% 60px">
+<div id="testimonialsSection" style="max-width:960px;margin:0 auto;padding:0 5% 60px">
   <div style="font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:12px">What Clients Say</div>
-  <div style="font-family:'Bebas Neue',sans-serif;font-size:clamp(32px,4vw,48px);letter-spacing:1px;color:var(--white);margin-bottom:32px">Client Testimonials</div>
-  <div id="testimonialsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px"></div>
+  <div style="font-family:'Bebas Neue',sans-serif;font-size:clamp(32px,4vw,48px);letter-spacing:1px;color:var(--white);margin-bottom:12px">Real Results.<br/>Real People.</div>
+  <p style="font-size:15px;color:var(--muted);max-width:480px;line-height:1.8;margin-bottom:28px">Every store we fix tells a story. Here's what store owners say after working with Karios Agency.</p>
+  <div id="testimonialsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px">
+    <div id="homeTesiPlaceholder" style="background:rgba(255,255,255,0.03);border:1px dashed rgba(255,255,255,0.08);border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="width:42px;height:42px;border-radius:50%;background:rgba(212,168,75,0.06);border:1px dashed rgba(212,168,75,0.2);display:flex;align-items:center;justify-content:center;font-size:17px">✨</div>
+        <div>
+          <div style="font-weight:700;font-size:14px;color:var(--muted)">Your name here</div>
+          <div style="font-size:12px;color:var(--muted2)">Your store</div>
+        </div>
+      </div>
+      <div style="font-size:13px;color:var(--muted2);line-height:1.7;font-style:italic">"Client testimonials will appear here automatically when added."</div>
+      <div style="font-size:13px;opacity:.3">⭐⭐⭐⭐⭐</div>
+    </div>
+  </div>
+  <div style="margin-top:20px">
+    <a href="https://wa.me/18734712764" target="_blank" style="display:inline-flex;align-items:center;gap:8px;background:transparent;border:1px solid rgba(212,168,75,0.25);color:var(--gold);font-size:13px;font-weight:600;padding:11px 22px;border-radius:8px;text-decoration:none">
+      💬 Become a success story
+    </a>
+  </div>
 </div>
 
 <!-- CONTACT SECTION -->
@@ -1116,6 +1134,22 @@ window.resetScan = function() {
 //  ACTIVITY FEED
 // ══════════════════════════════════════════════════════
 // ── LOAD TESTIMONIALS ───────────────────────────────
+async function loadSiteAssets() {
+  try {
+    const r = await fetch('/api/works')
+    if (!r.ok) return
+    const d = await r.json()
+    // Update favicon if logo set via bot
+    if (d.logo) {
+      const link = document.querySelector("link[rel='icon']") || document.createElement('link')
+      link.rel  = 'icon'
+      link.href = d.logo
+      document.head.appendChild(link)
+    }
+  } catch(e) {}
+}
+loadSiteAssets()
+
 async function loadTestimonials() {
   try {
     const r = await fetch('/api/works')
@@ -1124,11 +1158,12 @@ async function loadTestimonials() {
     const testimonials = d.testimonials || []
     if (!testimonials.length) return
 
-    const section = document.getElementById('testimonialsSection')
-    const grid    = document.getElementById('testimonialsGrid')
-    if (!section || !grid) return
+    const grid = document.getElementById('testimonialsGrid')
+    if (!grid) return
 
-    section.style.display = 'block'
+    // Remove placeholder
+    const ph = document.getElementById('homeTesiPlaceholder')
+    if (ph) ph.remove()
 
     testimonials.forEach(t => {
       const card = document.createElement('div')

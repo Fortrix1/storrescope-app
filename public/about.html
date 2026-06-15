@@ -231,10 +231,33 @@ footer{border-top:1px solid var(--border);padding:28px 6%;display:flex;align-ite
 </div>
 
 <!-- TESTIMONIALS -->
-<div class="section fade" id="testimonials-section" style="display:none">
+<div class="section fade" id="testimonials-section">
   <div class="sec-label">What Clients Say</div>
-  <div class="sec-h">Testimonials</div>
-  <div class="testi-grid" id="testiGrid"></div>
+  <div class="sec-h">Real Results.<br/>Real People.</div>
+  <p style="font-size:15px;color:var(--muted);max-width:520px;line-height:1.8;margin-bottom:32px">
+    Every store we work with is different — different niche, different problems, different goals.
+    But the result is always the same. <strong style="color:var(--text)">More visibility. More trust. More sales.</strong>
+    Here's what store owners say after working with Karios Agency.
+  </p>
+  <div class="testi-grid" id="testiGrid">
+    <!-- Placeholder shown until bot testimonials load -->
+    <div class="testi-card fade on" id="testiPlaceholder">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div class="testi-avatar" style="background:rgba(212,168,75,0.06);border-style:dashed">✨</div>
+        <div>
+          <div class="testi-name" style="color:var(--muted)">Your name here</div>
+          <div class="testi-biz" style="color:var(--muted2)">Your store</div>
+        </div>
+      </div>
+      <div class="testi-quote" style="color:var(--muted2)">"Testimonials from happy clients will appear here. Work with us and share your results."</div>
+      <div style="font-size:13px;opacity:.3">⭐⭐⭐⭐⭐</div>
+    </div>
+  </div>
+  <div style="margin-top:24px;text-align:center">
+    <a href="https://wa.me/18734712764" target="_blank" style="display:inline-flex;align-items:center;gap:8px;background:transparent;border:1px solid rgba(212,168,75,0.25);color:var(--gold);font-size:13px;font-weight:600;padding:11px 22px;border-radius:8px;text-decoration:none;letter-spacing:.04em">
+      💬 Become a success story — work with us
+    </a>
+  </div>
 </div>
 
 <!-- SERVICES -->
@@ -277,6 +300,21 @@ footer{border-top:1px solid var(--border);padding:28px 6%;display:flex;align-ite
 </footer>
 
 <script>
+// Load logo from bot
+async function loadLogo() {
+  try {
+    const r = await fetch('/api/works')
+    if (!r.ok) return
+    const d = await r.json()
+    if (d.logo) {
+      const link = document.querySelector("link[rel='icon']") || document.createElement('link')
+      link.rel='icon'; link.href=d.logo
+      document.head.appendChild(link)
+    }
+  } catch(e) {}
+}
+loadLogo()
+
 // Scroll reveal
 const obs = new IntersectionObserver(e => {
   e.forEach(el => { if (el.isIntersecting) el.target.classList.add('on') })
@@ -333,7 +371,9 @@ async function loadDynamic() {
     if (testimonials.length) {
       const section = document.getElementById('testimonials-section')
       const grid    = document.getElementById('testiGrid')
-      if (section) section.style.display = 'block'
+      // Remove placeholder when real ones load
+      const placeholder = document.getElementById('testiPlaceholder')
+      if (placeholder) placeholder.remove()
       testimonials.forEach(t => {
         const card = document.createElement('div')
         card.className = 'testi-card fade'

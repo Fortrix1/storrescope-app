@@ -143,6 +143,24 @@ module.exports = async (req, res) => {
     return res.status(200).send('OK')
   }
 
+  // ── /setlogo ──
+  if (text === '/setlogo') {
+    await send(chatId,
+      `<b>How to update your site logo:</b>
+
+` +
+      `Send a photo of your logo with caption:
+` +
+      `<code>logo</code>
+
+` +
+      `The image will be saved and used as your site favicon and logo.
+` +
+      `Best size: square image, at least 200x200px.`
+    )
+    return res.status(200).send('OK')
+  }
+
   // ── /addwork ──
   if (text === '/addwork') {
     await send(chatId,
@@ -216,7 +234,36 @@ module.exports = async (req, res) => {
     if (!isAdmin) { await send(chatId, '❌ Not authorised.'); return res.status(200).send('OK') }
 
     const isTestimonial = caption.toLowerCase().startsWith('testimonial:')
+    const isLogo        = caption.toLowerCase().trim() === 'logo'
     const db = await getData()
+
+    // ── Logo upload ──
+    if (isLogo) {
+      await send(chatId, '⏳ Uploading logo...')
+      const fileId      = photo[photo.length-1].file_id
+      const telegramUrl = await getPhotoUrl(fileId)
+      const imgUrl      = await uploadToCloudinary(telegramUrl)
+      if (imgUrl) {
+        db.logo = imgUrl
+        await saveData(db)
+        await send(chatId,
+          `✅ <b>Logo updated!</b>
+
+` +
+          `Your logo is now stored. To use it as favicon on your website, copy this URL:
+` +
+          `<code>${imgUrl}</code>
+
+` +
+          `Add it to your index.html as:
+` +
+          `<code>&lt;link rel="icon" href="${imgUrl}"&gt;</code>`
+        )
+      } else {
+        await send(chatId, '⚠️ Upload failed. Try again.')
+      }
+      return res.status(200).send('OK')
+    }
 
     await send(chatId, '⏳ Uploading image...')
     const fileId      = photo[photo.length-1].file_id

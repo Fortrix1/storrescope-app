@@ -15,6 +15,7 @@ module.exports = async (req, res) => {
     res.status(200).json({
       works:        d.record?.works        || [],
       testimonials: d.record?.testimonials || [],
+      logo:         d.record?.logo         || '',
     })
   } catch(e) {
     res.status(200).json({ works: [], testimonials: [] })
