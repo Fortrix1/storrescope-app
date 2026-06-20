@@ -118,7 +118,24 @@ module.exports = async (req, res) => {
   const text    = msg.text || ''
   const caption = msg.caption || ''
   const photo   = msg.photo
-  const isAdmin = !ADMIN_ID || userId === ADMIN_ID
+  // Strict admin check — hardcoded fallback so env var failure never opens access
+  const OWNER_ID = ADMIN_ID || '6427084234'
+  const isAdmin  = userId === OWNER_ID
+
+  // ── Block non-admins early ──
+  // Allow /start for everyone so they can see the menu
+  // Block everything else immediately
+  if (!text.startsWith('/start') && !isAdmin) {
+    await send(chatId,
+      `⛔ This bot is private.
+
+` +
+      `Only the bot owner can manage the website.
+` +
+      `Contact us at t.me/kariosagency`
+    )
+    return res.status(200).send('OK')
+  }
 
   // ── /start ──
   if (text.startsWith('/start')) {
