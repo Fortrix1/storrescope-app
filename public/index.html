@@ -8,7 +8,7 @@
 <meta property="og:title" content="Karios Agency — We Don't Guess. We Diagnose."/>
 <meta property="og:description" content="Free store analysis in 10 seconds. We turn struggling stores into stores that sell."/>
 <meta property="og:type" content="website"/>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>"/>
+<link rel="icon" id="faviconLink" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23000'/><text y='.9em' font-size='90'>K</text></svg>"/>
 <meta name="description" content="Karios Agency turns struggling stores into stores that sell. Free store analysis in under 10 seconds."/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cabinet+Grotesk:wght@300;400;500;700;800;900&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet"/>
@@ -1139,15 +1139,19 @@ async function loadSiteAssets() {
     const r = await fetch('/api/works')
     if (!r.ok) return
     const d = await r.json()
-    // Update favicon if logo set via bot
     if (d.logo) {
-      const link = document.querySelector("link[rel='icon']") || document.createElement('link')
-      link.rel  = 'icon'
-      link.href = d.logo
+      // Remove ALL existing favicon links first
+      document.querySelectorAll("link[rel='icon'], link[rel='shortcut icon']").forEach(l => l.remove())
+      // Create fresh one — forces browser to use new icon immediately
+      const link = document.createElement('link')
+      link.rel   = 'icon'
+      link.type  = 'image/png'
+      link.href  = d.logo + '?v=' + Date.now()  // cache-bust
       document.head.appendChild(link)
     }
   } catch(e) {}
 }
+// Run immediately on page load
 loadSiteAssets()
 
 async function loadTestimonials() {
