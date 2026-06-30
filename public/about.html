@@ -303,22 +303,28 @@ footer{border-top:1px solid var(--border);padding:28px 6%;display:flex;align-ite
 // Load logo from bot
 async function loadLogo() {
   try {
-    const r = await fetch('/api/works')
+    const r = await fetch('/api/works', { cache: 'no-store' })
     if (!r.ok) return
     const d = await r.json()
     if (d.logo) {
-      // Remove ALL existing favicon links first
-      document.querySelectorAll("link[rel='icon'], link[rel='shortcut icon']").forEach(l => l.remove())
-      // Create fresh one with cache-bust
+      document.querySelectorAll("link[rel*='icon']").forEach(l => l.remove())
+      const bustUrl = d.logo + (d.logo.includes('?') ? '&' : '?') + 'v=' + Date.now()
       const link = document.createElement('link')
-      link.rel   = 'icon'
-      link.type  = 'image/png'
-      link.href  = d.logo + '?v=' + Date.now()
+      link.rel='icon'; link.type='image/png'; link.href=bustUrl
       document.head.appendChild(link)
+      const link2 = document.createElement('link')
+      link2.rel='shortcut icon'; link2.type='image/png'; link2.href=bustUrl
+      document.head.appendChild(link2)
     }
   } catch(e) {}
 }
 loadLogo()
+let faviconChecks2 = 0
+const faviconInterval2 = setInterval(() => {
+  faviconChecks2++
+  loadLogo()
+  if (faviconChecks2 >= 4) clearInterval(faviconInterval2)
+}, 5000)
 
 // Scroll reveal
 const obs = new IntersectionObserver(e => {

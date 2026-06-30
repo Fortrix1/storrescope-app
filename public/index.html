@@ -1136,23 +1136,41 @@ window.resetScan = function() {
 // ── LOAD TESTIMONIALS ───────────────────────────────
 async function loadSiteAssets() {
   try {
-    const r = await fetch('/api/works')
+    const r = await fetch('/api/works', { cache: 'no-store' })
     if (!r.ok) return
     const d = await r.json()
     if (d.logo) {
-      // Remove ALL existing favicon links first
-      document.querySelectorAll("link[rel='icon'], link[rel='shortcut icon']").forEach(l => l.remove())
-      // Create fresh one — forces browser to use new icon immediately
-      const link = document.createElement('link')
-      link.rel   = 'icon'
-      link.type  = 'image/png'
-      link.href  = d.logo + '?v=' + Date.now()  // cache-bust
-      document.head.appendChild(link)
+      setFavicon(d.logo)
     }
   } catch(e) {}
 }
-// Run immediately on page load
+
+function setFavicon(url) {
+  // Remove every possible favicon-related link tag
+  document.querySelectorAll("link[rel*='icon']").forEach(l => l.remove())
+  const bustUrl = url + (url.includes('?') ? '&' : '?') + 'v=' + Date.now()
+  const link = document.createElement('link')
+  link.rel  = 'icon'
+  link.type = 'image/png'
+  link.href = bustUrl
+  document.head.appendChild(link)
+  // Also add shortcut icon for older browser compatibility
+  const link2 = document.createElement('link')
+  link2.rel  = 'shortcut icon'
+  link2.type = 'image/png'
+  link2.href = bustUrl
+  document.head.appendChild(link2)
+}
+
+// Run immediately, and re-check every 5 seconds for first 20 seconds
+// (handles slow network / browser favicon cache quirks)
 loadSiteAssets()
+let faviconChecks = 0
+const faviconInterval = setInterval(() => {
+  faviconChecks++
+  loadSiteAssets()
+  if (faviconChecks >= 4) clearInterval(faviconInterval)
+}, 5000)
 
 async function loadTestimonials() {
   try {
