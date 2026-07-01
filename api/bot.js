@@ -113,8 +113,27 @@ module.exports = async (req, res) => {
     }]))
   }
 
-  // In-memory session per chat (resets each cold start, acceptable for low traffic)
-  global.userSites = global.userSites || {}
+  // Session stored in a simple JSON file approach
+  // Since Vercel is stateless we use a separate session bin
+  const SESSION_BIN = 'https://api.jsonbin.io/v3/b/' + (process.env.JSONBIN_BIN_SESSION || '6a2b9c8ff5f4af5e29e4612d')
+
+  async function getSession() {
+    try {
+      const r = await fetch(SESSION_BIN + '/latest', { headers: { 'X-Master-Key': BIN_KEY } })
+      const d = await r.json()
+      return d.record?.sessions || {}
+    } catch { return {} }
+  }
+
+  async function saveSession(sessions) {
+    try {
+      await fetch(SESSION_BIN, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'X-Master-Key': BIN_KEY },
+        body: JSON.stringify({ sessions })
+      })
+    } catch {}
+  }
 
   // ── Callback buttons ──
   if (callback) {
@@ -131,7 +150,9 @@ module.exports = async (req, res) => {
     // Site selection
     if (data.startsWith('site_')) {
       const siteKey = data.replace('site_', '')
-      global.userSites[chatId] = siteKey
+      const sessions = await getSession()
+      sessions[chatId] = siteKey
+      await saveSession(sessions)
       const site = SITES[siteKey]
       await send(chatId,
         `✅ Now managing: <b>${site.emoji} ${site.name}</b>\n\n` +
@@ -144,7 +165,8 @@ module.exports = async (req, res) => {
     }
 
     // Delete handlers
-    const siteKey = global.userSites[chatId]
+    const sessions0 = await getSession()
+    const siteKey = sessions0[chatId]
     if (!siteKey) {
       await send(chatId, 'Please select a site first with /start')
       return res.status(200).send('OK')
@@ -202,7 +224,8 @@ module.exports = async (req, res) => {
   }
 
   // From here, need an active site selected
-  const siteKey = global.userSites[chatId]
+  const sessions1 = await getSession()
+  const siteKey = sessions1[chatId]
   if (!siteKey) {
     await send(chatId, `Please pick a site first:`, siteMenu())
     return res.status(200).send('OK')
