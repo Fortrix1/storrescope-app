@@ -20,7 +20,7 @@ module.exports = async (req, res) => {
     },
     mamas: {
       name: "Mama's Kitchen", emoji: '🍽️',
-      binUrl: 'https://api.jsonbin.io/v3/b/6a4412b7da38895dfe17b1f7',
+      binUrl: 'https://api.jsonbin.io/v3/b/6a482123f5f4af5e295c3098',
       itemFormat: 'Dish | Tag | Price | Description',
       itemExample: 'Jollof Rice | Bestseller | $12 | Smoky party rice with grilled chicken',
     },
@@ -54,13 +54,25 @@ module.exports = async (req, res) => {
 
   async function saveData(binUrl, data) {
     try {
-      await fetch(binUrl, {
+      const r = await fetch(binUrl, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json', 'X-Master-Key': BIN_KEY },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Master-Key': BIN_KEY,
+          'X-Bin-Private': 'false'
+        },
         body: JSON.stringify(data)
       })
+      const result = await r.json()
+      if (!r.ok) {
+        console.error('saveData failed:', r.status, JSON.stringify(result))
+        return false
+      }
       return true
-    } catch { return false }
+    } catch(e) {
+      console.error('saveData error:', e.message)
+      return false
+    }
   }
 
   async function getPhotoUrl(fileId) {
