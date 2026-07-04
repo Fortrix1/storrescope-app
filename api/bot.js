@@ -473,10 +473,7 @@ module.exports = async (req, res) => {
     })
     const saved = await saveData(KARIOS_BIN, db)
     await send(chatId, saved
-      ? `✅ <b>Social links updated!</b>
-
-` + Object.entries(db.socials).map(([k,v]) => `${k}: ${v}`).join('
-')
+      ? `✅ <b>Social links updated!</b>\n` + Object.entries(db.socials).map(([k,v]) => k+': '+v).join('\n')
       : `⚠️ Could not save.`
     )
     return res.status(200).send('OK')
