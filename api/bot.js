@@ -11,10 +11,12 @@ module.exports = async (req, res) => {
   const CLOUD_KEY    = process.env.CLOUDINARY_KEY    || '499294615748537'
   const CLOUD_SECRET = process.env.CLOUDINARY_SECRET || 'z17JJ6bKde2TJqGd0fIdokftHi8'
 
+  const KARIOS_BIN = 'https://api.jsonbin.io/v3/b/6a2b9c8ff5f4af5e29e4612d'
+
   const SITES = {
     karios: {
       name: 'Karios Agency', emoji: '⚡',
-      binUrl: 'https://api.jsonbin.io/v3/b/6a2b9c8ff5f4af5e29e4612d',
+      binUrl: KARIOS_BIN,
       itemFormat: 'Title | Tag | Result 1 | Result 2',
       itemExample: 'Fashion Store Lagos | SEO Fix | 0→12 sales | +340% traffic',
     },
@@ -48,8 +50,16 @@ module.exports = async (req, res) => {
     try {
       const r = await fetch(binUrl + '/latest', { headers: { 'X-Master-Key': BIN_KEY } })
       const d = await r.json()
-      return { works: d.record?.works || [], testimonials: d.record?.testimonials || [], logo: d.record?.logo || '' }
-    } catch { return { works: [], testimonials: [], logo: '' } }
+      const rec = d.record || {}
+      return {
+        works:        rec.works        || [],
+        testimonials: rec.testimonials || [],
+        logo:         rec.logo         || '',
+        automations:  rec.automations  || [],
+        partners:     rec.partners     || [],
+        socials:      rec.socials      || {},
+      }
+    } catch { return { works: [], testimonials: [], logo: '', automations: [], partners: [], socials: {} } }
   }
 
   async function saveData(binUrl, data) {
@@ -108,16 +118,24 @@ module.exports = async (req, res) => {
   }
 
   function siteMenu(siteKey) {
-    const site = SITES[siteKey]
-    return [
+    const isKarios = siteKey === 'karios'
+    const rows = [
       [{ text: '➕ Add item',         callback_data: `help_add_${siteKey}`   }],
       [{ text: '⭐ Add review',        callback_data: `help_testi_${siteKey}` }],
       [{ text: '🖼 Set logo',          callback_data: `help_logo_${siteKey}`  }],
       [{ text: '📋 List items',        callback_data: `list_${siteKey}`       }],
       [{ text: '🗑 Delete item',       callback_data: `dellist_${siteKey}`    }],
       [{ text: '🗑 Delete review',     callback_data: `deltestilist_${siteKey}`}],
-      [{ text: '🔀 Switch site',       callback_data: 'switch_site'           }],
     ]
+    if (isKarios) {
+      rows.push([{ text: '🎬 Add automation video', callback_data: 'help_auto' }])
+      rows.push([{ text: '🤝 Add partner/friend',   callback_data: 'help_partner' }])
+      rows.push([{ text: '🔗 Update social links',  callback_data: 'help_socials' }])
+      rows.push([{ text: '🗑 Delete automation',    callback_data: 'delautomation' }])
+      rows.push([{ text: '🗑 Delete partner',       callback_data: 'delpartner' }])
+    }
+    rows.push([{ text: '🔀 Switch site', callback_data: 'switch_site' }])
+    return rows
   }
 
   // ── CALLBACKS ──
@@ -142,6 +160,108 @@ module.exports = async (req, res) => {
 
     if (data === 'switch_site') {
       await send(chatId, 'Which site?', siteKeyboard())
+      return res.status(200).send('OK')
+    }
+
+    // Automation help
+    if (data === 'help_auto') {
+      await send(chatId,
+        `<b>Add an automation video:</b>
+
+` +
+        `Send a photo (thumbnail) with caption:
+` +
+        `<code>auto: Title | Description | VideoURL</code>
+
+` +
+        `<b>Example:</b>
+` +
+        `<code>auto: Restaurant Menu Update | Send a message, website updates instantly | https://tiktok.com/...</code>
+
+` +
+        `For YouTube use the full URL. For TikTok use the share link.`
+      )
+      return res.status(200).send('OK')
+    }
+
+    // Partner help
+    if (data === 'help_partner') {
+      await send(chatId,
+        `<b>Add a partner/friend profile:</b>
+
+` +
+        `Send their photo with caption:
+` +
+        `<code>partner: Name | What they do | FiverrLink</code>
+
+` +
+        `<b>Example:</b>
+` +
+        `<code>partner: John Doe | Logo & Brand Design | https://fiverr.com/johndoe</code>`
+      )
+      return res.status(200).send('OK')
+    }
+
+    // Socials help
+    if (data === 'help_socials') {
+      await send(chatId,
+        `<b>Update your social/contact links:</b>
+
+` +
+        `Send a text message in this format:
+` +
+        `<code>socials: fiverr=URL, linkedin=URL, twitter=URL, instagram=URL, youtube=URL</code>
+
+` +
+        `<b>Example:</b>
+` +
+        `<code>socials: fiverr=https://fiverr.com/karios, linkedin=https://linkedin.com/in/karios, instagram=https://instagram.com/kariosagency</code>
+
+` +
+        `Only include the ones you have. Others will stay unchanged.`
+      )
+      return res.status(200).send('OK')
+    }
+
+    // Delete automation
+    if (data === 'delautomation') {
+      const db = await getData(KARIOS_BIN)
+      if (!db.automations.length) { await send(chatId, 'No automations to delete.'); return res.status(200).send('OK') }
+      const keyboard = db.automations.map((a,i) => [{ text: `🗑 ${a.title}`, callback_data: `delauto_${i}` }])
+      await send(chatId, 'Which automation to remove?', keyboard)
+      return res.status(200).send('OK')
+    }
+
+    // Delete partner
+    if (data === 'delpartner') {
+      const db = await getData(KARIOS_BIN)
+      if (!db.partners.length) { await send(chatId, 'No partners to delete.'); return res.status(200).send('OK') }
+      const keyboard = db.partners.map((p,i) => [{ text: `🗑 ${p.name}`, callback_data: `delpartner_${i}` }])
+      await send(chatId, 'Which partner to remove?', keyboard)
+      return res.status(200).send('OK')
+    }
+
+    // Confirm delete automation
+    if (data.startsWith('delauto_')) {
+      const idx = parseInt(data.replace('delauto_', ''))
+      const db  = await getData(KARIOS_BIN)
+      if (!isNaN(idx) && idx < db.automations.length) {
+        const removed = db.automations.splice(idx, 1)[0]
+        await saveData(KARIOS_BIN, db)
+        await send(chatId, `✅ Removed automation: <b>${removed.title}</b>`)
+      }
+      return res.status(200).send('OK')
+    }
+
+    // Confirm delete partner
+    if (data.startsWith('delpartner_')) {
+      const idx = parseInt(data.replace('delpartner_', ''))
+      const db  = await getData(KARIOS_BIN)
+      if (!isNaN(idx) && idx < db.partners.length) {
+        const removed = db.partners.splice(idx, 1)[0]
+        await saveData(KARIOS_BIN, db)
+        await send(chatId, `✅ Removed partner: <b>${removed.name}</b>`)
+      }
       return res.status(200).send('OK')
     }
 
@@ -337,6 +457,28 @@ module.exports = async (req, res) => {
     await send(chatId, saved
       ? `✅ <b>Added to ${site.name}!</b>\n\n📌 <b>${title}</b>\n${tag?`🏷 ${tag}\n`:''}${result1?`💰 ${result1}\n`:''}${result2?`📝 ${result2}`:''}`
       : `⚠️ Could not save.`)
+    return res.status(200).send('OK')
+  }
+
+  // Socials text command (no photo needed)
+  if (text && text.toLowerCase().startsWith('socials:')) {
+    if (!isAdmin) { await send(chatId, '⛔ Not authorised.'); return res.status(200).send('OK') }
+    const clean = text.slice('socials:'.length).trim()
+    const db    = await getData(KARIOS_BIN)
+    if (!db.socials) db.socials = {}
+    clean.split(',').forEach(pair => {
+      const [key, ...rest] = pair.trim().split('=')
+      const val = rest.join('=').trim()
+      if (key && val) db.socials[key.trim().toLowerCase()] = val
+    })
+    const saved = await saveData(KARIOS_BIN, db)
+    await send(chatId, saved
+      ? `✅ <b>Social links updated!</b>
+
+` + Object.entries(db.socials).map(([k,v]) => `${k}: ${v}`).join('
+')
+      : `⚠️ Could not save.`
+    )
     return res.status(200).send('OK')
   }
 

@@ -273,6 +273,22 @@ footer{border-top:1px solid var(--border);padding:28px 6%;display:flex;align-ite
   </div>
 </div>
 
+<!-- AUTOMATIONS -->
+<div class="section fade" id="automations-section" style="display:none">
+  <div class="sec-label">What We Build</div>
+  <div class="sec-h">Automation Videos</div>
+  <p style="font-size:15px;color:var(--muted);max-width:520px;line-height:1.8;margin-bottom:28px">Watch our automations in action — real systems we built for real businesses.</p>
+  <div id="automationsGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px"></div>
+</div>
+
+<!-- PARTNERS -->
+<div class="section fade" id="partners-section" style="display:none">
+  <div class="sec-label">Our Network</div>
+  <div class="sec-h">Partners & Friends</div>
+  <p style="font-size:15px;color:var(--muted);max-width:520px;line-height:1.8;margin-bottom:28px">Real people in our network. Click their profiles to see their work and hire them directly.</p>
+  <div id="partnersGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px"></div>
+</div>
+
 <!-- CTA -->
 <div class="section fade">
   <div class="cta-box">
@@ -283,6 +299,7 @@ footer{border-top:1px solid var(--border);padding:28px 6%;display:flex;align-ite
       <a href="https://wa.me/18734712764" class="btn-ghost" target="_blank">💬 WhatsApp</a>
       <a href="https://t.me/kariosagency" class="btn-ghost" target="_blank">✈ Telegram</a>
     </div>
+    <div id="socialsRow" style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:16px"></div>
   </div>
 </div>
 
@@ -402,6 +419,79 @@ async function loadDynamic() {
         setTimeout(() => { card.classList.add('on'); obs.observe(card) }, 100)
       })
     }
+    // Automations
+    const automations = d.automations || []
+    if (automations.length) {
+      const section = document.getElementById('automations-section')
+      const grid    = document.getElementById('automationsGrid')
+      if (section) section.style.display = 'block'
+      automations.forEach(a => {
+        const card = document.createElement('div')
+        card.className = 'work-card fade'
+        const isYT = a.url && a.url.includes('youtube')
+        const isTT = a.url && a.url.includes('tiktok')
+        const videoId = isYT ? (a.url.match(/(?:v=|youtu\.be\/)([^&\s]+)/)?.[1] || '') : ''
+        card.innerHTML = `
+          <div class="work-card-top" style="${a.imgUrl ? `background:url('${a.imgUrl}') center/cover` : 'background:linear-gradient(135deg,#0d0c18,#16142a)'}">
+            ${!a.imgUrl ? '<span style="font-size:40px">🎬</span>' : ''}
+            ${a.url ? `<a href="${a.url}" target="_blank" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.4);border-radius:18px 18px 0 0;text-decoration:none;font-size:40px">▶️</a>` : ''}
+          </div>
+          <div class="work-card-body">
+            <span class="work-tag">Automation</span>
+            <div class="work-title">${a.title}</div>
+            <div class="work-desc">${a.desc || ''}</div>
+            ${a.url ? `<a href="${a.url}" target="_blank" style="display:inline-flex;align-items:center;gap:6px;margin-top:10px;font-size:12px;font-weight:700;color:var(--gold);text-decoration:none">Watch Video →</a>` : ''}
+          </div>`
+        grid?.appendChild(card)
+        setTimeout(() => { card.classList.add('on'); obs.observe(card) }, 100)
+      })
+    }
+
+    // Partners
+    const partners = d.partners || []
+    if (partners.length) {
+      const section = document.getElementById('partners-section')
+      const grid    = document.getElementById('partnersGrid')
+      if (section) section.style.display = 'block'
+      partners.forEach(p => {
+        const card = document.createElement('div')
+        card.className = 'testi-card fade'
+        card.style.cursor = p.link ? 'pointer' : 'default'
+        if (p.link) card.onclick = () => window.open(p.link, '_blank')
+        card.innerHTML = `
+          <div style="display:flex;align-items:center;gap:12px">
+            ${p.imgUrl && p.imgUrl.includes('cloudinary')
+              ? `<img src="${p.imgUrl}" style="width:48px;height:48px;border-radius:50%;object-fit:cover;border:2px solid rgba(212,168,75,0.3)">`
+              : `<div class="testi-avatar">${p.name.charAt(0).toUpperCase()}</div>`}
+            <div>
+              <div class="testi-name">${p.name}</div>
+              <div class="testi-biz">${p.role || ''}</div>
+            </div>
+          </div>
+          ${p.link ? `<div style="margin-top:10px"><a href="${p.link}" target="_blank" style="font-size:12px;font-weight:700;color:var(--gold);text-decoration:none">View Profile →</a></div>` : ''}`
+        grid?.appendChild(card)
+        setTimeout(() => { card.classList.add('on'); obs.observe(card) }, 100)
+      })
+    }
+
+    // Socials
+    const socials = d.socials || {}
+    if (Object.keys(socials).length) {
+      const row = document.getElementById('socialsRow')
+      if (row) {
+        const icons = { fiverr:'🟢', linkedin:'💼', twitter:'🐦', instagram:'📸', youtube:'▶️', tiktok:'🎵', github:'💻' }
+        Object.entries(socials).forEach(([key, url]) => {
+          const a = document.createElement('a')
+          a.href   = url; a.target = '_blank'
+          a.style.cssText = 'display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:var(--text);font-size:13px;font-weight:600;padding:9px 16px;border-radius:8px;text-decoration:none;transition:border-color .2s'
+          a.innerHTML = `${icons[key] || '🔗'} ${key.charAt(0).toUpperCase()+key.slice(1)}`
+          a.onmouseover = () => a.style.borderColor = 'rgba(212,168,75,0.4)'
+          a.onmouseout  = () => a.style.borderColor = 'rgba(255,255,255,0.08)'
+          row.appendChild(a)
+        })
+      }
+    }
+
   } catch(e) { console.log('loadDynamic error:', e) }
 }
 
