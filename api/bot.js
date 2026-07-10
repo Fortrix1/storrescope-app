@@ -227,7 +227,7 @@ module.exports = async (req, res) => {
       const db = await getData(KARIOS_BIN)
       const team = db.team || []
       if (!team.length) { await send(chatId, 'No team members yet.'); return res.status(200).send('OK') }
-      const keyboard = team.map((m,i) => [{ text: \`🗑 \${m.name}\`, callback_data: \`delteam_\${i}\` }])
+      const keyboard = team.map((m,i) => [{ text: `🗑 ${m.name}`, callback_data: `delteam_${i}` }])
       await send(chatId, 'Which team member to remove?', keyboard)
       return res.status(200).send('OK')
     }
@@ -239,7 +239,7 @@ module.exports = async (req, res) => {
       if (!isNaN(idx) && idx < (db.team||[]).length) {
         const removed = db.team.splice(idx, 1)[0]
         await saveData(KARIOS_BIN, db)
-        await send(chatId, \`✅ Removed team member: <b>\${removed.name}</b>\`)
+        await send(chatId, `✅ Removed team member: <b>${removed.name}</b>`)
       }
       return res.status(200).send('OK')
     }
