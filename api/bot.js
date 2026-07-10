@@ -132,7 +132,9 @@ module.exports = async (req, res) => {
       rows.push([{ text: '🤝 Add partner/friend',   callback_data: 'help_partner' }])
       rows.push([{ text: '🔗 Update social links',  callback_data: 'help_socials' }])
       rows.push([{ text: '🗑 Delete automation',    callback_data: 'delautomation' }])
-      rows.push([{ text: '🗑 Delete partner',       callback_data: 'delpartner' }])
+      rows.push([{ text: '🗑 Delete partner',       callback_data: 'delpartner'    }])
+      rows.push([{ text: '👥 Add team member',      callback_data: 'help_team'     }])
+      rows.push([{ text: '🗑 Delete team member',   callback_data: 'delteamlist'   }])
     }
     rows.push([{ text: '🔀 Switch site', callback_data: 'switch_site' }])
     return rows
@@ -199,6 +201,46 @@ module.exports = async (req, res) => {
 ` +
         `<code>partner: John Doe | Logo & Brand Design | https://fiverr.com/johndoe</code>`
       )
+      return res.status(200).send('OK')
+    }
+
+    // Team help
+    if (data === 'help_team') {
+      await send(chatId,
+        `<b>Add a team member:</b>
+
+` +
+        `Send their photo with caption:
+` +
+        `<code>team: Name | Role | Email | LinkedIn or website (optional)</code>
+
+` +
+        `<b>Example:</b>
+` +
+        `<code>team: Karios | Founder & Lead Strategist | hello@kariosagency.com | https://linkedin.com/in/karios</code>`
+      )
+      return res.status(200).send('OK')
+    }
+
+    // Delete team list
+    if (data === 'delteamlist') {
+      const db = await getData(KARIOS_BIN)
+      const team = db.team || []
+      if (!team.length) { await send(chatId, 'No team members yet.'); return res.status(200).send('OK') }
+      const keyboard = team.map((m,i) => [{ text: \`🗑 \${m.name}\`, callback_data: \`delteam_\${i}\` }])
+      await send(chatId, 'Which team member to remove?', keyboard)
+      return res.status(200).send('OK')
+    }
+
+    // Confirm delete team member
+    if (data.startsWith('delteam_')) {
+      const idx = parseInt(data.replace('delteam_', ''))
+      const db  = await getData(KARIOS_BIN)
+      if (!isNaN(idx) && idx < (db.team||[]).length) {
+        const removed = db.team.splice(idx, 1)[0]
+        await saveData(KARIOS_BIN, db)
+        await send(chatId, \`✅ Removed team member: <b>\${removed.name}</b>\`)
+      }
       return res.status(200).send('OK')
     }
 
@@ -443,6 +485,49 @@ module.exports = async (req, res) => {
       await send(chatId, saved
         ? `✅ <b>Review added to ${site.name}!</b>\n\n⭐ <b>${name}</b>${biz?` — ${biz}`:''}\n${quote?`"${quote}"`:''}`
         : `⚠️ Could not save.`)
+      return res.status(200).send('OK')
+    }
+
+    // Automation video (karios only)
+    if (siteKey === 'karios' && cleanCaption.toLowerCase().startsWith('auto:')) {
+      const parts = cleanCaption.slice(5).split('|').map(s => s.trim())
+      const title = parts[0] || 'Automation'
+      const desc  = parts[1] || ''
+      const url   = parts[2] || ''
+      const db2   = await getData(KARIOS_BIN)
+      db2.automations = db2.automations || []
+      db2.automations.unshift({ id: Date.now(), title, desc, url, imgUrl, addedAt: new Date().toISOString() })
+      const saved = await saveData(KARIOS_BIN, db2)
+      await send(chatId, saved ? `✅ Automation added: <b>${title}</b>` : `⚠️ Could not save.`)
+      return res.status(200).send('OK')
+    }
+
+    // Partner profile (karios only)
+    if (siteKey === 'karios' && cleanCaption.toLowerCase().startsWith('partner:')) {
+      const parts = cleanCaption.slice(8).split('|').map(s => s.trim())
+      const name  = parts[0] || 'Partner'
+      const role  = parts[1] || ''
+      const link  = parts[2] || ''
+      const db2   = await getData(KARIOS_BIN)
+      db2.partners = db2.partners || []
+      db2.partners.unshift({ id: Date.now(), name, role, link, imgUrl, addedAt: new Date().toISOString() })
+      const saved = await saveData(KARIOS_BIN, db2)
+      await send(chatId, saved ? `✅ Partner added: <b>${name}</b>` : `⚠️ Could not save.`)
+      return res.status(200).send('OK')
+    }
+
+    // Team member (karios only)
+    if (siteKey === 'karios' && cleanCaption.toLowerCase().startsWith('team:')) {
+      const parts = cleanCaption.slice(5).split('|').map(s => s.trim())
+      const name  = parts[0] || 'Team Member'
+      const role  = parts[1] || ''
+      const email = parts[2] || ''
+      const link  = parts[3] || ''
+      const db2   = await getData(KARIOS_BIN)
+      db2.team = db2.team || []
+      db2.team.unshift({ id: Date.now(), name, role, email, link, imgUrl, addedAt: new Date().toISOString() })
+      const saved = await saveData(KARIOS_BIN, db2)
+      await send(chatId, saved ? `✅ Team member added: <b>${name}</b> — ${email}` : `⚠️ Could not save.`)
       return res.status(200).send('OK')
     }
 

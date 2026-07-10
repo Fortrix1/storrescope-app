@@ -136,6 +136,7 @@ footer{border-top:1px solid var(--border);padding:28px 6%;display:flex;align-ite
     <li><a href="#portfolio-section">Case Studies</a></li>
     <li><a href="#services-section">Services</a></li>
     <li><a href="#testimonials-section">Testimonials</a></li>
+    <li><a href="#team-section">Team</a></li>
     <li><a href="/" style="color:var(--gold)">Free Analysis ↗</a></li>
   </ul>
   <a href="https://wa.me/18734712764" class="nav-cta" target="_blank">Work With Us</a>
@@ -334,6 +335,14 @@ footer{border-top:1px solid var(--border);padding:28px 6%;display:flex;align-ite
     <div style="font-size:15px;color:var(--text);margin-bottom:16px;line-height:1.7">Don't see exactly what you need? We do custom work. <strong style="color:var(--white)">Describe your problem and we'll tell you if we can automate it.</strong></div>
     <a href="https://wa.me/18734712764" target="_blank" style="display:inline-flex;align-items:center;gap:8px;background:var(--gold);color:#000;font-weight:800;font-size:13px;padding:13px 26px;border-radius:10px;text-decoration:none">💬 Tell Us Your Problem</a>
   </div>
+</div>
+
+<!-- TEAM -->
+<div class="section fade" id="team-section" style="display:none">
+  <div class="sec-label">The People Behind Karios</div>
+  <div class="sec-h">Our Team</div>
+  <p style="font-size:15px;color:var(--muted);max-width:520px;line-height:1.8;margin-bottom:32px">Real people. Real expertise. When you work with Karios Agency you know exactly who you are working with.</p>
+  <div id="teamGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px"></div>
 </div>
 
 <div class="section fade">
@@ -536,6 +545,37 @@ async function loadDynamic() {
           row.appendChild(a)
         })
       }
+    }
+
+    // Team
+    const team = d.team || []
+    if (team.length) {
+      const section = document.getElementById('team-section')
+      const grid    = document.getElementById('teamGrid')
+      if (section) section.style.display = 'block'
+      team.forEach(m => {
+        const card = document.createElement('div')
+        card.className = 'testi-card fade'
+        card.innerHTML = `
+          <div style="display:flex;align-items:center;gap:14px;margin-bottom:12px">
+            ${m.imgUrl && m.imgUrl.includes('cloudinary')
+              ? `<img src="${m.imgUrl}" style="width:54px;height:54px;border-radius:50%;object-fit:cover;border:2px solid rgba(212,168,75,0.3)">`
+              : `<div class="testi-avatar" style="width:54px;height:54px;font-size:20px">${m.name.charAt(0).toUpperCase()}</div>`}
+            <div>
+              <div class="testi-name" style="font-size:16px">${m.name}</div>
+              <div class="testi-biz">${m.role || ''}</div>
+            </div>
+          </div>
+          ${m.email ? `<div style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--gold);margin-bottom:8px">
+            <span>✉</span>
+            <a href="mailto:${m.email}" style="color:var(--gold);text-decoration:none">${m.email}</a>
+          </div>` : ''}
+          ${m.link ? `<a href="${m.link}" target="_blank" style="display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--text);text-decoration:none;border:1px solid var(--border);border-radius:6px;padding:6px 12px;margin-top:4px">
+            🔗 View Profile
+          </a>` : ''}`
+        grid?.appendChild(card)
+        setTimeout(() => { card.classList.add('on'); obs.observe(card) }, 100)
+      })
     }
 
   } catch(e) { console.log('loadDynamic error:', e) }

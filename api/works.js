@@ -18,6 +18,7 @@ module.exports = async (req, res) => {
       automations:  rec.automations  || [],
       partners:     rec.partners     || [],
       socials:      rec.socials      || {},
+      team:         rec.team         || [],
     })
   } catch(e) {
     res.status(200).json({ works: [], testimonials: [], logo: '', automations: [], partners: [], socials: {} })
