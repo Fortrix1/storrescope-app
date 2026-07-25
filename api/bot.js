@@ -545,6 +545,32 @@ module.exports = async (req, res) => {
     return res.status(200).send('OK')
   }
 
+  // Testimonial via TEXT ONLY (no photo required) — works for any site
+  // Format: "karios testimonial: Name | Business | Quote"
+  // or:     "mamas testimonial: Name | Business | Quote"
+  if (text) {
+    const lowerText = text.toLowerCase()
+    for (const [key, site] of Object.entries(SITES)) {
+      const prefix1 = key + ' testimonial:'
+      const prefix2 = key + ': testimonial:'
+      if (lowerText.startsWith(prefix1) || lowerText.startsWith(prefix2)) {
+        if (!isAdmin) { await send(chatId, '⛔ Not authorised.'); return res.status(200).send('OK') }
+        const cleanCap = text.slice(lowerText.startsWith(prefix2) ? prefix2.length : prefix1.length).trim()
+        const parts = cleanCap.split('|').map(s => s.trim())
+        const name  = parts[0] || 'Client'
+        const biz   = parts[1] || ''
+        const quote = (parts[2] || '').replace(/^["']|["']$/g, '').trim()
+        const db2   = await getData(site.binUrl)
+        db2.testimonials.unshift({ id: Date.now(), name, business: biz, quote, imgUrl: '', addedAt: new Date().toISOString() })
+        const saved = await saveData(site.binUrl, db2)
+        await send(chatId, saved
+          ? `✅ <b>Review added to ${site.name}!</b>\n\n⭐ <b>${name}</b>${biz?` — ${biz}`:''}\n${quote?`"${quote}"`:''}`
+          : `⚠️ Could not save.`)
+        return res.status(200).send('OK')
+      }
+    }
+  }
+
   // Socials text command (no photo needed)
   if (text && text.toLowerCase().startsWith('socials:')) {
     if (!isAdmin) { await send(chatId, '⛔ Not authorised.'); return res.status(200).send('OK') }
