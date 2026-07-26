@@ -58,6 +58,7 @@ module.exports = async (req, res) => {
         automations:  rec.automations  || [],
         partners:     rec.partners     || [],
         socials:      rec.socials      || {},
+        team:         rec.team         || [],
       }
     } catch { return { works: [], testimonials: [], logo: '', automations: [], partners: [], socials: {} } }
   }
@@ -568,6 +569,31 @@ module.exports = async (req, res) => {
           : `⚠️ Could not save.`)
         return res.status(200).send('OK')
       }
+    }
+  }
+
+  // Team member via TEXT ONLY (no photo required) — karios only
+  // Format: "karios team: Name | Role | Email | Link"
+  if (text) {
+    const lowerText2 = text.toLowerCase()
+    const teamPrefix1 = 'karios team:'
+    const teamPrefix2 = 'karios: team:'
+    if (lowerText2.startsWith(teamPrefix1) || lowerText2.startsWith(teamPrefix2)) {
+      if (!isAdmin) { await send(chatId, '⛔ Not authorised.'); return res.status(200).send('OK') }
+      const cleanCap = text.slice(lowerText2.startsWith(teamPrefix2) ? teamPrefix2.length : teamPrefix1.length).trim()
+      const parts = cleanCap.split('|').map(s => s.trim())
+      const name  = parts[0] || 'Team Member'
+      const role  = parts[1] || ''
+      const email = parts[2] || ''
+      const link  = parts[3] || ''
+      const db2   = await getData(KARIOS_BIN)
+      db2.team = db2.team || []
+      db2.team.unshift({ id: Date.now(), name, role, email, link, imgUrl: '', addedAt: new Date().toISOString() })
+      const saved = await saveData(KARIOS_BIN, db2)
+      await send(chatId, saved
+        ? `✅ <b>Team member added!</b>\n\n👤 <b>${name}</b>\n${role?'💼 '+role+'\n':''}${email?'📧 '+email+'\n':''}${link?'🔗 '+link:''}`
+        : `⚠️ Could not save.`)
+      return res.status(200).send('OK')
     }
   }
 
