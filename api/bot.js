@@ -1,5 +1,4 @@
 // api/bot.js - Multi-Site Bot (stateless — site encoded in every message)
-
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*')
   if (req.method === 'GET') return res.status(200).send('OK')
@@ -7,12 +6,14 @@ module.exports = async (req, res) => {
   const BOT_TOKEN    = process.env.BOT_TOKEN    || ''
   const ADMIN_ID     = process.env.ADMIN_ID     || '6427084234'
   const BIN_KEY      = process.env.JSONBIN_KEY  || ''
+  const GROQ_API_KEY = process.env.GROQ_API_KEY || ''
+  
   const CLOUD_NAME   = process.env.CLOUDINARY_NAME   || 'dorw8vhwq'
   const CLOUD_KEY    = process.env.CLOUDINARY_KEY    || '499294615748537'
   const CLOUD_SECRET = process.env.CLOUDINARY_SECRET || 'z17JJ6bKde2TJqGd0fIdokftHi8'
-
+  
   const KARIOS_BIN = 'https://api.jsonbin.io/v3/b/6a2b9c8ff5f4af5e29e4612d'
-
+  
   const SITES = {
     karios: {
       name: 'Karios Agency', emoji: '⚡',
@@ -43,7 +44,7 @@ module.exports = async (req, res) => {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       })
-    } catch(e) {}
+    } catch(e) { console.error('Send error:', e) }
   }
 
   async function getData(binUrl) {
@@ -52,13 +53,9 @@ module.exports = async (req, res) => {
       const d = await r.json()
       const rec = d.record || {}
       return {
-        works:        rec.works        || [],
-        testimonials: rec.testimonials || [],
-        logo:         rec.logo         || '',
-        automations:  rec.automations  || [],
-        partners:     rec.partners     || [],
-        socials:      rec.socials      || {},
-        team:         rec.team         || [],
+        works: rec.works || [], testimonials: rec.testimonials || [],
+        logo: rec.logo || '', automations: rec.automations || [],
+        partners: rec.partners || [], socials: rec.socials || {}, team: rec.team || [],
       }
     } catch { return { works: [], testimonials: [], logo: '', automations: [], partners: [], socials: {} } }
   }
@@ -67,23 +64,12 @@ module.exports = async (req, res) => {
     try {
       const r = await fetch(binUrl, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-Master-Key': BIN_KEY,
-          'X-Bin-Private': 'false'
-        },
+        headers: { 'Content-Type': 'application/json', 'X-Master-Key': BIN_KEY, 'X-Bin-Private': 'false' },
         body: JSON.stringify(data)
       })
-      const result = await r.json()
-      if (!r.ok) {
-        console.error('saveData failed:', r.status, JSON.stringify(result))
-        return false
-      }
+      if (!r.ok) { console.error('saveData failed:', r.status); return false }
       return true
-    } catch(e) {
-      console.error('saveData error:', e.message)
-      return false
-    }
+    } catch(e) { console.error('saveData error:', e.message); return false }
   }
 
   async function getPhotoUrl(fileId) {
@@ -121,12 +107,12 @@ module.exports = async (req, res) => {
   function siteMenu(siteKey) {
     const isKarios = siteKey === 'karios'
     const rows = [
-      [{ text: '➕ Add item',         callback_data: `help_add_${siteKey}`   }],
-      [{ text: '⭐ Add review',        callback_data: `help_testi_${siteKey}` }],
-      [{ text: '🖼 Set logo',          callback_data: `help_logo_${siteKey}`  }],
-      [{ text: '📋 List items',        callback_data: `list_${siteKey}`       }],
-      [{ text: '🗑 Delete item',       callback_data: `dellist_${siteKey}`    }],
-      [{ text: '🗑 Delete review',     callback_data: `deltestilist_${siteKey}`}],
+      [{ text: '➕ Add item',         callback_data:  `help_add_${siteKey}`    }],
+      [{ text: '⭐ Add review',        callback_data:  `help_testi_${siteKey}`  }],
+      [{ text: '🖼 Set logo',          callback_data:  `help_logo_${siteKey}`   }],
+      [{ text: '📋 List items',        callback_data:  `list_${siteKey}`        }],
+      [{ text: '🗑 Delete item',       callback_data:  `dellist_${siteKey}`     }],
+      [{ text: '🗑 Delete review',     callback_data:  `deltestilist_${siteKey}` }],
     ]
     if (isKarios) {
       rows.push([{ text: '🎬 Add automation video', callback_data: 'help_auto' }])
@@ -147,83 +133,28 @@ module.exports = async (req, res) => {
     const userId  = String(callback.from?.id || '')
     const data    = callback.data || ''
     const isAdmin = userId === ADMIN_ID
-
     if (!isAdmin) { await send(chatId, '⛔ Not authorised.'); return res.status(200).send('OK') }
 
-    // Site picker
     if (data === 'goto_karios' || data === 'goto_mamas') {
       const siteKey = data.replace('goto_', '')
       const site    = SITES[siteKey]
-      await send(chatId,
-        `${site.emoji} <b>Now managing: ${site.name}</b>\n\nWhat would you like to do?`,
-        siteMenu(siteKey)
-      )
+      await send(chatId, `${site.emoji} <b>Now managing: ${site.name}</b>\n\nWhat would you like to do?`, siteMenu(siteKey))
       return res.status(200).send('OK')
     }
-
-    if (data === 'switch_site') {
-      await send(chatId, 'Which site?', siteKeyboard())
-      return res.status(200).send('OK')
-    }
-
-    // Automation help
+    if (data === 'switch_site') { await send(chatId, 'Which site?', siteKeyboard()); return res.status(200).send('OK') }
+    
     if (data === 'help_auto') {
-      await send(chatId,
-        `<b>Add an automation video:</b>
-
-` +
-        `Send a photo (thumbnail) with caption:
-` +
-        `<code>auto: Title | Description | VideoURL</code>
-
-` +
-        `<b>Example:</b>
-` +
-        `<code>auto: Restaurant Menu Update | Send a message, website updates instantly | https://tiktok.com/...</code>
-
-` +
-        `For YouTube use the full URL. For TikTok use the share link.`
-      )
+      await send(chatId, `<b>Add an automation video:</b>\nSend a photo (thumbnail) with caption:\n<code>auto: Title | Description | VideoURL</code>`)
       return res.status(200).send('OK')
     }
-
-    // Partner help
     if (data === 'help_partner') {
-      await send(chatId,
-        `<b>Add a partner/friend profile:</b>
-
-` +
-        `Send their photo with caption:
-` +
-        `<code>partner: Name | What they do | FiverrLink</code>
-
-` +
-        `<b>Example:</b>
-` +
-        `<code>partner: John Doe | Logo & Brand Design | https://fiverr.com/johndoe</code>`
-      )
+      await send(chatId, `<b>Add a partner/friend profile:</b>\nSend their photo with caption:\n<code>partner: Name | What they do | FiverrLink</code>`)
       return res.status(200).send('OK')
     }
-
-    // Team help
     if (data === 'help_team') {
-      await send(chatId,
-        `<b>Add a team member:</b>
-
-` +
-        `Send their photo with caption:
-` +
-        `<code>team: Name | Role | Email | LinkedIn or website (optional)</code>
-
-` +
-        `<b>Example:</b>
-` +
-        `<code>team: Karios | Founder & Lead Strategist | hello@kariosagency.com | https://linkedin.com/in/karios</code>`
-      )
+      await send(chatId, `<b>Add a team member:</b>\nSend their photo with caption:\n<code>team: Name | Role | Email | LinkedIn or website (optional)</code>`)
       return res.status(200).send('OK')
     }
-
-    // Delete team list
     if (data === 'delteamlist') {
       const db = await getData(KARIOS_BIN)
       const team = db.team || []
@@ -232,8 +163,6 @@ module.exports = async (req, res) => {
       await send(chatId, 'Which team member to remove?', keyboard)
       return res.status(200).send('OK')
     }
-
-    // Confirm delete team member
     if (data.startsWith('delteam_')) {
       const idx = parseInt(data.replace('delteam_', ''))
       const db  = await getData(KARIOS_BIN)
@@ -244,29 +173,10 @@ module.exports = async (req, res) => {
       }
       return res.status(200).send('OK')
     }
-
-    // Socials help
     if (data === 'help_socials') {
-      await send(chatId,
-        `<b>Update your social/contact links:</b>
-
-` +
-        `Send a text message in this format:
-` +
-        `<code>socials: fiverr=URL, linkedin=URL, twitter=URL, instagram=URL, youtube=URL</code>
-
-` +
-        `<b>Example:</b>
-` +
-        `<code>socials: fiverr=https://fiverr.com/karios, linkedin=https://linkedin.com/in/karios, instagram=https://instagram.com/kariosagency</code>
-
-` +
-        `Only include the ones you have. Others will stay unchanged.`
-      )
+      await send(chatId, `<b>Update your social/contact links:</b>\nSend a text message:\n<code>socials: fiverr=URL, linkedin=URL, instagram=URL</code>`)
       return res.status(200).send('OK')
     }
-
-    // Delete automation
     if (data === 'delautomation') {
       const db = await getData(KARIOS_BIN)
       if (!db.automations.length) { await send(chatId, 'No automations to delete.'); return res.status(200).send('OK') }
@@ -274,8 +184,6 @@ module.exports = async (req, res) => {
       await send(chatId, 'Which automation to remove?', keyboard)
       return res.status(200).send('OK')
     }
-
-    // Delete partner
     if (data === 'delpartner') {
       const db = await getData(KARIOS_BIN)
       if (!db.partners.length) { await send(chatId, 'No partners to delete.'); return res.status(200).send('OK') }
@@ -283,8 +191,6 @@ module.exports = async (req, res) => {
       await send(chatId, 'Which partner to remove?', keyboard)
       return res.status(200).send('OK')
     }
-
-    // Confirm delete automation
     if (data.startsWith('delauto_')) {
       const idx = parseInt(data.replace('delauto_', ''))
       const db  = await getData(KARIOS_BIN)
@@ -295,8 +201,6 @@ module.exports = async (req, res) => {
       }
       return res.status(200).send('OK')
     }
-
-    // Confirm delete partner
     if (data.startsWith('delpartner_')) {
       const idx = parseInt(data.replace('delpartner_', ''))
       const db  = await getData(KARIOS_BIN)
@@ -307,39 +211,22 @@ module.exports = async (req, res) => {
       }
       return res.status(200).send('OK')
     }
-
-    // Help messages — tell user what caption to send
     if (data.startsWith('help_add_')) {
       const siteKey = data.replace('help_add_', '')
       const site    = SITES[siteKey]
-      await send(chatId,
-        `<b>Add item to ${site.name}:</b>\n\n` +
-        `Send a photo with caption:\n<code>${site.itemFormat}</code>\n\n` +
-        `Start caption with <b>${siteKey}:</b>\n\n` +
-        `<b>Example:</b>\n<code>${siteKey}: ${site.itemExample}</code>`
-      )
+      await send(chatId, `<b>Add item to ${site.name}:</b>\n\nSend a photo with caption:\n<code>${site.itemFormat}</code>\n\nStart caption with <b>${siteKey}:</b>\n\n<b>Example:</b>\n<code>${siteKey}: ${site.itemExample}</code>`)
       return res.status(200).send('OK')
     }
-
     if (data.startsWith('help_testi_')) {
       const siteKey = data.replace('help_testi_', '')
-      await send(chatId,
-        `<b>Add review:</b>\n\nSend a photo with caption starting with:\n` +
-        `<code>${siteKey} testimonial: Name | Business | "Quote"</code>\n\n` +
-        `<b>Example:</b>\n<code>${siteKey} testimonial: John | Lagos Bistro | "Amazing food!"</code>`
-      )
+      await send(chatId, `<b>Add review:</b>\n\nSend a photo with caption starting with:\n<code>${siteKey} testimonial: Name | Business | "Quote"</code>`)
       return res.status(200).send('OK')
     }
-
     if (data.startsWith('help_logo_')) {
       const siteKey = data.replace('help_logo_', '')
-      await send(chatId,
-        `<b>Set logo:</b>\n\nSend a photo with caption:\n<code>${siteKey} logo</code>`
-      )
+      await send(chatId, `<b>Set logo:</b>\n\nSend a photo with caption:\n<code>${siteKey} logo</code>`)
       return res.status(200).send('OK')
     }
-
-    // List items
     if (data.startsWith('list_')) {
       const siteKey = data.replace('list_', '')
       const site    = SITES[siteKey]
@@ -350,8 +237,6 @@ module.exports = async (req, res) => {
       await send(chatId, list)
       return res.status(200).send('OK')
     }
-
-    // Delete item list
     if (data.startsWith('dellist_')) {
       const siteKey = data.replace('dellist_', '')
       const site    = SITES[siteKey]
@@ -362,8 +247,6 @@ module.exports = async (req, res) => {
       await send(chatId, 'Which item to remove?', keyboard)
       return res.status(200).send('OK')
     }
-
-    // Delete testimonial list
     if (data.startsWith('deltestilist_')) {
       const siteKey = data.replace('deltestilist_', '')
       const site    = SITES[siteKey]
@@ -374,8 +257,6 @@ module.exports = async (req, res) => {
       await send(chatId, 'Which review to remove?', keyboard)
       return res.status(200).send('OK')
     }
-
-    // Confirm delete item
     if (data.startsWith('delwork_')) {
       const parts   = data.split('_')
       const siteKey = parts[1]
@@ -389,8 +270,6 @@ module.exports = async (req, res) => {
       }
       return res.status(200).send('OK')
     }
-
-    // Confirm delete testimonial
     if (data.startsWith('deltesti_')) {
       const parts   = data.split('_')
       const siteKey = parts[1]
@@ -404,21 +283,20 @@ module.exports = async (req, res) => {
       }
       return res.status(200).send('OK')
     }
-
     return res.status(200).send('OK')
   }
 
   if (!msg) return res.status(200).send('OK')
-
+  
   const chatId  = msg.chat.id
   const userId  = String(msg.from?.id || '')
-  const text    = msg.text    || ''
+  let text      = msg.text    || ''
   const caption = (msg.caption || '').trim()
   const photo   = msg.photo
   const isAdmin = userId === ADMIN_ID
 
   // Block non-admins
-  if (!text.startsWith('/start') && !isAdmin) {
+  if (!text.startsWith('/start') && !isAdmin && !msg.voice && !msg.audio) {
     await send(chatId, `⛔ This bot is private.\n\nContact: t.me/kariosagency`)
     return res.status(200).send('OK')
   }
@@ -429,18 +307,100 @@ module.exports = async (req, res) => {
     return res.status(200).send('OK')
   }
 
-  // Photo + caption — site is identified by caption PREFIX
-  // Format: "sitekey: caption..." or "sitekey testimonial: ..." or "sitekey logo"
-  if (photo && caption) {
+  // ── NEW: VOICE NOTE HANDLING (Groq Whisper) ──
+  if (msg.voice || msg.audio) {
+    if (!isAdmin) { await send(chatId, '⛔ Not authorised.'); return res.status(200).send('OK') }
+    if (!GROQ_API_KEY) { await send(chatId, '⚠️ Groq API key missing.'); return res.status(200).send('OK') }
+
+    const fileId = msg.voice ? msg.voice.file_id : msg.audio.file_id;
+    await send(chatId, '⏳ Listening to your voice note...');
+
+    try {
+      const fileRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getFile?file_id=${fileId}`);
+      const fileData = await fileRes.json();
+      const fileUrl = `https://api.telegram.org/file/bot${BOT_TOKEN}/${fileData.result.file_path}`;
+
+      const audioRes = await fetch(fileUrl);
+      const audioBuffer = Buffer.from(await audioRes.arrayBuffer());
+
+      const formData = new FormData();
+      formData.append('file', new Blob([audioBuffer]), 'voice.ogg');
+      formData.append('model', 'whisper-large-v3-turbo');
+      formData.append('response_format', 'text');
+
+      const groqRes = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${GROQ_API_KEY}` },
+        body: formData
+      });
+
+      const transcribedText = (await groqRes.text()).trim();
+
+      if (!transcribedText) {
+        await send(chatId, '⚠️ Could not understand the voice note. Please try again.');
+        return res.status(200).send('OK');
+      }
+
+      // Inject transcribed text into the text variable so it falls through to the text parsers!
+      text = transcribedText; 
+      await send(chatId, `🎙 Heard: "${transcribedText}"\n\nProcessing...`);
+    } catch (e) {
+      console.error('Voice error:', e);
+      await send(chatId, '⚠️ Error processing voice note.');
+      return res.status(200).send('OK');
+    }
+  }
+
+  // ── NEW: TEXT-ONLY "SPECIAL" COMMAND (No photo required) ──
+  // Format: "mamas special: Dish | Price | Desc" or just "special: ..."
+  if (text && text.toLowerCase().includes('special:')) {
     if (!isAdmin) { await send(chatId, '⛔ Not authorised.'); return res.status(200).send('OK') }
 
-    // Detect which site from caption prefix
-    let siteKey = null
-    let cleanCaption = caption
+    let targetSiteKey = 'mamas'; // Default to restaurant for specials
+    let cleanText = text;
 
     for (const key of Object.keys(SITES)) {
-      if (caption.toLowerCase().startsWith(key + ':') ||
-          caption.toLowerCase().startsWith(key + ' ')) {
+      if (text.toLowerCase().startsWith(key + ' special:')) {
+        targetSiteKey = key;
+        cleanText = text.slice((key + ' special:').length).trim();
+        break;
+      }
+    }
+    if (text.toLowerCase().startsWith('special:')) {
+      cleanText = text.slice('special:'.length).trim();
+    }
+
+    const site = SITES[targetSiteKey];
+    const parts = cleanText.split('|').map(s => s.trim());
+    
+    const title   = parts[0] || 'Daily Special';
+    const tag     = parts[1] || 'Today';
+    const result1 = parts[2] || ''; 
+    const result2 = parts[3] || ''; 
+
+    const db = await getData(site.binUrl);
+    db.works.unshift({ 
+      id: Date.now(), title, tag, result1, result2, 
+      imgUrl: '', // No image for quick text/voice updates
+      addedAt: new Date().toISOString() 
+    });
+
+    const saved = await saveData(site.binUrl, db);
+    await send(chatId, saved 
+      ? `✅ <b>Daily Special Updated for ${site.name}!</b>\n\n📌 <b>${title}</b>\n${tag ? `🏷 ${tag}\n` : ''}${result1 ? `💰 ${result1}\n` : ''}${result2 ? `📝 ${result2}` : ''}`
+      : `⚠️ Could not save.`
+    );
+    return res.status(200).send('OK');
+  }
+
+  // Photo + caption — site is identified by caption PREFIX
+  if (photo && caption) {
+    if (!isAdmin) { await send(chatId, '⛔ Not authorised.'); return res.status(200).send('OK') }
+    
+    let siteKey = null
+    let cleanCaption = caption
+    for (const key of Object.keys(SITES)) {
+      if (caption.toLowerCase().startsWith(key + ':') || caption.toLowerCase().startsWith(key + ' ')) {
         siteKey      = key
         cleanCaption = caption.slice(key.length).replace(/^[\s:]+/, '').trim()
         break
@@ -448,20 +408,14 @@ module.exports = async (req, res) => {
     }
 
     if (!siteKey) {
-      await send(chatId,
-        `⚠️ Please start your caption with the site name:\n\n` +
-        `<code>karios: Title | Tag | Result1 | Result2</code>\n` +
-        `<code>mamas: Dish | Tag | Price | Description</code>\n\n` +
-        `Or for logo: <code>karios logo</code> / <code>mamas logo</code>\n` +
-        `Or for review: <code>karios testimonial: Name | Biz | "Quote"</code>`
-      )
+      await send(chatId, `⚠️ Please start your caption with the site name:\n\n<code>karios: Title | Tag | Result1 | Result2</code>\n<code>mamas: Dish | Tag | Price | Description</code>`)
       return res.status(200).send('OK')
     }
 
     const site = SITES[siteKey]
     const isLogo        = cleanCaption.toLowerCase() === 'logo'
     const isTestimonial = cleanCaption.toLowerCase().startsWith('testimonial:')
-
+    
     await send(chatId, '⏳ Uploading...')
     const fileId      = photo[photo.length-1].file_id
     const telegramUrl = await getPhotoUrl(fileId)
@@ -474,7 +428,6 @@ module.exports = async (req, res) => {
       await send(chatId, `✅ Logo updated for <b>${site.name}</b>!`)
       return res.status(200).send('OK')
     }
-
     if (isTestimonial) {
       const clean = cleanCaption.replace(/^testimonial:\s*/i, '')
       const parts = clean.split('|').map(s => s.trim())
@@ -483,18 +436,12 @@ module.exports = async (req, res) => {
       const quote = (parts[2] || '').replace(/^["']|["']$/g, '').trim()
       db.testimonials.unshift({ id: Date.now(), name, business: biz, quote, imgUrl, addedAt: new Date().toISOString() })
       const saved = await saveData(site.binUrl, db)
-      await send(chatId, saved
-        ? `✅ <b>Review added to ${site.name}!</b>\n\n⭐ <b>${name}</b>${biz?` — ${biz}`:''}\n${quote?`"${quote}"`:''}`
-        : `⚠️ Could not save.`)
+      await send(chatId, saved ? `✅ <b>Review added to ${site.name}!</b>\n\n⭐ <b>${name}</b>${biz?` — ${biz}`:''}\n${quote?`"${quote}"`:''}` : `⚠️ Could not save.`)
       return res.status(200).send('OK')
     }
-
-    // Automation video (karios only)
     if (siteKey === 'karios' && cleanCaption.toLowerCase().startsWith('auto:')) {
       const parts = cleanCaption.slice(5).split('|').map(s => s.trim())
-      const title = parts[0] || 'Automation'
-      const desc  = parts[1] || ''
-      const url   = parts[2] || ''
+      const title = parts[0] || 'Automation'; const desc = parts[1] || ''; const url = parts[2] || ''
       const db2   = await getData(KARIOS_BIN)
       db2.automations = db2.automations || []
       db2.automations.unshift({ id: Date.now(), title, desc, url, imgUrl, addedAt: new Date().toISOString() })
@@ -502,13 +449,9 @@ module.exports = async (req, res) => {
       await send(chatId, saved ? `✅ Automation added: <b>${title}</b>` : `⚠️ Could not save.`)
       return res.status(200).send('OK')
     }
-
-    // Partner profile (karios only)
     if (siteKey === 'karios' && cleanCaption.toLowerCase().startsWith('partner:')) {
       const parts = cleanCaption.slice(8).split('|').map(s => s.trim())
-      const name  = parts[0] || 'Partner'
-      const role  = parts[1] || ''
-      const link  = parts[2] || ''
+      const name  = parts[0] || 'Partner'; const role = parts[1] || ''; const link = parts[2] || ''
       const db2   = await getData(KARIOS_BIN)
       db2.partners = db2.partners || []
       db2.partners.unshift({ id: Date.now(), name, role, link, imgUrl, addedAt: new Date().toISOString() })
@@ -516,14 +459,9 @@ module.exports = async (req, res) => {
       await send(chatId, saved ? `✅ Partner added: <b>${name}</b>` : `⚠️ Could not save.`)
       return res.status(200).send('OK')
     }
-
-    // Team member (karios only)
     if (siteKey === 'karios' && cleanCaption.toLowerCase().startsWith('team:')) {
       const parts = cleanCaption.slice(5).split('|').map(s => s.trim())
-      const name  = parts[0] || 'Team Member'
-      const role  = parts[1] || ''
-      const email = parts[2] || ''
-      const link  = parts[3] || ''
+      const name  = parts[0] || 'Team Member'; const role = parts[1] || ''; const email = parts[2] || ''; const link = parts[3] || ''
       const db2   = await getData(KARIOS_BIN)
       db2.team = db2.team || []
       db2.team.unshift({ id: Date.now(), name, role, email, link, imgUrl, addedAt: new Date().toISOString() })
@@ -540,15 +478,11 @@ module.exports = async (req, res) => {
     const result2 = parts[3] || ''
     db.works.unshift({ id: Date.now(), title, tag, result1, result2, imgUrl, addedAt: new Date().toISOString() })
     const saved = await saveData(site.binUrl, db)
-    await send(chatId, saved
-      ? `✅ <b>Added to ${site.name}!</b>\n\n📌 <b>${title}</b>\n${tag?`🏷 ${tag}\n`:''}${result1?`💰 ${result1}\n`:''}${result2?`📝 ${result2}`:''}`
-      : `⚠️ Could not save.`)
+    await send(chatId, saved ? `✅ <b>Added to ${site.name}!</b>\n\n📌 <b>${title}</b>\n${tag?`🏷 ${tag}\n`:''}${result1?`💰 ${result1}\n`:''}${result2?`📝 ${result2}`:''}` : `⚠️ Could not save.`)
     return res.status(200).send('OK')
   }
 
-  // Testimonial via TEXT ONLY (no photo required) — works for any site
-  // Format: "karios testimonial: Name | Business | Quote"
-  // or:     "mamas testimonial: Name | Business | Quote"
+  // Testimonial via TEXT ONLY
   if (text) {
     const lowerText = text.toLowerCase()
     for (const [key, site] of Object.entries(SITES)) {
@@ -564,16 +498,13 @@ module.exports = async (req, res) => {
         const db2   = await getData(site.binUrl)
         db2.testimonials.unshift({ id: Date.now(), name, business: biz, quote, imgUrl: '', addedAt: new Date().toISOString() })
         const saved = await saveData(site.binUrl, db2)
-        await send(chatId, saved
-          ? `✅ <b>Review added to ${site.name}!</b>\n\n⭐ <b>${name}</b>${biz?` — ${biz}`:''}\n${quote?`"${quote}"`:''}`
-          : `⚠️ Could not save.`)
+        await send(chatId, saved ? `✅ <b>Review added to ${site.name}!</b>\n\n⭐ <b>${name}</b>${biz?` — ${biz}`:''}\n${quote?`"${quote}"`:''}` : `⚠️ Could not save.`)
         return res.status(200).send('OK')
       }
     }
   }
 
-  // Team member via TEXT ONLY (no photo required) — karios only
-  // Format: "karios team: Name | Role | Email | Link"
+  // Team member via TEXT ONLY
   if (text) {
     const lowerText2 = text.toLowerCase()
     const teamPrefix1 = 'karios team:'
@@ -582,22 +513,17 @@ module.exports = async (req, res) => {
       if (!isAdmin) { await send(chatId, '⛔ Not authorised.'); return res.status(200).send('OK') }
       const cleanCap = text.slice(lowerText2.startsWith(teamPrefix2) ? teamPrefix2.length : teamPrefix1.length).trim()
       const parts = cleanCap.split('|').map(s => s.trim())
-      const name  = parts[0] || 'Team Member'
-      const role  = parts[1] || ''
-      const email = parts[2] || ''
-      const link  = parts[3] || ''
+      const name  = parts[0] || 'Team Member'; const role = parts[1] || ''; const email = parts[2] || ''; const link = parts[3] || ''
       const db2   = await getData(KARIOS_BIN)
       db2.team = db2.team || []
       db2.team.unshift({ id: Date.now(), name, role, email, link, imgUrl: '', addedAt: new Date().toISOString() })
       const saved = await saveData(KARIOS_BIN, db2)
-      await send(chatId, saved
-        ? `✅ <b>Team member added!</b>\n\n👤 <b>${name}</b>\n${role?'💼 '+role+'\n':''}${email?'📧 '+email+'\n':''}${link?'🔗 '+link:''}`
-        : `⚠️ Could not save.`)
+      await send(chatId, saved ? `✅ <b>Team member added!</b>\n\n👤 <b>${name}</b>\n${role?'💼 '+role+'\n':''}${email?'📧 '+email+'\n':''}${link?'🔗 '+link:''}` : `⚠️ Could not save.`)
       return res.status(200).send('OK')
     }
   }
 
-  // Socials text command (no photo needed)
+  // Socials text command
   if (text && text.toLowerCase().startsWith('socials:')) {
     if (!isAdmin) { await send(chatId, '⛔ Not authorised.'); return res.status(200).send('OK') }
     const clean = text.slice('socials:'.length).trim()
@@ -609,10 +535,7 @@ module.exports = async (req, res) => {
       if (key && val) db.socials[key.trim().toLowerCase()] = val
     })
     const saved = await saveData(KARIOS_BIN, db)
-    await send(chatId, saved
-      ? `✅ <b>Social links updated!</b>\n` + Object.entries(db.socials).map(([k,v]) => k+': '+v).join('\n')
-      : `⚠️ Could not save.`
-    )
+    await send(chatId, saved ? `✅ <b>Social links updated!</b>\n` + Object.entries(db.socials).map(([k,v]) => k+': '+v).join('\n') : `⚠️ Could not save.`)
     return res.status(200).send('OK')
   }
 
