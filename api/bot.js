@@ -2,17 +2,14 @@
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*')
   if (req.method === 'GET') return res.status(200).send('OK')
-
+  
   const BOT_TOKEN    = process.env.BOT_TOKEN    || ''
   const ADMIN_ID     = process.env.ADMIN_ID     || '6427084234'
   const BIN_KEY      = process.env.JSONBIN_KEY  || ''
-  const GROQ_API_KEY = process.env.GROQ_API_KEY || ''
-  
   const CLOUD_NAME   = process.env.CLOUDINARY_NAME   || 'dorw8vhwq'
   const CLOUD_KEY    = process.env.CLOUDINARY_KEY    || '499294615748537'
   const CLOUD_SECRET = process.env.CLOUDINARY_SECRET || 'z17JJ6bKde2TJqGd0fIdokftHi8'
-  
-  const KARIOS_BIN = 'https://api.jsonbin.io/v3/b/6a2b9c8ff5f4af5e29e4612d'
+  const KARIOS_BIN   = 'https://api.jsonbin.io/v3/b/6a2b9c8ff5f4af5e29e4612d'
   
   const SITES = {
     karios: {
@@ -32,7 +29,7 @@ module.exports = async (req, res) => {
   let body = req.body
   if (typeof body === 'string') { try { body = JSON.parse(body) } catch { return res.status(200).send('OK') } }
   if (!body) return res.status(200).send('OK')
-
+  
   const msg      = body.message
   const callback = body.callback_query
 
@@ -44,7 +41,7 @@ module.exports = async (req, res) => {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       })
-    } catch(e) { console.error('Send error:', e) }
+    } catch(e) {}
   }
 
   async function getData(binUrl) {
@@ -53,9 +50,13 @@ module.exports = async (req, res) => {
       const d = await r.json()
       const rec = d.record || {}
       return {
-        works: rec.works || [], testimonials: rec.testimonials || [],
-        logo: rec.logo || '', automations: rec.automations || [],
-        partners: rec.partners || [], socials: rec.socials || {}, team: rec.team || [],
+        works:        rec.works        || [],
+        testimonials: rec.testimonials || [],
+        logo:         rec.logo         || '',
+        automations:  rec.automations  || [],
+        partners:     rec.partners     || [],
+        socials:      rec.socials      || {},
+        team:         rec.team         || [],
       }
     } catch { return { works: [], testimonials: [], logo: '', automations: [], partners: [], socials: {} } }
   }
@@ -64,12 +65,23 @@ module.exports = async (req, res) => {
     try {
       const r = await fetch(binUrl, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json', 'X-Master-Key': BIN_KEY, 'X-Bin-Private': 'false' },
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Master-Key': BIN_KEY,
+          'X-Bin-Private': 'false'
+        },
         body: JSON.stringify(data)
       })
-      if (!r.ok) { console.error('saveData failed:', r.status); return false }
+      const result = await r.json()
+      if (!r.ok) {
+        console.error('saveData failed:', r.status, JSON.stringify(result))
+        return false
+      }
       return true
-    } catch(e) { console.error('saveData error:', e.message); return false }
+    } catch(e) {
+      console.error('saveData error:', e.message)
+      return false
+    }
   }
 
   async function getPhotoUrl(fileId) {
@@ -133,6 +145,7 @@ module.exports = async (req, res) => {
     const userId  = String(callback.from?.id || '')
     const data    = callback.data || ''
     const isAdmin = userId === ADMIN_ID
+
     if (!isAdmin) { await send(chatId, '⛔ Not authorised.'); return res.status(200).send('OK') }
 
     if (data === 'goto_karios' || data === 'goto_mamas') {
@@ -141,18 +154,20 @@ module.exports = async (req, res) => {
       await send(chatId, `${site.emoji} <b>Now managing: ${site.name}</b>\n\nWhat would you like to do?`, siteMenu(siteKey))
       return res.status(200).send('OK')
     }
-    if (data === 'switch_site') { await send(chatId, 'Which site?', siteKeyboard()); return res.status(200).send('OK') }
-    
+    if (data === 'switch_site') {
+      await send(chatId, 'Which site?', siteKeyboard())
+      return res.status(200).send('OK')
+    }
     if (data === 'help_auto') {
-      await send(chatId, `<b>Add an automation video:</b>\nSend a photo (thumbnail) with caption:\n<code>auto: Title | Description | VideoURL</code>`)
+      await send(chatId, `<b>Add an automation video:</b>\nSend a photo (thumbnail) with caption:\n<code>auto: Title | Description | VideoURL</code>\n<b>Example:</b>\n<code>auto: Restaurant Menu Update | Send a message, website updates instantly | https://tiktok.com/...</code>\nFor YouTube use the full URL. For TikTok use the share link.`)
       return res.status(200).send('OK')
     }
     if (data === 'help_partner') {
-      await send(chatId, `<b>Add a partner/friend profile:</b>\nSend their photo with caption:\n<code>partner: Name | What they do | FiverrLink</code>`)
+      await send(chatId, `<b>Add a partner/friend profile:</b>\nSend their photo with caption:\n<code>partner: Name | What they do | FiverrLink</code>\n<b>Example:</b>\n<code>partner: John Doe | Logo & Brand Design | https://fiverr.com/johndoe</code>`)
       return res.status(200).send('OK')
     }
     if (data === 'help_team') {
-      await send(chatId, `<b>Add a team member:</b>\nSend their photo with caption:\n<code>team: Name | Role | Email | LinkedIn or website (optional)</code>`)
+      await send(chatId, `<b>Add a team member:</b>\nSend their photo with caption:\n<code>team: Name | Role | Email | LinkedIn or website (optional)</code>\n<b>Example:</b>\n<code>team: Karios | Founder & Lead Strategist | hello@kariosagency.com | https://linkedin.com/in/karios</code>`)
       return res.status(200).send('OK')
     }
     if (data === 'delteamlist') {
@@ -174,7 +189,7 @@ module.exports = async (req, res) => {
       return res.status(200).send('OK')
     }
     if (data === 'help_socials') {
-      await send(chatId, `<b>Update your social/contact links:</b>\nSend a text message:\n<code>socials: fiverr=URL, linkedin=URL, instagram=URL</code>`)
+      await send(chatId, `<b>Update your social/contact links:</b>\nSend a text message in this format:\n<code>socials: fiverr=URL, linkedin=URL, twitter=URL, instagram=URL, youtube=URL</code>\n<b>Example:</b>\n<code>socials: fiverr=https://fiverr.com/karios, linkedin=https://linkedin.com/in/karios, instagram=https://instagram.com/kariosagency</code>\nOnly include the ones you have. Others will stay unchanged.`)
       return res.status(200).send('OK')
     }
     if (data === 'delautomation') {
@@ -219,7 +234,7 @@ module.exports = async (req, res) => {
     }
     if (data.startsWith('help_testi_')) {
       const siteKey = data.replace('help_testi_', '')
-      await send(chatId, `<b>Add review:</b>\n\nSend a photo with caption starting with:\n<code>${siteKey} testimonial: Name | Business | "Quote"</code>`)
+      await send(chatId, `<b>Add review:</b>\n\nSend a photo with caption starting with:\n<code>${siteKey} testimonial: Name | Business | "Quote"</code>\n\n<b>Example:</b>\n<code>${siteKey} testimonial: John | Lagos Bistro | "Amazing food!"</code>`)
       return res.status(200).send('OK')
     }
     if (data.startsWith('help_logo_')) {
@@ -307,22 +322,25 @@ module.exports = async (req, res) => {
     return res.status(200).send('OK')
   }
 
-  // ── NEW: VOICE NOTE HANDLING (Groq Whisper) ──
+  // ── VOICE NOTE / AUDIO HANDLING (The Magic Trick) ──
   if (msg.voice || msg.audio) {
     if (!isAdmin) { await send(chatId, '⛔ Not authorised.'); return res.status(200).send('OK') }
-    if (!GROQ_API_KEY) { await send(chatId, '⚠️ Groq API key missing.'); return res.status(200).send('OK') }
-
+    
     const fileId = msg.voice ? msg.voice.file_id : msg.audio.file_id;
     await send(chatId, '⏳ Listening to your voice note...');
 
     try {
+      // 1. Get file path from Telegram
       const fileRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getFile?file_id=${fileId}`);
       const fileData = await fileRes.json();
-      const fileUrl = `https://api.telegram.org/file/bot${BOT_TOKEN}/${fileData.result.file_path}`;
+      const filePath = fileData.result.file_path;
+      const fileUrl = `https://api.telegram.org/file/bot${BOT_TOKEN}/${filePath}`;
 
+      // 2. Download the audio file
       const audioRes = await fetch(fileUrl);
       const audioBuffer = Buffer.from(await audioRes.arrayBuffer());
 
+      // 3. Send to Groq Whisper API for transcription
       const formData = new FormData();
       formData.append('file', new Blob([audioBuffer]), 'voice.ogg');
       formData.append('model', 'whisper-large-v3-turbo');
@@ -330,67 +348,26 @@ module.exports = async (req, res) => {
 
       const groqRes = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${GROQ_API_KEY}` },
+        headers: { 'Authorization': `Bearer ${process.env.GROQ_API_KEY}` },
         body: formData
       });
-
+      
       const transcribedText = (await groqRes.text()).trim();
-
+      
       if (!transcribedText) {
-        await send(chatId, '⚠️ Could not understand the voice note. Please try again.');
+        await send(chatId, '⚠️ Could not understand the voice note. Please try again or type it out.');
         return res.status(200).send('OK');
       }
 
-      // Inject transcribed text into the text variable so it falls through to the text parsers!
+      // 4. Feed the transcribed text back into the bot as if they typed it!
       text = transcribedText; 
       await send(chatId, `🎙 Heard: "${transcribedText}"\n\nProcessing...`);
+      
     } catch (e) {
-      console.error('Voice error:', e);
-      await send(chatId, '⚠️ Error processing voice note.');
+      console.error('Voice processing error:', e);
+      await send(chatId, '⚠️ Error processing voice note. Please try again.');
       return res.status(200).send('OK');
     }
-  }
-
-  // ── NEW: TEXT-ONLY "SPECIAL" COMMAND (No photo required) ──
-  // Format: "mamas special: Dish | Price | Desc" or just "special: ..."
-  if (text && text.toLowerCase().includes('special:')) {
-    if (!isAdmin) { await send(chatId, '⛔ Not authorised.'); return res.status(200).send('OK') }
-
-    let targetSiteKey = 'mamas'; // Default to restaurant for specials
-    let cleanText = text;
-
-    for (const key of Object.keys(SITES)) {
-      if (text.toLowerCase().startsWith(key + ' special:')) {
-        targetSiteKey = key;
-        cleanText = text.slice((key + ' special:').length).trim();
-        break;
-      }
-    }
-    if (text.toLowerCase().startsWith('special:')) {
-      cleanText = text.slice('special:'.length).trim();
-    }
-
-    const site = SITES[targetSiteKey];
-    const parts = cleanText.split('|').map(s => s.trim());
-    
-    const title   = parts[0] || 'Daily Special';
-    const tag     = parts[1] || 'Today';
-    const result1 = parts[2] || ''; 
-    const result2 = parts[3] || ''; 
-
-    const db = await getData(site.binUrl);
-    db.works.unshift({ 
-      id: Date.now(), title, tag, result1, result2, 
-      imgUrl: '', // No image for quick text/voice updates
-      addedAt: new Date().toISOString() 
-    });
-
-    const saved = await saveData(site.binUrl, db);
-    await send(chatId, saved 
-      ? `✅ <b>Daily Special Updated for ${site.name}!</b>\n\n📌 <b>${title}</b>\n${tag ? `🏷 ${tag}\n` : ''}${result1 ? `💰 ${result1}\n` : ''}${result2 ? `📝 ${result2}` : ''}`
-      : `⚠️ Could not save.`
-    );
-    return res.status(200).send('OK');
   }
 
   // Photo + caption — site is identified by caption PREFIX
@@ -406,22 +383,19 @@ module.exports = async (req, res) => {
         break
       }
     }
-
     if (!siteKey) {
-      await send(chatId, `⚠️ Please start your caption with the site name:\n\n<code>karios: Title | Tag | Result1 | Result2</code>\n<code>mamas: Dish | Tag | Price | Description</code>`)
+      await send(chatId, `⚠️ Please start your caption with the site name:\n\n<code>karios: Title | Tag | Result1 | Result2</code>\n<code>mamas: Dish | Tag | Price | Description</code>\n\nOr for logo: <code>karios logo</code> / <code>mamas logo</code>\nOr for review: <code>karios testimonial: Name | Biz | "Quote"</code>`)
       return res.status(200).send('OK')
     }
-
     const site = SITES[siteKey]
     const isLogo        = cleanCaption.toLowerCase() === 'logo'
     const isTestimonial = cleanCaption.toLowerCase().startsWith('testimonial:')
-    
     await send(chatId, '⏳ Uploading...')
     const fileId      = photo[photo.length-1].file_id
     const telegramUrl = await getPhotoUrl(fileId)
     const imgUrl      = await uploadToCloudinary(telegramUrl) || telegramUrl
     const db          = await getData(site.binUrl)
-
+    
     if (isLogo) {
       db.logo = imgUrl
       await saveData(site.binUrl, db)
@@ -441,7 +415,9 @@ module.exports = async (req, res) => {
     }
     if (siteKey === 'karios' && cleanCaption.toLowerCase().startsWith('auto:')) {
       const parts = cleanCaption.slice(5).split('|').map(s => s.trim())
-      const title = parts[0] || 'Automation'; const desc = parts[1] || ''; const url = parts[2] || ''
+      const title = parts[0] || 'Automation'
+      const desc  = parts[1] || ''
+      const url   = parts[2] || ''
       const db2   = await getData(KARIOS_BIN)
       db2.automations = db2.automations || []
       db2.automations.unshift({ id: Date.now(), title, desc, url, imgUrl, addedAt: new Date().toISOString() })
@@ -451,7 +427,9 @@ module.exports = async (req, res) => {
     }
     if (siteKey === 'karios' && cleanCaption.toLowerCase().startsWith('partner:')) {
       const parts = cleanCaption.slice(8).split('|').map(s => s.trim())
-      const name  = parts[0] || 'Partner'; const role = parts[1] || ''; const link = parts[2] || ''
+      const name  = parts[0] || 'Partner'
+      const role  = parts[1] || ''
+      const link  = parts[2] || ''
       const db2   = await getData(KARIOS_BIN)
       db2.partners = db2.partners || []
       db2.partners.unshift({ id: Date.now(), name, role, link, imgUrl, addedAt: new Date().toISOString() })
@@ -461,7 +439,10 @@ module.exports = async (req, res) => {
     }
     if (siteKey === 'karios' && cleanCaption.toLowerCase().startsWith('team:')) {
       const parts = cleanCaption.slice(5).split('|').map(s => s.trim())
-      const name  = parts[0] || 'Team Member'; const role = parts[1] || ''; const email = parts[2] || ''; const link = parts[3] || ''
+      const name  = parts[0] || 'Team Member'
+      const role  = parts[1] || ''
+      const email = parts[2] || ''
+      const link  = parts[3] || ''
       const db2   = await getData(KARIOS_BIN)
       db2.team = db2.team || []
       db2.team.unshift({ id: Date.now(), name, role, email, link, imgUrl, addedAt: new Date().toISOString() })
@@ -469,80 +450,10 @@ module.exports = async (req, res) => {
       await send(chatId, saved ? `✅ Team member added: <b>${name}</b> — ${email}` : `⚠️ Could not save.`)
       return res.status(200).send('OK')
     }
-
     // Regular item
     const parts   = cleanCaption.split('|').map(s => s.trim())
     const title   = parts[0] || 'New Item'
     const tag     = parts[1] || ''
     const result1 = parts[2] || ''
     const result2 = parts[3] || ''
-    db.works.unshift({ id: Date.now(), title, tag, result1, result2, imgUrl, addedAt: new Date().toISOString() })
-    const saved = await saveData(site.binUrl, db)
-    await send(chatId, saved ? `✅ <b>Added to ${site.name}!</b>\n\n📌 <b>${title}</b>\n${tag?`🏷 ${tag}\n`:''}${result1?`💰 ${result1}\n`:''}${result2?`📝 ${result2}`:''}` : `⚠️ Could not save.`)
-    return res.status(200).send('OK')
-  }
-
-  // Testimonial via TEXT ONLY
-  if (text) {
-    const lowerText = text.toLowerCase()
-    for (const [key, site] of Object.entries(SITES)) {
-      const prefix1 = key + ' testimonial:'
-      const prefix2 = key + ': testimonial:'
-      if (lowerText.startsWith(prefix1) || lowerText.startsWith(prefix2)) {
-        if (!isAdmin) { await send(chatId, '⛔ Not authorised.'); return res.status(200).send('OK') }
-        const cleanCap = text.slice(lowerText.startsWith(prefix2) ? prefix2.length : prefix1.length).trim()
-        const parts = cleanCap.split('|').map(s => s.trim())
-        const name  = parts[0] || 'Client'
-        const biz   = parts[1] || ''
-        const quote = (parts[2] || '').replace(/^["']|["']$/g, '').trim()
-        const db2   = await getData(site.binUrl)
-        db2.testimonials.unshift({ id: Date.now(), name, business: biz, quote, imgUrl: '', addedAt: new Date().toISOString() })
-        const saved = await saveData(site.binUrl, db2)
-        await send(chatId, saved ? `✅ <b>Review added to ${site.name}!</b>\n\n⭐ <b>${name}</b>${biz?` — ${biz}`:''}\n${quote?`"${quote}"`:''}` : `⚠️ Could not save.`)
-        return res.status(200).send('OK')
-      }
-    }
-  }
-
-  // Team member via TEXT ONLY
-  if (text) {
-    const lowerText2 = text.toLowerCase()
-    const teamPrefix1 = 'karios team:'
-    const teamPrefix2 = 'karios: team:'
-    if (lowerText2.startsWith(teamPrefix1) || lowerText2.startsWith(teamPrefix2)) {
-      if (!isAdmin) { await send(chatId, '⛔ Not authorised.'); return res.status(200).send('OK') }
-      const cleanCap = text.slice(lowerText2.startsWith(teamPrefix2) ? teamPrefix2.length : teamPrefix1.length).trim()
-      const parts = cleanCap.split('|').map(s => s.trim())
-      const name  = parts[0] || 'Team Member'; const role = parts[1] || ''; const email = parts[2] || ''; const link = parts[3] || ''
-      const db2   = await getData(KARIOS_BIN)
-      db2.team = db2.team || []
-      db2.team.unshift({ id: Date.now(), name, role, email, link, imgUrl: '', addedAt: new Date().toISOString() })
-      const saved = await saveData(KARIOS_BIN, db2)
-      await send(chatId, saved ? `✅ <b>Team member added!</b>\n\n👤 <b>${name}</b>\n${role?'💼 '+role+'\n':''}${email?'📧 '+email+'\n':''}${link?'🔗 '+link:''}` : `⚠️ Could not save.`)
-      return res.status(200).send('OK')
-    }
-  }
-
-  // Socials text command
-  if (text && text.toLowerCase().startsWith('socials:')) {
-    if (!isAdmin) { await send(chatId, '⛔ Not authorised.'); return res.status(200).send('OK') }
-    const clean = text.slice('socials:'.length).trim()
-    const db    = await getData(KARIOS_BIN)
-    if (!db.socials) db.socials = {}
-    clean.split(',').forEach(pair => {
-      const [key, ...rest] = pair.trim().split('=')
-      const val = rest.join('=').trim()
-      if (key && val) db.socials[key.trim().toLowerCase()] = val
-    })
-    const saved = await saveData(KARIOS_BIN, db)
-    await send(chatId, saved ? `✅ <b>Social links updated!</b>\n` + Object.entries(db.socials).map(([k,v]) => k+': '+v).join('\n') : `⚠️ Could not save.`)
-    return res.status(200).send('OK')
-  }
-
-  // Unknown text
-  if (text && !text.startsWith('/')) {
-    await send(chatId, `Use /start to pick a site and see options.`)
-  }
-
-  res.status(200).send('OK')
-}
+    db.works.unshift({ id: Date.now(), title, tag, result1
