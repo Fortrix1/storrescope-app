@@ -1,4 +1,4 @@
-// api/bot.js - Multi-Site Bot with Voice Note Preview & Auto-Publish
+// api/bot.js - CLEAN VERSION
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*')
   if (req.method === 'GET') return res.status(200).send('OK')
@@ -130,9 +130,9 @@ module.exports = async (req, res) => {
     if (isKarios) {
       rows.push([{ text: '🎬 Add automation video', callback_data: 'help_auto' }])
       rows.push([{ text: '🤝 Add partner/friend',   callback_data: 'help_partner' }])
-      rows.push([{ text: '🔗 Update social links',  callback_data: 'help_socials' }])
-      rows.push([{ text: ' Delete automation',    callback_data: 'delautomation' }])
-      rows.push([{ text: ' Delete partner',       callback_data: 'delpartner'    }])
+      rows.push([{ text: ' Update social links',  callback_data: 'help_socials' }])
+      rows.push([{ text: '🗑 Delete automation',    callback_data: 'delautomation' }])
+      rows.push([{ text: '🗑 Delete partner',       callback_data: 'delpartner'    }])
       rows.push([{ text: '👥 Add team member',      callback_data: 'help_team'     }])
       rows.push([{ text: '🗑 Delete team member',   callback_data: 'delteamlist'   }])
     }
@@ -147,7 +147,7 @@ module.exports = async (req, res) => {
     const data    = callback.data || ''
     const isAdmin = userId === ADMIN_ID
 
-    if (!isAdmin) { await send(chatId, ' Not authorised.'); return res.status(200).send('OK') }
+    if (!isAdmin) { await send(chatId, '⛔ Not authorised.'); return res.status(200).send('OK') }
 
     if (data === 'goto_karios' || data === 'goto_mamas') {
       const siteKey = data.replace('goto_', '')
@@ -175,7 +175,7 @@ module.exports = async (req, res) => {
       const db = await getData(KARIOS_BIN)
       const team = db.team || []
       if (!team.length) { await send(chatId, 'No team members yet.'); return res.status(200).send('OK') }
-      const keyboard = team.map((m,i) => [{ text: ` ${m.name}`, callback_data: `delteam_${i}` }])
+      const keyboard = team.map((m,i) => [{ text: `🗑 ${m.name}`, callback_data: `delteam_${i}` }])
       await send(chatId, 'Which team member to remove?', keyboard)
       return res.status(200).send('OK')
     }
@@ -258,7 +258,7 @@ module.exports = async (req, res) => {
       const site    = SITES[siteKey]
       const db      = await getData(site.binUrl)
       if (!db.works.length) { await send(chatId, 'Nothing to delete.'); return res.status(200).send('OK') }
-      const keyboard = db.works.map((w,i) => [{ text: ` ${w.title}`, callback_data: `delwork_${siteKey}_${i}` }])
+      const keyboard = db.works.map((w,i) => [{ text: `🗑 ${w.title}`, callback_data: `delwork_${siteKey}_${i}` }])
       keyboard.push([{ text: '← Back', callback_data: `goto_${siteKey}` }])
       await send(chatId, 'Which item to remove?', keyboard)
       return res.status(200).send('OK')
@@ -268,7 +268,7 @@ module.exports = async (req, res) => {
       const site    = SITES[siteKey]
       const db      = await getData(site.binUrl)
       if (!db.testimonials.length) { await send(chatId, 'Nothing to delete.'); return res.status(200).send('OK') }
-      const keyboard = db.testimonials.map((t,i) => [{ text: ` ${t.name}`, callback_data: `deltesti_${siteKey}_${i}` }])
+      const keyboard = db.testimonials.map((t,i) => [{ text: `🗑 ${t.name}`, callback_data: `deltesti_${siteKey}_${i}` }])
       keyboard.push([{ text: '← Back', callback_data: `goto_${siteKey}` }])
       await send(chatId, 'Which review to remove?', keyboard)
       return res.status(200).send('OK')
@@ -313,7 +313,7 @@ module.exports = async (req, res) => {
 
   // Block non-admins
   if (!text.startsWith('/start') && !isAdmin && !msg.voice && !msg.audio && !photo) {
-    await send(chatId, `⛔ This bot is private.\n\nContact: t.me/kariosagency`)
+    await send(chatId, ` This bot is private.\n\nContact: t.me/kariosagency`)
     return res.status(200).send('OK')
   }
 
@@ -323,7 +323,7 @@ module.exports = async (req, res) => {
     return res.status(200).send('OK')
   }
 
-  // ── VOICE NOTE / AUDIO HANDLING (The Magic Trick) ─
+  // ── VOICE NOTE HANDLING ──
   if (msg.voice || msg.audio) {
     if (!isAdmin) { await send(chatId, '⛔ Not authorised.'); return res.status(200).send('OK') }
     
@@ -374,19 +374,28 @@ module.exports = async (req, res) => {
       const result1 = parts[2] || ''; 
       const result2 = parts[3] || '';
 
-      // Save pending with timestamp
+      // Get current data FIRST, then add pending_voice
       const db = await getData(defaultSite.binUrl);
-      db.pending_voice = { 
+      
+      // Store pending with timestamp
+      const pendingData = { 
         text: transcribedText, 
         site: 'mamas', 
         timestamp: Date.now(),
         parsed: { title, tag, result1, result2 }
       };
-      await saveData(defaultSite.binUrl, db);
+      
+      // Merge with existing data
+      const updatedData = {
+        ...db,
+        pending_voice: pendingData
+      };
+      
+      await saveData(defaultSite.binUrl, updatedData);
 
       // Show preview
       const preview = `🎙 <b>Heard:</b> "${transcribedText}"\n\n` +
-        ` <b>Preview (how it will look):</b>\n` +
+        `📋 <b>Preview (how it will look):</b>\n` +
         `📌 <b>${title}</b>\n` +
         `${tag ? `🏷 ${tag}\n` : ''}` +
         `${result1 ? `💰 ${result1}\n` : ''}` +
@@ -406,11 +415,11 @@ module.exports = async (req, res) => {
     }
   }
 
-  // ── HANDLE REPLIES TO PENDING VOICE ──
+  // ── HANDLE REPLIES ──
   if (text && isAdmin) {
     const db = await getData(SITES.mamas.binUrl);
     
-    if (db.pending_voice && (Date.now() - db.pending_voice.timestamp < 60000)) { // 1 min window
+    if (db.pending_voice && (Date.now() - db.pending_voice.timestamp < 60000)) {
       const pending = db.pending_voice;
       const lowerText = text.toLowerCase();
 
@@ -418,7 +427,11 @@ module.exports = async (req, res) => {
       if (lowerText === 'ok' || lowerText === 'yes' || lowerText === 'y') {
         const { title, tag, result1, result2 } = pending.parsed;
         
-        db.works.unshift({ 
+        // Get fresh data
+        const currentDb = await getData(SITES.mamas.binUrl);
+        
+        // Add to works
+        currentDb.works.unshift({ 
           id: Date.now(), 
           title, 
           tag, 
@@ -427,42 +440,47 @@ module.exports = async (req, res) => {
           imgUrl: '', 
           addedAt: new Date().toISOString() 
         });
-        delete db.pending_voice;
-        await saveData(SITES.mamas.binUrl, db);
         
-        await send(chatId, `✅ <b>Published!</b>\n\n <b>${title}</b>\n${tag ? `🏷 ${tag}\n` : ''}${result1 ? `💰 ${result1}\n` : ''}${result2 ? `📝 ${result2}` : ''}`);
+        // Remove pending
+        delete currentDb.pending_voice;
+        
+        await saveData(SITES.mamas.binUrl, currentDb);
+        
+        await send(chatId, `✅ <b>Published!</b>\n\n📌 <b>${title}</b>\n${tag ? `🏷 ${tag}\n` : ''}${result1 ? `💰 ${result1}\n` : ''}${result2 ? `📝 ${result2}` : ''}`);
         return res.status(200).send('OK');
       }
 
       // Cancel
       if (lowerText === 'no' || lowerText === 'cancel' || lowerText === 'stop') {
-        delete db.pending_voice;
-        await saveData(SITES.mamas.binUrl, db);
+        const currentDb = await getData(SITES.mamas.binUrl);
+        delete currentDb.pending_voice;
+        await saveData(SITES.mamas.binUrl, currentDb);
         await send(chatId, '❌ Cancelled. Send another voice note when ready.');
         return res.status(200).send('OK');
       }
 
-      // Edit with new text - re-parse and show new preview
+      // Edit with new text
       const newParts = text.split('|').map(s => s.trim());
       const newTitle   = newParts[0] || 'Daily Special';
       const newTag     = newParts[1] || 'Today';
       const newResult1 = newParts[2] || ''; 
       const newResult2 = newParts[3] || '';
 
-      db.pending_voice = { 
+      const currentDb = await getData(SITES.mamas.binUrl);
+      currentDb.pending_voice = { 
         text: text, 
         site: 'mamas', 
         timestamp: Date.now(),
         parsed: { title: newTitle, tag: newTag, result1: newResult1, result2: newResult2 }
       };
-      await saveData(SITES.mamas.binUrl, db);
+      await saveData(SITES.mamas.binUrl, currentDb);
 
-      const newPreview = `️ <b>Updated preview:</b>\n\n` +
+      const newPreview = `🔄 <b>Updated preview:</b>\n\n` +
         `📌 <b>${newTitle}</b>\n` +
-        `${newTag ? `🏷 ${newTag}\n` : ''}` +
+        `${newTag ? ` ${newTag}\n` : ''}` +
         `${newResult1 ? `💰 ${newResult1}\n` : ''}` +
-        `${newResult2 ? `📝 ${newResult2}` : ''}\n\n` +
-        ` <b>Auto-publishing in 10 seconds...</b>\n\n` +
+        `${newResult2 ? ` ${newResult2}` : ''}\n\n` +
+        `⏱ <b>Auto-publishing in 10 seconds...</b>\n\n` +
         `✅ Reply <b>OK</b> to publish now\n` +
         `🔄 Reply with new text to edit again\n` +
         `❌ Reply <b>NO</b> to cancel`;
