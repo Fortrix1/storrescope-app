@@ -1,4 +1,4 @@
-// api/bot.js - CLEAN VERSION
+// api/bot.js - CLEAN VERSION - NO SYNTAX ERRORS
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*')
   if (req.method === 'GET') return res.status(200).send('OK')
@@ -19,7 +19,7 @@ module.exports = async (req, res) => {
       itemExample: 'Fashion Store Lagos | SEO Fix | 0→12 sales | +340% traffic',
     },
     mamas: {
-      name: "Mama's Kitchen", emoji: '️',
+      name: "Mama's Kitchen", emoji: '🍽️',
       binUrl: 'https://api.jsonbin.io/v3/b/6a482123f5f4af5e295c3098',
       itemFormat: 'Dish | Tag | Price | Description',
       itemExample: 'Jollof Rice | Bestseller | $12 | Smoky party rice with grilled chicken',
@@ -59,7 +59,7 @@ module.exports = async (req, res) => {
         team:         rec.team         || [],
         pending_voice: rec.pending_voice || null,
       }
-    } catch { return { works: [], testimonials: [], logo: '', automations: [], partners: [], socials: {}, pending_voice: null } }
+    } catch { return { works: [], testimonials: [], logo: '', automations: [], partners: [], socials: {}, team: [], pending_voice: null } }
   }
 
   async function saveData(binUrl, data) {
@@ -122,7 +122,7 @@ module.exports = async (req, res) => {
     const rows = [
       [{ text: '➕ Add item',         callback_data:  `help_add_${siteKey}`    }],
       [{ text: '⭐ Add review',        callback_data:  `help_testi_${siteKey}`  }],
-      [{ text: '🖼 Set logo',          callback_data:  `help_logo_${siteKey}`   }],
+      [{ text: ' Set logo',          callback_data:  `help_logo_${siteKey}`   }],
       [{ text: '📋 List items',        callback_data:  `list_${siteKey}`        }],
       [{ text: '🗑 Delete item',       callback_data:  `dellist_${siteKey}`     }],
       [{ text: '🗑 Delete review',     callback_data:  `deltestilist_${siteKey}` }],
@@ -130,9 +130,9 @@ module.exports = async (req, res) => {
     if (isKarios) {
       rows.push([{ text: '🎬 Add automation video', callback_data: 'help_auto' }])
       rows.push([{ text: '🤝 Add partner/friend',   callback_data: 'help_partner' }])
-      rows.push([{ text: ' Update social links',  callback_data: 'help_socials' }])
-      rows.push([{ text: '🗑 Delete automation',    callback_data: 'delautomation' }])
-      rows.push([{ text: '🗑 Delete partner',       callback_data: 'delpartner'    }])
+      rows.push([{ text: '🔗 Update social links',  callback_data: 'help_socials' }])
+      rows.push([{ text: ' Delete automation',    callback_data: 'delautomation' }])
+      rows.push([{ text: ' Delete partner',       callback_data: 'delpartner'    }])
       rows.push([{ text: '👥 Add team member',      callback_data: 'help_team'     }])
       rows.push([{ text: '🗑 Delete team member',   callback_data: 'delteamlist'   }])
     }
@@ -196,7 +196,7 @@ module.exports = async (req, res) => {
     if (data === 'delautomation') {
       const db = await getData(KARIOS_BIN)
       if (!db.automations.length) { await send(chatId, 'No automations to delete.'); return res.status(200).send('OK') }
-      const keyboard = db.automations.map((a,i) => [{ text: ` ${a.title}`, callback_data: `delauto_${i}` }])
+      const keyboard = db.automations.map((a,i) => [{ text: `🗑 ${a.title}`, callback_data: `delauto_${i}` }])
       await send(chatId, 'Which automation to remove?', keyboard)
       return res.status(200).send('OK')
     }
@@ -313,7 +313,7 @@ module.exports = async (req, res) => {
 
   // Block non-admins
   if (!text.startsWith('/start') && !isAdmin && !msg.voice && !msg.audio && !photo) {
-    await send(chatId, ` This bot is private.\n\nContact: t.me/kariosagency`)
+    await send(chatId, `⛔ This bot is private.\n\nContact: t.me/kariosagency`)
     return res.status(200).send('OK')
   }
 
@@ -323,7 +323,7 @@ module.exports = async (req, res) => {
     return res.status(200).send('OK')
   }
 
-  // ── VOICE NOTE HANDLING ──
+  // ── VOICE NOTE HANDLING ─
   if (msg.voice || msg.audio) {
     if (!isAdmin) { await send(chatId, '⛔ Not authorised.'); return res.status(200).send('OK') }
     
@@ -374,10 +374,9 @@ module.exports = async (req, res) => {
       const result1 = parts[2] || ''; 
       const result2 = parts[3] || '';
 
-      // Get current data FIRST, then add pending_voice
-      const db = await getData(defaultSite.binUrl);
+      // Get current data and add pending_voice
+      const currentDb = await getData(defaultSite.binUrl);
       
-      // Store pending with timestamp
       const pendingData = { 
         text: transcribedText, 
         site: 'mamas', 
@@ -385,9 +384,15 @@ module.exports = async (req, res) => {
         parsed: { title, tag, result1, result2 }
       };
       
-      // Merge with existing data
+      // Merge with existing data - PRESERVE EVERYTHING
       const updatedData = {
-        ...db,
+        works: currentDb.works || [],
+        testimonials: currentDb.testimonials || [],
+        logo: currentDb.logo || '',
+        automations: currentDb.automations || [],
+        partners: currentDb.partners || [],
+        socials: currentDb.socials || {},
+        team: currentDb.team || [],
         pending_voice: pendingData
       };
       
@@ -417,42 +422,46 @@ module.exports = async (req, res) => {
 
   // ── HANDLE REPLIES ──
   if (text && isAdmin) {
-    const db = await getData(SITES.mamas.binUrl);
+    const currentDb = await getData(SITES.mamas.binUrl);
     
-    if (db.pending_voice && (Date.now() - db.pending_voice.timestamp < 60000)) {
-      const pending = db.pending_voice;
+    if (currentDb.pending_voice && (Date.now() - currentDb.pending_voice.timestamp < 60000)) {
+      const pending = currentDb.pending_voice;
       const lowerText = text.toLowerCase();
 
       // Confirm publish
       if (lowerText === 'ok' || lowerText === 'yes' || lowerText === 'y') {
         const { title, tag, result1, result2 } = pending.parsed;
         
-        // Get fresh data
-        const currentDb = await getData(SITES.mamas.binUrl);
-        
-        // Add to works
-        currentDb.works.unshift({ 
-          id: Date.now(), 
-          title, 
-          tag, 
-          result1, 
-          result2, 
-          imgUrl: '', 
-          addedAt: new Date().toISOString() 
-        });
+        // Add to works - PRESERVE EXISTING
+        const finalData = {
+          works: [{ 
+            id: Date.now(), 
+            title, 
+            tag, 
+            result1, 
+            result2, 
+            imgUrl: '', 
+            addedAt: new Date().toISOString() 
+          }, ...(currentDb.works || [])],
+          testimonials: currentDb.testimonials || [],
+          logo: currentDb.logo || '',
+          automations: currentDb.automations || [],
+          partners: currentDb.partners || [],
+          socials: currentDb.socials || {},
+          team: currentDb.team || []
+        };
         
         // Remove pending
-        delete currentDb.pending_voice;
+        delete finalData.pending_voice;
         
-        await saveData(SITES.mamas.binUrl, currentDb);
+        await saveData(SITES.mamas.binUrl, finalData);
         
-        await send(chatId, `✅ <b>Published!</b>\n\n📌 <b>${title}</b>\n${tag ? `🏷 ${tag}\n` : ''}${result1 ? `💰 ${result1}\n` : ''}${result2 ? `📝 ${result2}` : ''}`);
+        await send(chatId, `✅ <b>Published!</b>\n\n <b>${title}</b>\n${tag ? `🏷 ${tag}\n` : ''}${result1 ? `💰 ${result1}\n` : ''}${result2 ? `📝 ${result2}` : ''}`);
         return res.status(200).send('OK');
       }
 
       // Cancel
       if (lowerText === 'no' || lowerText === 'cancel' || lowerText === 'stop') {
-        const currentDb = await getData(SITES.mamas.binUrl);
         delete currentDb.pending_voice;
         await saveData(SITES.mamas.binUrl, currentDb);
         await send(chatId, '❌ Cancelled. Send another voice note when ready.');
@@ -466,7 +475,6 @@ module.exports = async (req, res) => {
       const newResult1 = newParts[2] || ''; 
       const newResult2 = newParts[3] || '';
 
-      const currentDb = await getData(SITES.mamas.binUrl);
       currentDb.pending_voice = { 
         text: text, 
         site: 'mamas', 
@@ -477,9 +485,9 @@ module.exports = async (req, res) => {
 
       const newPreview = `🔄 <b>Updated preview:</b>\n\n` +
         `📌 <b>${newTitle}</b>\n` +
-        `${newTag ? ` ${newTag}\n` : ''}` +
+        `${newTag ? `🏷 ${newTag}\n` : ''}` +
         `${newResult1 ? `💰 ${newResult1}\n` : ''}` +
-        `${newResult2 ? ` ${newResult2}` : ''}\n\n` +
+        `${newResult2 ? `📝 ${newResult2}` : ''}\n\n` +
         `⏱ <b>Auto-publishing in 10 seconds...</b>\n\n` +
         `✅ Reply <b>OK</b> to publish now\n` +
         `🔄 Reply with new text to edit again\n` +
@@ -488,6 +496,50 @@ module.exports = async (req, res) => {
       await send(chatId, newPreview);
       return res.status(200).send('OK');
     }
+  }
+
+  // Photo handling
+  if (photo && caption && isAdmin) {
+    let siteKey = null
+    let cleanCaption = caption
+    for (const key of Object.keys(SITES)) {
+      if (caption.toLowerCase().startsWith(key + ':') || caption.toLowerCase().startsWith(key + ' ')) {
+        siteKey      = key
+        cleanCaption = caption.slice(key.length).replace(/^[\s:]+/, '').trim()
+        break
+      }
+    }
+    if (!siteKey) {
+      await send(chatId, `⚠️ Please start your caption with the site name:\n\n<code>mamas: Dish | Tag | Price | Description</code>`)
+      return res.status(200).send('OK')
+    }
+    const site = SITES[siteKey]
+    await send(chatId, '⏳ Uploading...')
+    const fileId      = photo[photo.length-1].file_id
+    const telegramUrl = await getPhotoUrl(fileId)
+    const imgUrl      = await uploadToCloudinary(telegramUrl) || telegramUrl
+    const currentDb   = await getData(site.binUrl)
+    
+    const parts   = cleanCaption.split('|').map(s => s.trim())
+    const title   = parts[0] || 'New Item'
+    const tag     = parts[1] || ''
+    const result1 = parts[2] || ''
+    const result2 = parts[3] || ''
+    
+    // PRESERVE EXISTING DATA
+    const finalData = {
+      works: [{ id: Date.now(), title, tag, result1, result2, imgUrl, addedAt: new Date().toISOString() }, ...(currentDb.works || [])],
+      testimonials: currentDb.testimonials || [],
+      logo: currentDb.logo || '',
+      automations: currentDb.automations || [],
+      partners: currentDb.partners || [],
+      socials: currentDb.socials || {},
+      team: currentDb.team || []
+    }
+    
+    const saved = await saveData(site.binUrl, finalData)
+    await send(chatId, saved ? `✅ <b>Added to ${site.name}!</b>\n\n📌 <b>${title}</b>\n${tag?`🏷 ${tag}\n`:''}${result1?`💰 ${result1}\n`:''}${result2?`📝 ${result2}`:''}` : `⚠️ Could not save.`)
+    return res.status(200).send('OK')
   }
 
   // Unknown text
