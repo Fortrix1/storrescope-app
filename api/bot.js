@@ -1,4 +1,4 @@
-// api/bot.js - COMPLETE & CLEAN VERSION
+// api/bot.js - COMPLETE, CLEAN & SMART CURRENCY VERSION
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*')
   if (req.method === 'GET') return res.status(200).send('OK')
@@ -50,14 +50,9 @@ module.exports = async (req, res) => {
       const d = await r.json()
       const rec = d.record || {}
       return {
-        works:        rec.works        || [],
-        testimonials: rec.testimonials || [],
-        logo:         rec.logo         || '',
-        automations:  rec.automations  || [],
-        partners:     rec.partners     || [],
-        socials:      rec.socials      || {},
-        team:         rec.team         || [],
-        pending_voice: rec.pending_voice || null,
+        works: rec.works || [], testimonials: rec.testimonials || [], logo: rec.logo || '',
+        automations: rec.automations || [], partners: rec.partners || [], socials: rec.socials || {},
+        team: rec.team || [], pending_voice: rec.pending_voice || null,
       }
     } catch { return { works: [], testimonials: [], logo: '', automations: [], partners: [], socials: {}, team: [], pending_voice: null } }
   }
@@ -97,7 +92,44 @@ module.exports = async (req, res) => {
     } catch { return '' }
   }
 
-  // AI Edit Interpreter
+  // 1. SMART CURRENCY FORMATTER
+  function formatCurrency(text) {
+    const map = { 
+      'dollar': '$', 'dollars': '$', 'usd': '$', 'bucks': '$', 
+      'naira': '₦', 'ngn': '₦', 
+      'euro': '€', 'euros': '€', 'eur': '€', 
+      'pound': '£', 'pounds': '£', 'gbp': '£', 'quid': '£',
+      'cedis': '₵', 'cedi': '₵', 'rand': 'R', 'rands': 'R'
+    };
+    let out = text;
+    for (const [word, sym] of Object.entries(map)) {
+      // Matches "12 dollars" -> "$12"
+      out = out.replace(new RegExp(`(\\d+(?:\\.\\d+)?)\\s+${word}\\b`, 'gi'), `${sym}$1`);
+      // Matches "dollars 12" -> "$12"
+      out = out.replace(new RegExp(`\\b${word}\\s+(\\d+(?:\\.\\d+)?)`, 'gi'), `${sym}$1`);
+    }
+    return out;
+  }
+
+  // 2. AI NATURAL LANGUAGE PARSER (Converts "Jollof rice 12 dollars" to "Jollof Rice | Today | $12 | ")
+  async function parseWithAI(rawText) {
+    try {
+      const formData = new FormData();
+      formData.append('model', 'llama-3.1-70b-versatile');
+      formData.append('messages', JSON.stringify([
+        { role: 'system', content: 'You are a restaurant menu formatter. Convert spoken text into EXACTLY this format: "Title | Tag | Price | Description". Use $ for dollars, ₦ for naira, € for euros, £ for pounds. If a part is missing, leave it blank. Return ONLY the formatted string, nothing else.' },
+        { role: 'user', content: rawText }
+      ]));
+      formData.append('max_tokens', '100');
+      const r = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST', headers: { 'Authorization': `Bearer ${process.env.GROQ_API_KEY}` }, body: formData
+      });
+      const d = await r.json();
+      return d.choices[0].message.content.trim().replace(/"/g, '');
+    } catch { return null }
+  }
+
+  // 3. AI EDIT INTERPRETER
   async function interpretEdit(originalText, instruction) {
     try {
       const formData = new FormData();
@@ -118,7 +150,7 @@ module.exports = async (req, res) => {
   function siteKeyboard() {
     return [
       [{ text: '⚡ Karios Agency', callback_data: 'goto_karios' }],
-      [{ text: "🍽️ Mama's Kitchen", callback_data: 'goto_mamas' }],
+      [{ text: "️ Mama's Kitchen", callback_data: 'goto_mamas' }],
     ]
   }
 
@@ -136,7 +168,7 @@ module.exports = async (req, res) => {
       rows.push([{ text: '🎬 Add automation', callback_data: 'help_auto' }])
       rows.push([{ text: '🤝 Add partner', callback_data: 'help_partner' }])
       rows.push([{ text: '🔗 Socials', callback_data: 'help_socials' }])
-      rows.push([{ text: ' Add team', callback_data: 'help_team' }])
+      rows.push([{ text: '👥 Add team', callback_data: 'help_team' }])
       rows.push([{ text: '🗑 Delete team', callback_data: 'delteamlist' }])
     }
     rows.push([{ text: '🔀 Switch site', callback_data: 'switch_site' }])
@@ -158,9 +190,8 @@ module.exports = async (req, res) => {
     const data = callback.data || ''
     const isAdmin = userId === ADMIN_ID
 
-    if (!isAdmin) { await send(chatId, ' Not authorised.'); return res.status(200).send('OK') }
+    if (!isAdmin) { await send(chatId, '⛔ Not authorised.'); return res.status(200).send('OK') }
 
-    // NEW EDIT BUTTONS
     if (data === 'edit_ok') {
       const db = await getData(SITES.mamas.binUrl);
       if (db.pending_voice) {
@@ -171,7 +202,7 @@ module.exports = async (req, res) => {
           partners: db.partners || [], socials: db.socials || {}, team: db.team || []
         };
         await saveData(SITES.mamas.binUrl, finalData);
-        await send(chatId, `✅ <b>Published!</b>\n\n📌 <b>${title}</b>\n${tag ? `🏷 ${tag}\n` : ''}${result1 ? `💰 ${result1}\n` : ''}${result2 ? `📝 ${result2}` : ''}`);
+        await send(chatId, `✅ <b>Published!</b>\n\n📌 <b>${title}</b>\n${tag ? `🏷 ${tag}\n` : ''}${result1 ? `💰 ${result1}\n` : ''}${result2 ? ` ${result2}` : ''}`);
       }
       return res.status(200).send('OK');
     }
@@ -189,7 +220,6 @@ module.exports = async (req, res) => {
       return res.status(200).send('OK');
     }
 
-    // EXISTING CALLBACKS
     if (data === 'goto_karios' || data === 'goto_mamas') {
       const siteKey = data.replace('goto_', '')
       await send(chatId, `${SITES[siteKey].emoji} <b>Now managing: ${SITES[siteKey].name}</b>\n\nWhat would you like to do?`, siteMenu(siteKey))
@@ -215,7 +245,7 @@ module.exports = async (req, res) => {
     if (data === 'delautomation') {
       const db = await getData(KARIOS_BIN)
       if (!db.automations.length) { await send(chatId, 'None.'); return res.status(200).send('OK') }
-      await send(chatId, 'Which?', db.automations.map((a,i) => [{ text: ` ${a.title}`, callback_data: `delauto_${i}` }]))
+      await send(chatId, 'Which?', db.automations.map((a,i) => [{ text: `🗑 ${a.title}`, callback_data: `delauto_${i}` }]))
       return res.status(200).send('OK')
     }
     if (data === 'delpartner') {
@@ -266,7 +296,7 @@ module.exports = async (req, res) => {
     if (data.startsWith('deltestilist_')) {
       const siteKey = data.replace('deltestilist_', ''); const site = SITES[siteKey]; const db = await getData(site.binUrl)
       if (!db.testimonials.length) { await send(chatId, 'Nothing.'); return res.status(200).send('OK') }
-      const kb = db.testimonials.map((t,i) => [{ text: `🗑 ${t.name}`, callback_data: `deltesti_${siteKey}_${i}` }])
+      const kb = db.testimonials.map((t,i) => [{ text: ` ${t.name}`, callback_data: `deltesti_${siteKey}_${i}` }])
       kb.push([{ text: '← Back', callback_data: `goto_${siteKey}` }])
       await send(chatId, 'Remove which?', kb); return res.status(200).send('OK')
     }
@@ -293,7 +323,7 @@ module.exports = async (req, res) => {
   const isAdmin = userId === ADMIN_ID
 
   if (!text.startsWith('/start') && !isAdmin && !msg.voice && !msg.audio && !photo) {
-    await send(chatId, '⛔ Private bot.')
+    await send(chatId, ' Private bot.')
     return res.status(200).send('OK')
   }
 
@@ -306,7 +336,6 @@ module.exports = async (req, res) => {
   if (photo && isAdmin) {
     const db = await getData(SITES.mamas.binUrl);
     
-    // Attach to pending voice
     if (db.pending_voice) {
       await send(chatId, '⏳ Uploading photo...');
       const fileId = photo[photo.length-1].file_id;
@@ -318,7 +347,6 @@ module.exports = async (req, res) => {
       return res.status(200).send('OK');
     }
     
-    // Normal photo flow
     if (!caption) { await send(chatId, '️ Add a caption: <code>mamas: Dish | Tag | Price | Desc</code>'); return res.status(200).send('OK') }
     let siteKey = null; let cleanCaption = caption;
     for (const key of Object.keys(SITES)) {
@@ -326,8 +354,8 @@ module.exports = async (req, res) => {
         siteKey = key; cleanCaption = caption.slice(key.length).replace(/^[\s:]+/, '').trim(); break
       }
     }
-    if (!siteKey) { await send(chatId, '⚠️ Start with site name: <code>mamas: ...</code>'); return res.status(200).send('OK') }
-    const site = SITES[siteKey]; await send(chatId, '⏳ Uploading...');
+    if (!siteKey) { await send(chatId, '️ Start with site name: <code>mamas: ...</code>'); return res.status(200).send('OK') }
+    const site = SITES[siteKey]; await send(chatId, ' Uploading...');
     const fileId = photo[photo.length-1].file_id;
     const telegramUrl = await getPhotoUrl(fileId);
     const imgUrl = await uploadToCloudinary(telegramUrl) || telegramUrl;
@@ -362,12 +390,15 @@ module.exports = async (req, res) => {
       const groqRes = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
         method: 'POST', headers: { 'Authorization': `Bearer ${process.env.GROQ_API_KEY}` }, body: formData
       });
-      const transcribedText = (await groqRes.text()).trim();
+      let transcribedText = (await groqRes.text()).trim();
       if (!transcribedText) { await send(chatId, '⚠️ Could not understand.'); return res.status(200).send('OK') }
+
+      // Apply smart currency formatting immediately
+      transcribedText = formatCurrency(transcribedText);
 
       // EDIT MODE: If pending_voice exists, treat as edit instruction
       if (db.pending_voice) {
-        await send(chatId, ' AI is interpreting your edit...');
+        await send(chatId, '🤖 AI is interpreting your edit...');
         const editedText = await interpretEdit(db.pending_voice.text, transcribedText);
         if (editedText) {
           const parts = editedText.split('|').map(s => s.trim());
@@ -380,31 +411,44 @@ module.exports = async (req, res) => {
           const preview = `🔄 <b>Edited Preview:</b>\n\n📌 <b>${db.pending_voice.parsed.title}</b>\n${db.pending_voice.parsed.tag ? `🏷 ${db.pending_voice.parsed.tag}\n` : ''}${db.pending_voice.parsed.result1 ? `💰 ${db.pending_voice.parsed.result1}\n` : ''}${db.pending_voice.parsed.result2 ? `📝 ${db.pending_voice.parsed.result2}` : ''}`;
           await send(chatId, preview, editKeyboard());
         } else {
-          await send(chatId, '️ AI could not understand the edit. Try again.');
+          await send(chatId, '⚠️ AI could not understand the edit. Try again.');
         }
         return res.status(200).send('OK');
       }
 
       // NORMAL MODE: New voice note
-      const parts = transcribedText.split('|').map(s => s.trim());
+      let finalText = transcribedText;
+      
+      // If the user didn't use pipes (|), let the AI format it naturally!
+      if (!transcribedText.includes('|')) {
+        await send(chatId, '🤖 AI is formatting your natural speech...');
+        const aiFormatted = await parseWithAI(transcribedText);
+        if (aiFormatted && aiFormatted.includes('|')) {
+          finalText = aiFormatted;
+        }
+      }
+
+      const parts = finalText.split('|').map(s => s.trim());
       const title = parts[0] || 'Daily Special'; const tag = parts[1] || 'Today';
       const result1 = parts[2] || ''; const result2 = parts[3] || '';
+      
       db.pending_voice = {
-        text: transcribedText, site: 'mamas', timestamp: Date.now(),
+        text: finalText, site: 'mamas', timestamp: Date.now(),
         parsed: { title, tag, result1, result2 }, imgUrl: ''
       };
       await saveData(SITES.mamas.binUrl, db);
-      const preview = `🎙 <b>Heard:</b> "${transcribedText}"\n\n📋 <b>Preview:</b>\n📌 <b>${title}</b>\n${tag ? `🏷 ${tag}\n` : ''}${result1 ? `💰 ${result1}\n` : ''}${result2 ? `📝 ${result2}` : ''}\n\n<i>What would you like to do?</i>`;
+      
+      const preview = `🎙 <b>Heard:</b> "${transcribedText}"\n\n <b>Preview:</b>\n📌 <b>${title}</b>\n${tag ? `🏷 ${tag}\n` : ''}${result1 ? `💰 ${result1}\n` : ''}${result2 ? `📝 ${result2}` : ''}\n\n<i>What would you like to do?</i>`;
       await send(chatId, preview, editKeyboard());
       return res.status(200).send('OK');
     } catch (e) {
       console.error('Voice error:', e);
-      await send(chatId, '⚠️ Error processing voice.');
+      await send(chatId, '️ Error processing voice.');
       return res.status(200).send('OK');
     }
   }
 
-  // ── TEXT COMMANDS ──
+  // ── TEXT COMMANDS ─
   if (text && isAdmin) {
     if (text.toLowerCase() === '/cancel') {
       const db = await getData(SITES.mamas.binUrl); delete db.pending_voice; await saveData(SITES.mamas.binUrl, db);
