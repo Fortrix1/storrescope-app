@@ -332,6 +332,9 @@ module.exports = async (req, res) => {
     try {
       const fileRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getFile?file_id=${fileId}`);
       const fileData = await fileRes.json();
+      
+      if (!fileData.ok) throw new Error('Failed to get file info');
+      
       const filePath = fileData.result.file_path;
       const fileUrl = `https://api.telegram.org/file/bot${BOT_TOKEN}/${filePath}`;
 
@@ -343,12 +346,23 @@ module.exports = async (req, res) => {
       formData.append('model', 'whisper-large-v3-turbo');
       formData.append('response_format', 'text');
 
+      if (!process.env.GROQ_API_KEY) {
+        await send(chatId, '⚠️ Server error: Missing GROQ_API_KEY. Please contact the developer.');
+        return res.status(200).send('OK');
+      }
+
       const groqRes = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${process.env.GROQ_API_KEY}` },
         body: formData
       });
       
+      if (!groqRes.ok) {
+        const errText = await groqRes.text();
+        console.error('Groq API Error:', groqRes.status, errText);
+        throw new Error('Groq API failed');
+      }
+
       const transcribedText = (await groqRes.text()).trim();
       
       if (!transcribedText) {
