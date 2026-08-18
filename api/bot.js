@@ -1,4 +1,4 @@
-// api/bot.js - CLEAN VERSION - NO SYNTAX ERRORS
+// api/bot.js - CLEAN VERSION
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*')
   if (req.method === 'GET') return res.status(200).send('OK')
@@ -122,7 +122,7 @@ module.exports = async (req, res) => {
     const rows = [
       [{ text: '➕ Add item',         callback_data:  `help_add_${siteKey}`    }],
       [{ text: '⭐ Add review',        callback_data:  `help_testi_${siteKey}`  }],
-      [{ text: ' Set logo',          callback_data:  `help_logo_${siteKey}`   }],
+      [{ text: '🖼 Set logo',          callback_data:  `help_logo_${siteKey}`   }],
       [{ text: '📋 List items',        callback_data:  `list_${siteKey}`        }],
       [{ text: '🗑 Delete item',       callback_data:  `dellist_${siteKey}`     }],
       [{ text: '🗑 Delete review',     callback_data:  `deltestilist_${siteKey}` }],
@@ -131,16 +131,16 @@ module.exports = async (req, res) => {
       rows.push([{ text: '🎬 Add automation video', callback_data: 'help_auto' }])
       rows.push([{ text: '🤝 Add partner/friend',   callback_data: 'help_partner' }])
       rows.push([{ text: '🔗 Update social links',  callback_data: 'help_socials' }])
-      rows.push([{ text: ' Delete automation',    callback_data: 'delautomation' }])
-      rows.push([{ text: ' Delete partner',       callback_data: 'delpartner'    }])
+      rows.push([{ text: '🗑 Delete automation',    callback_data: 'delautomation' }])
+      rows.push([{ text: '🗑 Delete partner',       callback_data: 'delpartner'    }])
       rows.push([{ text: '👥 Add team member',      callback_data: 'help_team'     }])
-      rows.push([{ text: '🗑 Delete team member',   callback_data: 'delteamlist'   }])
+      rows.push([{ text: ' Delete team member',   callback_data: 'delteamlist'   }])
     }
     rows.push([{ text: '🔀 Switch site', callback_data: 'switch_site' }])
     return rows
   }
 
-  // ── CALLBACKS ──
+  // ── CALLBACKS ─
   if (callback) {
     const chatId  = callback.message.chat.id
     const userId  = String(callback.from?.id || '')
@@ -323,183 +323,51 @@ module.exports = async (req, res) => {
     return res.status(200).send('OK')
   }
 
-  // ── VOICE NOTE HANDLING ─
-  if (msg.voice || msg.audio) {
-    if (!isAdmin) { await send(chatId, '⛔ Not authorised.'); return res.status(200).send('OK') }
+  // ── PHOTO HANDLING (Check for pending voice first) ──
+  if (photo && isAdmin) {
+    const db = await getData(SITES.mamas.binUrl);
     
-    const fileId = msg.voice ? msg.voice.file_id : msg.audio.file_id;
-    await send(chatId, '⏳ Listening to your voice note...');
-
-    try {
-      const fileRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getFile?file_id=${fileId}`);
-      const fileData = await fileRes.json();
-      if (!fileData.ok) throw new Error('Failed to get file info');
+    // If there's a pending voice note, attach photo to it
+    if (db.pending_voice && (Date.now() - db.pending_voice.timestamp < 300000)) {
+      const pending = db.pending_voice;
+      await send(chatId, '⏳ Uploading photo and attaching to special...');
       
-      const filePath = fileData.result.file_path;
-      const fileUrl = `https://api.telegram.org/file/bot${BOT_TOKEN}/${filePath}`;
-
-      const audioRes = await fetch(fileUrl);
-      const audioBuffer = Buffer.from(await audioRes.arrayBuffer());
-
-      const formData = new FormData();
-      formData.append('file', new Blob([audioBuffer]), 'voice.ogg');
-      formData.append('model', 'whisper-large-v3-turbo');
-      formData.append('response_format', 'text');
-
-      if (!process.env.GROQ_API_KEY) {
-        await send(chatId, '⚠️ Server error: Missing GROQ_API_KEY.');
-        return res.status(200).send('OK');
-      }
-
-      const groqRes = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${process.env.GROQ_API_KEY}` },
-        body: formData
-      });
+      const fileId      = photo[photo.length-1].file_id
+      const telegramUrl = await getPhotoUrl(fileId)
+      const imgUrl      = await uploadToCloudinary(telegramUrl) || telegramUrl
       
-      if (!groqRes.ok) throw new Error('Groq API failed');
-
-      const transcribedText = (await groqRes.text()).trim();
+      const { title, tag, result1, result2 } = pending.parsed;
       
-      if (!transcribedText) {
-        await send(chatId, '⚠️ Could not understand. Please try again.');
-        return res.status(200).send('OK');
-      }
-
-      // Parse the transcribed text
-      const defaultSite = SITES.mamas;
-      const parts = transcribedText.split('|').map(s => s.trim());
-      const title   = parts[0] || 'Daily Special';
-      const tag     = parts[1] || 'Today';
-      const result1 = parts[2] || ''; 
-      const result2 = parts[3] || '';
-
-      // Get current data and add pending_voice
-      const currentDb = await getData(defaultSite.binUrl);
-      
-      const pendingData = { 
-        text: transcribedText, 
-        site: 'mamas', 
-        timestamp: Date.now(),
-        parsed: { title, tag, result1, result2 }
+      const finalData = {
+        works: [{ 
+          id: Date.now(), 
+          title, 
+          tag, 
+          result1, 
+          result2, 
+          imgUrl, 
+          addedAt: new Date().toISOString() 
+        }, ...(db.works || [])],
+        testimonials: db.testimonials || [],
+        logo: db.logo || '',
+        automations: db.automations || [],
+        partners: db.partners || [],
+        socials: db.socials || {},
+        team: db.team || []
       };
       
-      // Merge with existing data - PRESERVE EVERYTHING
-      const updatedData = {
-        works: currentDb.works || [],
-        testimonials: currentDb.testimonials || [],
-        logo: currentDb.logo || '',
-        automations: currentDb.automations || [],
-        partners: currentDb.partners || [],
-        socials: currentDb.socials || {},
-        team: currentDb.team || [],
-        pending_voice: pendingData
-      };
+      await saveData(SITES.mamas.binUrl, finalData);
       
-      await saveData(defaultSite.binUrl, updatedData);
-
-      // Show preview
-      const preview = `🎙 <b>Heard:</b> "${transcribedText}"\n\n` +
-        `📋 <b>Preview (how it will look):</b>\n` +
-        `📌 <b>${title}</b>\n` +
-        `${tag ? `🏷 ${tag}\n` : ''}` +
-        `${result1 ? `💰 ${result1}\n` : ''}` +
-        `${result2 ? `📝 ${result2}` : ''}\n\n` +
-        `⏱ <b>Auto-publishing in 10 seconds...</b>\n\n` +
-        `✅ Reply <b>OK</b> or <b>YES</b> to publish now\n` +
-        `🔄 Reply with new text/voice to edit\n` +
-        `❌ Reply <b>NO</b> or <b>CANCEL</b> to cancel`;
-
-      await send(chatId, preview);
-      return res.status(200).send('OK');
-      
-    } catch (e) {
-      console.error('Voice processing error:', e);
-      await send(chatId, '⚠️ Error processing voice note. Please try again.');
+      await send(chatId, `✅ <b>Published with Photo!</b>\n\n <b>${title}</b>\n${tag ? `🏷 ${tag}\n` : ''}${result1 ? `💰 ${result1}\n` : ''}${result2 ? `📝 ${result2}` : ''}`);
       return res.status(200).send('OK');
     }
-  }
-
-  // ── HANDLE REPLIES ──
-  if (text && isAdmin) {
-    const currentDb = await getData(SITES.mamas.binUrl);
     
-    if (currentDb.pending_voice && (Date.now() - currentDb.pending_voice.timestamp < 60000)) {
-      const pending = currentDb.pending_voice;
-      const lowerText = text.toLowerCase();
-
-      // Confirm publish
-      if (lowerText === 'ok' || lowerText === 'yes' || lowerText === 'y') {
-        const { title, tag, result1, result2 } = pending.parsed;
-        
-        // Add to works - PRESERVE EXISTING
-        const finalData = {
-          works: [{ 
-            id: Date.now(), 
-            title, 
-            tag, 
-            result1, 
-            result2, 
-            imgUrl: '', 
-            addedAt: new Date().toISOString() 
-          }, ...(currentDb.works || [])],
-          testimonials: currentDb.testimonials || [],
-          logo: currentDb.logo || '',
-          automations: currentDb.automations || [],
-          partners: currentDb.partners || [],
-          socials: currentDb.socials || {},
-          team: currentDb.team || []
-        };
-        
-        // Remove pending
-        delete finalData.pending_voice;
-        
-        await saveData(SITES.mamas.binUrl, finalData);
-        
-        await send(chatId, `✅ <b>Published!</b>\n\n <b>${title}</b>\n${tag ? `🏷 ${tag}\n` : ''}${result1 ? `💰 ${result1}\n` : ''}${result2 ? `📝 ${result2}` : ''}`);
-        return res.status(200).send('OK');
-      }
-
-      // Cancel
-      if (lowerText === 'no' || lowerText === 'cancel' || lowerText === 'stop') {
-        delete currentDb.pending_voice;
-        await saveData(SITES.mamas.binUrl, currentDb);
-        await send(chatId, '❌ Cancelled. Send another voice note when ready.');
-        return res.status(200).send('OK');
-      }
-
-      // Edit with new text
-      const newParts = text.split('|').map(s => s.trim());
-      const newTitle   = newParts[0] || 'Daily Special';
-      const newTag     = newParts[1] || 'Today';
-      const newResult1 = newParts[2] || ''; 
-      const newResult2 = newParts[3] || '';
-
-      currentDb.pending_voice = { 
-        text: text, 
-        site: 'mamas', 
-        timestamp: Date.now(),
-        parsed: { title: newTitle, tag: newTag, result1: newResult1, result2: newResult2 }
-      };
-      await saveData(SITES.mamas.binUrl, currentDb);
-
-      const newPreview = `🔄 <b>Updated preview:</b>\n\n` +
-        `📌 <b>${newTitle}</b>\n` +
-        `${newTag ? `🏷 ${newTag}\n` : ''}` +
-        `${newResult1 ? `💰 ${newResult1}\n` : ''}` +
-        `${newResult2 ? `📝 ${newResult2}` : ''}\n\n` +
-        `⏱ <b>Auto-publishing in 10 seconds...</b>\n\n` +
-        `✅ Reply <b>OK</b> to publish now\n` +
-        `🔄 Reply with new text to edit again\n` +
-        `❌ Reply <b>NO</b> to cancel`;
-
-      await send(chatId, newPreview);
+    // Normal photo + caption flow
+    if (!caption) {
+      await send(chatId, `⚠️ Please add a caption to your photo.\n\n<code>mamas: Dish | Tag | Price | Description</code>`);
       return res.status(200).send('OK');
     }
-  }
 
-  // Photo handling
-  if (photo && caption && isAdmin) {
     let siteKey = null
     let cleanCaption = caption
     for (const key of Object.keys(SITES)) {
@@ -526,7 +394,6 @@ module.exports = async (req, res) => {
     const result1 = parts[2] || ''
     const result2 = parts[3] || ''
     
-    // PRESERVE EXISTING DATA
     const finalData = {
       works: [{ id: Date.now(), title, tag, result1, result2, imgUrl, addedAt: new Date().toISOString() }, ...(currentDb.works || [])],
       testimonials: currentDb.testimonials || [],
@@ -542,9 +409,175 @@ module.exports = async (req, res) => {
     return res.status(200).send('OK')
   }
 
+  // ── VOICE NOTE HANDLING ──
+  if ((msg.voice || msg.audio) && isAdmin) {
+    const fileId = msg.voice ? msg.voice.file_id : msg.audio.file_id;
+    await send(chatId, '⏳ Listening to your voice note...');
+
+    try {
+      const fileRes = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getFile?file_id=${fileId}`);
+      const fileData = await fileRes.json();
+      if (!fileData.ok) throw new Error('Failed');
+      
+      const filePath = fileData.result.file_path;
+      const fileUrl = `https://api.telegram.org/file/bot${BOT_TOKEN}/${filePath}`;
+
+      const audioRes = await fetch(fileUrl);
+      const audioBuffer = Buffer.from(await audioRes.arrayBuffer());
+
+      const formData = new FormData();
+      formData.append('file', new Blob([audioBuffer]), 'voice.ogg');
+      formData.append('model', 'whisper-large-v3-turbo');
+      formData.append('response_format', 'text');
+
+      if (!process.env.GROQ_API_KEY) {
+        await send(chatId, '⚠️ Missing GROQ_API_KEY');
+        return res.status(200).send('OK');
+      }
+
+      const groqRes = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${process.env.GROQ_API_KEY}` },
+        body: formData
+      });
+      
+      if (!groqRes.ok) throw new Error('Groq failed');
+
+      const transcribedText = (await groqRes.text()).trim();
+      
+      if (!transcribedText) {
+        await send(chatId, '⚠️ Could not understand.');
+        return res.status(200).send('OK');
+      }
+
+      const defaultSite = SITES.mamas;
+      const parts = transcribedText.split('|').map(s => s.trim());
+      const title   = parts[0] || 'Daily Special';
+      const tag     = parts[1] || 'Today';
+      const result1 = parts[2] || ''; 
+      const result2 = parts[3] || '';
+
+      const currentDb = await getData(defaultSite.binUrl);
+      
+      const pendingData = { 
+        text: transcribedText, 
+        site: 'mamas', 
+        timestamp: Date.now(),
+        parsed: { title, tag, result1, result2 }
+      };
+      
+      const updatedData = {
+        works: currentDb.works || [],
+        testimonials: currentDb.testimonials || [],
+        logo: currentDb.logo || '',
+        automations: currentDb.automations || [],
+        partners: currentDb.partners || [],
+        socials: currentDb.socials || {},
+        team: currentDb.team || [],
+        pending_voice: pendingData
+      };
+      
+      await saveData(defaultSite.binUrl, updatedData);
+
+      const preview = `🎙 <b>Heard:</b> "${transcribedText}"\n\n` +
+        `📋 <b>Preview:</b>\n` +
+        `📌 <b>${title}</b>\n` +
+        `${tag ? `🏷 ${tag}\n` : ''}` +
+        `${result1 ? `💰 ${result1}\n` : ''}` +
+        `${result2 ? `📝 ${result2}` : ''}\n\n` +
+        `⏱ <b>Auto-publishing in 10 seconds...</b>\n\n` +
+        `✅ Reply <b>OK</b> or <b>YES</b> to publish now\n` +
+        `📷 <b>Send a photo</b> to attach image\n` +
+        `🔄 Reply with new text to edit\n` +
+        `❌ Reply <b>NO</b> to cancel`;
+
+      await send(chatId, preview);
+      return res.status(200).send('OK');
+      
+    } catch (e) {
+      console.error('Voice error:', e);
+      await send(chatId, '⚠️ Error processing voice note.');
+      return res.status(200).send('OK');
+    }
+  }
+
+  // ── HANDLE TEXT REPLIES ──
+  if (text && isAdmin) {
+    const currentDb = await getData(SITES.mamas.binUrl);
+    
+    if (currentDb.pending_voice && (Date.now() - currentDb.pending_voice.timestamp < 60000)) {
+      const pending = currentDb.pending_voice;
+      const lowerText = text.toLowerCase();
+
+      // Confirm publish
+      if (lowerText === 'ok' || lowerText === 'yes' || lowerText === 'y') {
+        const { title, tag, result1, result2 } = pending.parsed;
+        
+        const finalData = {
+          works: [{ 
+            id: Date.now(), 
+            title, 
+            tag, 
+            result1, 
+            result2, 
+            imgUrl: '', 
+            addedAt: new Date().toISOString() 
+          }, ...(currentDb.works || [])],
+          testimonials: currentDb.testimonials || [],
+          logo: currentDb.logo || '',
+          automations: currentDb.automations || [],
+          partners: currentDb.partners || [],
+          socials: currentDb.socials || {},
+          team: currentDb.team || []
+        };
+        
+        await saveData(SITES.mamas.binUrl, finalData);
+        
+        await send(chatId, `✅ <b>Published!</b>\n\n📌 <b>${title}</b>\n${tag ? `🏷 ${tag}\n` : ''}${result1 ? `💰 ${result1}\n` : ''}${result2 ? `📝 ${result2}` : ''}`);
+        return res.status(200).send('OK');
+      }
+
+      // Cancel
+      if (lowerText === 'no' || lowerText === 'cancel' || lowerText === 'stop') {
+        delete currentDb.pending_voice;
+        await saveData(SITES.mamas.binUrl, currentDb);
+        await send(chatId, '❌ Cancelled.');
+        return res.status(200).send('OK');
+      }
+
+      // Edit with new text
+      const newParts = text.split('|').map(s => s.trim());
+      const newTitle   = newParts[0] || 'Daily Special';
+      const newTag     = newParts[1] || 'Today';
+      const newResult1 = newParts[2] || ''; 
+      const newResult2 = newParts[3] || '';
+
+      currentDb.pending_voice = { 
+        text: text, 
+        site: 'mamas', 
+        timestamp: Date.now(),
+        parsed: { title: newTitle, tag: newTag, result1: newResult1, result2: newResult2 }
+      };
+      await saveData(SITES.mamas.binUrl, currentDb);
+
+      const newPreview = `🔄 <b>Updated:</b>\n\n` +
+        `📌 <b>${newTitle}</b>\n` +
+        `${newTag ? ` ${newTag}\n` : ''}` +
+        `${newResult1 ? `💰 ${newResult1}\n` : ''}` +
+        `${newResult2 ? `📝 ${newResult2}` : ''}\n\n` +
+        `⏱ <b>Auto-publishing in 10 seconds...</b>\n\n` +
+        `✅ Reply <b>OK</b> to publish\n` +
+        `📷 <b>Send photo</b> to attach\n` +
+        `❌ Reply <b>NO</b> to cancel`;
+
+      await send(chatId, newPreview);
+      return res.status(200).send('OK');
+    }
+  }
+
   // Unknown text
   if (text && !text.startsWith('/')) {
-    await send(chatId, `Use /start to pick a site and see options, or send a voice note.`);
+    await send(chatId, `Use /start to pick a site.`);
   }
   
   res.status(200).send('OK')
