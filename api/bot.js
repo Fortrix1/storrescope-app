@@ -1,4 +1,4 @@
-// api/bot.js - Multi-Site Bot with Voice Note Photo Flow
+// api/bot.js - Multi-Site Bot with Voice Note Preview & Auto-Publish
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*')
   if (req.method === 'GET') return res.status(200).send('OK')
@@ -13,13 +13,13 @@ module.exports = async (req, res) => {
   
   const SITES = {
     karios: {
-      name: 'Karios Agency', emoji: '',
+      name: 'Karios Agency', emoji: '⚡',
       binUrl: KARIOS_BIN,
       itemFormat: 'Title | Tag | Result 1 | Result 2',
       itemExample: 'Fashion Store Lagos | SEO Fix | 0→12 sales | +340% traffic',
     },
     mamas: {
-      name: "Mama's Kitchen", emoji: '🍽️',
+      name: "Mama's Kitchen", emoji: '️',
       binUrl: 'https://api.jsonbin.io/v3/b/6a482123f5f4af5e295c3098',
       itemFormat: 'Dish | Tag | Price | Description',
       itemExample: 'Jollof Rice | Bestseller | $12 | Smoky party rice with grilled chicken',
@@ -147,7 +147,7 @@ module.exports = async (req, res) => {
     const data    = callback.data || ''
     const isAdmin = userId === ADMIN_ID
 
-    if (!isAdmin) { await send(chatId, '⛔ Not authorised.'); return res.status(200).send('OK') }
+    if (!isAdmin) { await send(chatId, ' Not authorised.'); return res.status(200).send('OK') }
 
     if (data === 'goto_karios' || data === 'goto_mamas') {
       const siteKey = data.replace('goto_', '')
@@ -175,7 +175,7 @@ module.exports = async (req, res) => {
       const db = await getData(KARIOS_BIN)
       const team = db.team || []
       if (!team.length) { await send(chatId, 'No team members yet.'); return res.status(200).send('OK') }
-      const keyboard = team.map((m,i) => [{ text: `🗑 ${m.name}`, callback_data: `delteam_${i}` }])
+      const keyboard = team.map((m,i) => [{ text: ` ${m.name}`, callback_data: `delteam_${i}` }])
       await send(chatId, 'Which team member to remove?', keyboard)
       return res.status(200).send('OK')
     }
@@ -196,7 +196,7 @@ module.exports = async (req, res) => {
     if (data === 'delautomation') {
       const db = await getData(KARIOS_BIN)
       if (!db.automations.length) { await send(chatId, 'No automations to delete.'); return res.status(200).send('OK') }
-      const keyboard = db.automations.map((a,i) => [{ text: `🗑 ${a.title}`, callback_data: `delauto_${i}` }])
+      const keyboard = db.automations.map((a,i) => [{ text: ` ${a.title}`, callback_data: `delauto_${i}` }])
       await send(chatId, 'Which automation to remove?', keyboard)
       return res.status(200).send('OK')
     }
@@ -258,7 +258,7 @@ module.exports = async (req, res) => {
       const site    = SITES[siteKey]
       const db      = await getData(site.binUrl)
       if (!db.works.length) { await send(chatId, 'Nothing to delete.'); return res.status(200).send('OK') }
-      const keyboard = db.works.map((w,i) => [{ text: `🗑 ${w.title}`, callback_data: `delwork_${siteKey}_${i}` }])
+      const keyboard = db.works.map((w,i) => [{ text: ` ${w.title}`, callback_data: `delwork_${siteKey}_${i}` }])
       keyboard.push([{ text: '← Back', callback_data: `goto_${siteKey}` }])
       await send(chatId, 'Which item to remove?', keyboard)
       return res.status(200).send('OK')
@@ -268,7 +268,7 @@ module.exports = async (req, res) => {
       const site    = SITES[siteKey]
       const db      = await getData(site.binUrl)
       if (!db.testimonials.length) { await send(chatId, 'Nothing to delete.'); return res.status(200).send('OK') }
-      const keyboard = db.testimonials.map((t,i) => [{ text: `🗑 ${t.name}`, callback_data: `deltesti_${siteKey}_${i}` }])
+      const keyboard = db.testimonials.map((t,i) => [{ text: ` ${t.name}`, callback_data: `deltesti_${siteKey}_${i}` }])
       keyboard.push([{ text: '← Back', callback_data: `goto_${siteKey}` }])
       await send(chatId, 'Which review to remove?', keyboard)
       return res.status(200).send('OK')
@@ -319,11 +319,11 @@ module.exports = async (req, res) => {
 
   // /start
   if (text.startsWith('/start')) {
-    await send(chatId, ` <b>Multi-Site Manager</b>\n\nWhich website do you want to manage?`, siteKeyboard())
+    await send(chatId, `👋 <b>Multi-Site Manager</b>\n\nWhich website do you want to manage?`, siteKeyboard())
     return res.status(200).send('OK')
   }
 
-  // ── VOICE NOTE / AUDIO HANDLING (The Magic Trick) ──
+  // ── VOICE NOTE / AUDIO HANDLING (The Magic Trick) ─
   if (msg.voice || msg.audio) {
     if (!isAdmin) { await send(chatId, '⛔ Not authorised.'); return res.status(200).send('OK') }
     
@@ -347,7 +347,7 @@ module.exports = async (req, res) => {
       formData.append('response_format', 'text');
 
       if (!process.env.GROQ_API_KEY) {
-        await send(chatId, '⚠️ Server error: Missing GROQ_API_KEY. Please contact the developer.');
+        await send(chatId, '⚠️ Server error: Missing GROQ_API_KEY.');
         return res.status(200).send('OK');
       }
 
@@ -357,26 +357,46 @@ module.exports = async (req, res) => {
         body: formData
       });
       
-      if (!groqRes.ok) {
-        const errText = await groqRes.text();
-        console.error('Groq API Error:', groqRes.status, errText);
-        throw new Error('Groq API failed');
-      }
+      if (!groqRes.ok) throw new Error('Groq API failed');
 
       const transcribedText = (await groqRes.text()).trim();
       
       if (!transcribedText) {
-        await send(chatId, '⚠️ Could not understand the voice note. Please try again or type it out.');
+        await send(chatId, '⚠️ Could not understand. Please try again.');
         return res.status(200).send('OK');
       }
 
-      // Save to pending_voice in the default site (mamas) for now
+      // Parse the transcribed text
       const defaultSite = SITES.mamas;
+      const parts = transcribedText.split('|').map(s => s.trim());
+      const title   = parts[0] || 'Daily Special';
+      const tag     = parts[1] || 'Today';
+      const result1 = parts[2] || ''; 
+      const result2 = parts[3] || '';
+
+      // Save pending with timestamp
       const db = await getData(defaultSite.binUrl);
-      db.pending_voice = { text: transcribedText, site: 'mamas', timestamp: Date.now() };
+      db.pending_voice = { 
+        text: transcribedText, 
+        site: 'mamas', 
+        timestamp: Date.now(),
+        parsed: { title, tag, result1, result2 }
+      };
       await saveData(defaultSite.binUrl, db);
 
-      await send(chatId, `🎙 Heard: "${transcribedText}"\n\n<b>Do you want to add a photo to this special?</b>\n- Send a photo now to attach it.\n- Reply NO to publish as text-only.`);
+      // Show preview
+      const preview = `🎙 <b>Heard:</b> "${transcribedText}"\n\n` +
+        ` <b>Preview (how it will look):</b>\n` +
+        `📌 <b>${title}</b>\n` +
+        `${tag ? `🏷 ${tag}\n` : ''}` +
+        `${result1 ? `💰 ${result1}\n` : ''}` +
+        `${result2 ? `📝 ${result2}` : ''}\n\n` +
+        `⏱ <b>Auto-publishing in 10 seconds...</b>\n\n` +
+        `✅ Reply <b>OK</b> or <b>YES</b> to publish now\n` +
+        `🔄 Reply with new text/voice to edit\n` +
+        `❌ Reply <b>NO</b> or <b>CANCEL</b> to cancel`;
+
+      await send(chatId, preview);
       return res.status(200).send('OK');
       
     } catch (e) {
@@ -386,139 +406,75 @@ module.exports = async (req, res) => {
     }
   }
 
-  // ── PHOTO HANDLING (Check for pending voice note) ──
-  if (photo) {
-    if (!isAdmin) { await send(chatId, ' Not authorised.'); return res.status(200).send('OK') }
+  // ── HANDLE REPLIES TO PENDING VOICE ──
+  if (text && isAdmin) {
+    const db = await getData(SITES.mamas.binUrl);
     
-    // Check if there's a pending voice note
-    const defaultSite = SITES.mamas;
-    const db = await getData(defaultSite.binUrl);
-    
-    if (db.pending_voice && (Date.now() - db.pending_voice.timestamp < 300000)) { // 5 min window
+    if (db.pending_voice && (Date.now() - db.pending_voice.timestamp < 60000)) { // 1 min window
       const pending = db.pending_voice;
-      await send(chatId, ' Uploading photo and attaching to special...');
-      
-      const fileId      = photo[photo.length-1].file_id
-      const telegramUrl = await getPhotoUrl(fileId)
-      const imgUrl      = await uploadToCloudinary(telegramUrl) || telegramUrl
-      
-      const parts = pending.text.split('|').map(s => s.trim());
-      const title   = parts[0] || 'Daily Special';
-      const tag     = parts[1] || 'Today';
-      const result1 = parts[2] || ''; 
-      const result2 = parts[3] || ''; 
+      const lowerText = text.toLowerCase();
 
-      db.works.unshift({ 
-        id: Date.now(), 
-        title, 
-        tag, 
-        result1, 
-        result2, 
-        imgUrl, 
-        addedAt: new Date().toISOString() 
-      });
-      delete db.pending_voice;
-      const saved = await saveData(defaultSite.binUrl, db);
-      
-      await send(chatId, saved 
-        ? `✅ <b>Daily Special Updated with Photo!</b>\n\n <b>${title}</b>\n${tag ? `🏷 ${tag}\n` : ''}${result1 ? `💰 ${result1}\n` : ''}${result2 ? `📝 ${result2}` : ''}`
-        : `️ Could not save.`
-      );
-      return res.status(200).send('OK');
-    }
-
-    // Normal photo + caption flow (existing code)
-    if (!caption) {
-      await send(chatId, `⚠️ Please add a caption to your photo.\n\n<code>mamas: Dish | Tag | Price | Description</code>`);
-      return res.status(200).send('OK');
-    }
-
-    let siteKey = null
-    let cleanCaption = caption
-    for (const key of Object.keys(SITES)) {
-      if (caption.toLowerCase().startsWith(key + ':') || caption.toLowerCase().startsWith(key + ' ')) {
-        siteKey      = key
-        cleanCaption = caption.slice(key.length).replace(/^[\s:]+/, '').trim()
-        break
+      // Confirm publish
+      if (lowerText === 'ok' || lowerText === 'yes' || lowerText === 'y') {
+        const { title, tag, result1, result2 } = pending.parsed;
+        
+        db.works.unshift({ 
+          id: Date.now(), 
+          title, 
+          tag, 
+          result1, 
+          result2, 
+          imgUrl: '', 
+          addedAt: new Date().toISOString() 
+        });
+        delete db.pending_voice;
+        await saveData(SITES.mamas.binUrl, db);
+        
+        await send(chatId, `✅ <b>Published!</b>\n\n <b>${title}</b>\n${tag ? `🏷 ${tag}\n` : ''}${result1 ? `💰 ${result1}\n` : ''}${result2 ? `📝 ${result2}` : ''}`);
+        return res.status(200).send('OK');
       }
-    }
-    if (!siteKey) {
-      await send(chatId, `⚠️ Please start your caption with the site name:\n\n<code>karios: Title | Tag | Result1 | Result2</code>\n<code>mamas: Dish | Tag | Price | Description</code>`)
-      return res.status(200).send('OK')
-    }
-    const site = SITES[siteKey]
-    const isLogo        = cleanCaption.toLowerCase() === 'logo'
-    const isTestimonial = cleanCaption.toLowerCase().startsWith('testimonial:')
-    await send(chatId, '⏳ Uploading...')
-    const fileId      = photo[photo.length-1].file_id
-    const telegramUrl = await getPhotoUrl(fileId)
-    const imgUrl      = await uploadToCloudinary(telegramUrl) || telegramUrl
-    const db2          = await getData(site.binUrl)
-    
-    if (isLogo) {
-      db2.logo = imgUrl
-      await saveData(site.binUrl, db2)
-      await send(chatId, `✅ Logo updated for <b>${site.name}</b>!`)
-      return res.status(200).send('OK')
-    }
-    if (isTestimonial) {
-      const clean = cleanCaption.replace(/^testimonial:\s*/i, '')
-      const parts = clean.split('|').map(s => s.trim())
-      const name  = parts[0] || 'Client'
-      const biz   = parts[1] || ''
-      const quote = (parts[2] || '').replace(/^["']|["']$/g, '').trim()
-      db2.testimonials.unshift({ id: Date.now(), name, business: biz, quote, imgUrl, addedAt: new Date().toISOString() })
-      const saved = await saveData(site.binUrl, db2)
-      await send(chatId, saved ? `✅ <b>Review added to ${site.name}!</b>\n\n⭐ <b>${name}</b>${biz?` — ${biz}`:''}\n${quote?`"${quote}"`:''}` : `⚠️ Could not save.`)
-      return res.status(200).send('OK')
-    }
-    // Regular item
-    const parts   = cleanCaption.split('|').map(s => s.trim())
-    const title   = parts[0] || 'New Item'
-    const tag     = parts[1] || ''
-    const result1 = parts[2] || ''
-    const result2 = parts[3] || ''
-    db2.works.unshift({ id: Date.now(), title, tag, result1, result2, imgUrl, addedAt: new Date().toISOString() })
-    const saved = await saveData(site.binUrl, db2)
-    await send(chatId, saved ? `✅ <b>Added to ${site.name}!</b>\n\n📌 <b>${title}</b>\n${tag?`🏷 ${tag}\n`:''}${result1?`💰 ${result1}\n`:''}${result2?`📝 ${result2}`:''}` : `⚠️ Could not save.`)
-    return res.status(200).send('OK')
-  }
 
-  // ── TEXT HANDLING (Check for "NO" to publish pending voice) ─
-  if (text && text.toLowerCase() === 'no') {
-    const defaultSite = SITES.mamas;
-    const db = await getData(defaultSite.binUrl);
-    if (db.pending_voice && (Date.now() - db.pending_voice.timestamp < 300000)) {
-      const pending = db.pending_voice;
-      const parts = pending.text.split('|').map(s => s.trim());
-      const title   = parts[0] || 'Daily Special';
-      const tag     = parts[1] || 'Today';
-      const result1 = parts[2] || ''; 
-      const result2 = parts[3] || ''; 
+      // Cancel
+      if (lowerText === 'no' || lowerText === 'cancel' || lowerText === 'stop') {
+        delete db.pending_voice;
+        await saveData(SITES.mamas.binUrl, db);
+        await send(chatId, '❌ Cancelled. Send another voice note when ready.');
+        return res.status(200).send('OK');
+      }
 
-      db.works.unshift({ 
-        id: Date.now(), 
-        title, 
-        tag, 
-        result1, 
-        result2, 
-        imgUrl: '', 
-        addedAt: new Date().toISOString() 
-      });
-      delete db.pending_voice;
-      const saved = await saveData(defaultSite.binUrl, db);
-      
-      await send(chatId, saved 
-        ? `✅ <b>Daily Special Published (Text-Only)!</b>\n\n <b>${title}</b>\n${tag ? `🏷 ${tag}\n` : ''}${result1 ? `💰 ${result1}\n` : ''}${result2 ? `📝 ${result2}` : ''}`
-        : `️ Could not save.`
-      );
+      // Edit with new text - re-parse and show new preview
+      const newParts = text.split('|').map(s => s.trim());
+      const newTitle   = newParts[0] || 'Daily Special';
+      const newTag     = newParts[1] || 'Today';
+      const newResult1 = newParts[2] || ''; 
+      const newResult2 = newParts[3] || '';
+
+      db.pending_voice = { 
+        text: text, 
+        site: 'mamas', 
+        timestamp: Date.now(),
+        parsed: { title: newTitle, tag: newTag, result1: newResult1, result2: newResult2 }
+      };
+      await saveData(SITES.mamas.binUrl, db);
+
+      const newPreview = `️ <b>Updated preview:</b>\n\n` +
+        `📌 <b>${newTitle}</b>\n` +
+        `${newTag ? `🏷 ${newTag}\n` : ''}` +
+        `${newResult1 ? `💰 ${newResult1}\n` : ''}` +
+        `${newResult2 ? `📝 ${newResult2}` : ''}\n\n` +
+        ` <b>Auto-publishing in 10 seconds...</b>\n\n` +
+        `✅ Reply <b>OK</b> to publish now\n` +
+        `🔄 Reply with new text to edit again\n` +
+        `❌ Reply <b>NO</b> to cancel`;
+
+      await send(chatId, newPreview);
       return res.status(200).send('OK');
     }
   }
 
   // Unknown text
   if (text && !text.startsWith('/')) {
-    await send(chatId, `Use /start to pick a site and see options, or send a photo with a caption.`);
+    await send(chatId, `Use /start to pick a site and see options, or send a voice note.`);
   }
   
   res.status(200).send('OK')
